@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dtwain_cpp\dtwain_cpp_interface.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="twainsave_verinfo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_acquire_characteristics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_buffered_transfer_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_capability_interface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_image_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_twain_array.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_twain_identity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_twain_session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_twain_source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_twain_printer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dtwain_cpp\dtwain_pdf_options.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="twainsave-opensource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dtwain_cpp\dtwain_twtimer.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twsource_impl.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twsource.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twsession.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twrange.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twlogger.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twlistener.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twimage.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twidentity.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twframe.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twfix32.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twbasic.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twarray.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twain_characteristics.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_pdf_options.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_logger.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_filetype.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_dsm.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_capinterface.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_capbasics1.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_buffered_transfer.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_acquire_characteristics.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="dtwain_cpp\dtwain_twprinter.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="twainsave-opernsource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
