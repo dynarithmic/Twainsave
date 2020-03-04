@@ -732,7 +732,7 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 			}
 			// encryption
 			bool encryption_on = boost::any_cast<bool>(varmap["pdfencrypt"].value());
-			if (!encryption_on)
+			if (encryption_on)
 			{
 				std::vector<std::string> encryptcommands = { 
 					"pdfownerpass", "pdfuserpass", "pdfrandowner",
