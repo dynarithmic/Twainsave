@@ -150,6 +150,8 @@ struct scanner_options
 	scanner_options() : twainsave_return_value(RETURN_OK),
 							m_nOverwriteCount(1),
 							m_nOverwriteWidth(1),
+							m_bUseADF(false),
+							m_bUseADFOrFlatbed(false),
 							m_FileTypeMap{
 							INIT_TYPE(bmp, file_type, bmp),
 							INIT_TYPE(gif, file_type,gif),

@@ -245,6 +245,7 @@ namespace dynarithmic
         std::string acquire_characteristics::get_halftone() const { return m_sHalftone; }
         twain_frame& acquire_characteristics::get_acquire_area() { return m_area_of_interest; }
         bool acquire_characteristics::can_multi_page() const { return m_bMultiPage && file_type_info::get_multipage_type(m_file_type); }
+		long acquire_characteristics::get_multi_page_type() const { return file_type_info::get_multipage_type(m_file_type); }
         bool acquire_characteristics::is_multi_page() const { return m_bMultiPage; }
         bool acquire_characteristics::is_show_ui() const { return m_bShowUI; }
         color_type acquire_characteristics::get_color_type() const { return m_transfer_color_type; }

@@ -101,23 +101,8 @@ namespace dynarithmic
         {
             auto& details = tw_characteristics.get_logger_details();
             const LONG log_destination = static_cast<LONG>(details.get_destination());
-            const LONG log_verbosity = static_cast<LONG>(details.get_verbosity());
-
-            LONG realoptions = DTWAIN_LOG_ALL;
-            const LONG testOptions[] = { DTWAIN_LOG_CONSOLE, DTWAIN_LOG_DEBUGMONITOR, DTWAIN_LOG_USEFILE };
-            const LONG verbosityOptions[] = { static_cast<LONG>(logger_verbosity::verbose1), static_cast<LONG>(logger_verbosity::verbose2),
-                                              static_cast<LONG>(logger_verbosity::verbose3), static_cast<LONG>(logger_verbosity::verbose4)};
-            for (int i = 0; i < sizeof(testOptions) / sizeof(testOptions[0]); ++i)
-            {
-                if (!(log_destination & testOptions[i]))
-                    realoptions = realoptions & ~testOptions[i];
-            }
-
-            for (int i = 0; i < sizeof(verbosityOptions) / sizeof(verbosityOptions[0]); ++i)
-                realoptions = realoptions & ~verbosityOptions[i];
-
-            realoptions |= log_verbosity;
-            DTWAIN_SetTwainLogA(realoptions, details.get_filename().c_str());
+            const LONG log_verbosity = static_cast<LONG>(details.get_verbosity_aslong());
+            DTWAIN_SetTwainLogA(DTWAIN_LOG_USEFILE | log_verbosity, details.get_filename().c_str());
             if ( m_logger_callback.second )
                 DTWAIN_SetLoggerCallbackA(logger_callback_proc, reinterpret_cast<DTWAIN_LONG64>(this));
         }

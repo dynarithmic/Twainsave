@@ -421,8 +421,12 @@ namespace dynarithmic
             DTWAIN_SetFileAutoIncrement(m_theSource, inc.get_increment(), inc.is_reset_count() ? TRUE : FALSE,
                                         inc.is_enabled() ? TRUE : FALSE);
             DTWAIN_EnableMsgNotify(1);
+			LONG file_type = static_cast<LONG>(ac.get_file_type());
+			if (ac.can_multi_page())
+				file_type = ac.get_multi_page_type();
             auto retval = DTWAIN_AcquireFileA(m_theSource, ac.get_filename_pattern().c_str(),
-                                              static_cast<LONG>(ac.get_file_type()), dtwain_transfer_type,
+                                              file_type,
+											  dtwain_transfer_type,
                                               static_cast<LONG>(ac.get_color_type()),
                                               static_cast<LONG>(ac.get_max_pages()), ac.is_show_ui(),
                                               ac.is_auto_close_source(),

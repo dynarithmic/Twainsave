@@ -188,6 +188,7 @@ public:
     twain_frame& get_acquire_area();
     bool can_multi_page() const;
     bool is_multi_page() const;
+	long get_multi_page_type() const;
     bool is_show_ui() const;
     color_type get_color_type() const;
     file_type get_file_type() const;

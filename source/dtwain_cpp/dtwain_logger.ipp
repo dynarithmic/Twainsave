@@ -32,10 +32,11 @@ enum class logger_destination
 
 enum class logger_verbosity
 {
-    verbose1 = DTWAIN_LOG_CALLSTACK,
-    verbose2 = verbose1 | DTWAIN_LOG_DECODE_DEST | DTWAIN_LOG_DECODE_SOURCE,
-    verbose3 = verbose2 | DTWAIN_LOG_DECODE_TWMEMREF,
-    verbose4 = verbose3 | DTWAIN_LOG_DECODE_TWEVENT,
+    verbose0 = 0,
+    verbose1 = 1,
+    verbose2 = 2,
+    verbose3 = 3,
+    verbose4 = 4
 };
 
 class logger_details
@@ -43,13 +44,24 @@ class logger_details
     logger_destination m_log_destination = logger_destination::tocustom;
     logger_verbosity m_log_verbosity = logger_verbosity::verbose4;
     std::string m_log_filename;
+	std::array<LONG, 5> m_verbose_settings;
     bool m_bEnabled = false;
     public:
+	    logger_details() : m_log_verbosity(logger_verbosity::verbose1)
+		{
+			m_verbose_settings[0] = 0;
+			m_verbose_settings[1] = DTWAIN_LOG_CALLSTACK;
+			m_verbose_settings[2] = m_verbose_settings[1] | DTWAIN_LOG_DECODE_DEST | DTWAIN_LOG_DECODE_SOURCE;
+			m_verbose_settings[3] = m_verbose_settings[2] | DTWAIN_LOG_DECODE_TWMEMREF;
+			m_verbose_settings[4] = m_verbose_settings[3] | DTWAIN_LOG_DECODE_TWEVENT;
+		}
+
         logger_details& enable(bool bEnable = true) { m_bEnabled = bEnable; return *this; }
         logger_details& set_destination(logger_destination ld) { m_log_destination = ld; return *this; }
         logger_destination get_destination() const { return m_log_destination; }
         logger_details& set_verbosity(logger_verbosity lv) { m_log_verbosity = lv; return *this; }
         logger_verbosity get_verbosity() const { return m_log_verbosity; }
+        long  get_verbosity_aslong() const { return m_verbose_settings[static_cast<LONG>(m_log_verbosity)];}
         logger_details& set_filename(const std::string& filename) { m_log_filename = filename; return *this; }
         std::string get_filename() const { return m_log_filename; }
         bool is_enabled() const { return m_bEnabled; }
