@@ -19,6 +19,7 @@ DYNARITHMIC SOFTWARE. DYNARITHMIC SOFTWARE DISCLAIMS THE WARRANTY OF NON INFRING
 OF THIRD PARTY RIGHTS.
 */
 #include "dtwain_cpp_interface.hpp"
+#pragma warning( disable:4996 )  // Stores the current warning state for every warning.
 namespace dynarithmic
 {
     namespace twain

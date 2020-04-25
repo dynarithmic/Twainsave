@@ -19,13 +19,15 @@ DYNARITHMIC SOFTWARE. DYNARITHMIC SOFTWARE DISCLAIMS THE WARRANTY OF NON INFRING
 OF THIRD PARTY RIGHTS.
 */
 #include "dtwain_cpp_interface.hpp"
+#include <algorithm>
+
 namespace dynarithmic
 {
     namespace twain
     {
         static void copy_util(const std::string& s, char *dest, size_t num)
         {
-            const auto minval = std::min(num, s.size());
+            const auto minval = (std::min)(num, s.size());
             std::copy(s.begin(), s.begin() + minval, dest);
             dest[minval] = 0;
         }

@@ -27,13 +27,13 @@ namespace dynarithmic
         void buffered_transfer_info::attach(twain_source& ts)
         {
             capability_interface ci;
-            ci.attach(ts);
+            ci.attach(ts.get_source());
             std::unordered_set<capability_interface::compression_type> vc;
             ci.get_compression(vc);
             std::transform(vc.begin(), vc.end(), std::inserter(all_compression_types, all_compression_types.end()),
                            [&](LONG value) { return static_cast<twain_compression_type>(value); });
             DTWAIN_GetAcquireStripSizes(ts.get_source(), &m_nMinSize, &m_nMaxSize, &m_nPrefSize);
-            m_twain_source = &ts;
+            m_twain_source = ts.get_source();
         }
 
         bool buffered_transfer_info::init_transfer()
@@ -61,7 +61,7 @@ namespace dynarithmic
                 if (!m_hStrip)
                     return false;
 
-                if (DTWAIN_SetAcquireStripBuffer(m_twain_source->get_source(), m_hStrip))
+                if (DTWAIN_SetAcquireStripBuffer(m_twain_source, m_hStrip))
                 {
                     DTWAIN_FreeMemory(m_hStrip);
                     return false;

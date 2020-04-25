@@ -26,7 +26,7 @@ class buffered_transfer_info
         LONG m_nMinSize, m_nMaxSize, m_nPrefSize;
         twain_compression_type m_compression_type;
         std::unordered_set<twain_compression_type> all_compression_types;
-        twain_source* m_twain_source;
+        DTWAIN_SOURCE m_twain_source;
     
     public:
         buffered_transfer_info() : m_hStrip(nullptr), m_nStripSize(0),

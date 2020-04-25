@@ -182,3 +182,4 @@ public:
     int get_increment() const { return increment_value; }
     bool is_reset_count() const { return m_resetOnStartup; }
 };
+

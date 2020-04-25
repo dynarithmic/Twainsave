@@ -42,9 +42,9 @@ OF THIRD PARTY RIGHTS.
 #include <boost/concept_check.hpp>
 #include <boost/variant.hpp>
 #include <boost/logic/tribool.hpp>
-#include <dtwain.h>
+#include "dtwain.h"
 
-#undef min
+#pragma warning( push )  
 #pragma warning (disable:4996)
 namespace dynarithmic
 {
@@ -68,30 +68,36 @@ namespace dynarithmic
         class twain_source;
         class twain_twfix32;
         class capability_listener;
+		class feeder_info;
+		class duplex_info;
 
-        #include "dtwain_twtimer.ipp"
-        #include "dtwain_twframe.ipp"
-        #include "dtwain_twidentity.ipp"
-        #include "dtwain_dsm.ipp"
-        #include "dtwain_logger.ipp"
-        #include "dtwain_twain_characteristics.ipp"
-        #include "dtwain_filetype.ipp"
-        #include "dtwain_twimage.ipp"
-        #include "dtwain_twbasic.ipp"
+		#include "dtwain_twain_types.ipp"
+		#include "dtwain_buffered_transfer_info.ipp"
+		#include "dtwain_twain_dsm.ipp"
+		#include "dtwain_twain_identity.ipp"
+		#include "dtwain_twain_logger_details.ipp"
+		#include "dtwain_twain_filetype.ipp"
         #include "dtwain_pdf_options.ipp"
+		#include "dtwain_image_handler.ipp"
+		#include "dtwain_twain_frame.ipp"
+		#include "dtwain_file_transfer_info.ipp"
+		#include "dtwain_twain_twfix32.ipp"
+		#include "dtwain_twain_printer.ipp"
+		#include "dtwain_feeder_info.ipp"
+		#include "dtwain_duplex_info.ipp"
+		#include "dtwain_twain_array.ipp"
+		#include "dtwain_twain_capbasics.ipp"
+		#include "dtwain_capability_interface.ipp"
         #include "dtwain_acquire_characteristics.ipp"
-        #include "dtwain_twfix32.ipp"
-        #include "dtwain_twrange.ipp"
-        #include "dtwain_twarray.ipp"
-        #include "dtwain_twprinter.ipp"
-        #include "dtwain_capbasics1.ipp"
-        #include "dtwain_buffered_transfer.ipp"
-        #include "dtwain_capinterface.ipp"
-        #include "dtwain_twsource.ipp"
-        #include "dtwain_twlistener.ipp"
-        #include "dtwain_twlogger.ipp"
-        #include "dtwain_twsession.ipp"
-        #include "dtwain_twsource_impl.ipp"
+		#include "dtwain_twain_characteristics.ipp"
+		#include "dtwain_twain_source.ipp"
+		#include "dtwain_twain_timer.ipp"
+        #include "dtwain_twain_range.ipp"
+        #include "dtwain_twain_listener.ipp"
+        #include "dtwain_twain_logger.ipp"
+        #include "dtwain_twain_session.ipp"
+        #include "dtwain_twain_source_impl.ipp"
     };
+	#pragma warning( pop )  
 }
 #endif

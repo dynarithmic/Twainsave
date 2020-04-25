@@ -88,7 +88,7 @@ public:
     };
         
 private:
-    twain_source* m_Source;
+    DTWAIN_SOURCE m_Source;
     source_cap_info m_caps;
     using cache_vector_type = std::vector<boost::variant<long, std::string, double, twain_frame>>;
     using capability_cache = std::unordered_map<int, cache_vector_type>;
@@ -141,7 +141,7 @@ private:
 public:
     typedef source_cap_info::value_type value_type;
     typedef std::string camera_name_type;
-    twain_source* get_source() const { return m_Source; }
+    DTWAIN_SOURCE get_source() const { return m_Source; }
         
     static cap_getter_info get()
     {
@@ -1599,7 +1599,7 @@ public:
     cap_return_type set_cap_values(const Container& C, int capvalue,
                                     const cap_setter_info& scType = cap_setter_info()) const
     {
-        const auto theSource = m_Source->get_source();
+        const auto theSource = m_Source;
         if (!theSource)
             return {false, DTWAIN_ERR_BAD_SOURCE};
         if (!m_caps.empty() && m_caps.find(capvalue) == m_caps.end())
@@ -1608,10 +1608,8 @@ public:
         twain_array ta;
         const auto array_type = DTWAIN_GetCapArrayType(theSource, capvalue);
         twain_array_copy_traits::copy_to_twain_array(theSource, ta, capvalue, C);
-        m_Source->invoke_callback(CAP_CALLBACK_SET_BEGIN, capvalue, scType);
         auto retval = DTWAIN_SetCapValues(theSource, capvalue, static_cast<LONG>(scType.get_setter_type()),
                                             ta.get_array());
-        m_Source->invoke_callback(CAP_CALLBACK_SET_END, capvalue, scType, retval?true:false);
         LONG last_error = DTWAIN_NO_ERROR;
         if (!retval)
             last_error = DTWAIN_GetLastError();
@@ -1646,7 +1644,7 @@ public:
     cap_return_type get_cap_values(Container& C, int capvalue,
                                     const cap_getter_info& gcType = cap_getter_info()) const
     {
-        if (!m_Source || !m_Source->get_source())
+        if (!m_Source)
             return {false, DTWAIN_ERR_BAD_SOURCE};
         if (!m_caps.empty() && m_caps.find(capvalue) == m_caps.end())
             return {false, DTWAIN_ERR_CAP_NO_SUPPORT};
@@ -1661,17 +1659,14 @@ public:
             if (copy_from_cache(C, capvalue))
                 return {true, DTWAIN_NO_ERROR};
         }
-        
 
         twain_array ta;
-        m_Source->invoke_callback(CAP_CALLBACK_GET_BEGIN, capvalue, gcType);
-        bool retVal = DTWAIN_GetCapValues(m_Source->get_source(), capvalue,
+        bool retVal = DTWAIN_GetCapValues(m_Source, capvalue,
                                             static_cast<LONG>(gcType.get_getter_type()), ta.get_array_ptr()) != 0;
-        m_Source->invoke_callback(CAP_CALLBACK_GET_END, capvalue, gcType, retVal);
         if (!retVal)
             return {false, DTWAIN_GetLastError()};
         C.clear();
-        const auto array_type = DTWAIN_GetCapArrayType(m_Source->get_source(), capvalue);
+        const auto array_type = DTWAIN_GetCapArrayType(m_Source, capvalue);
         twain_array_copy_traits::copy_from_twain_array(ta, ta.get_count(), C);
         if (is_cache)
             copy_to_cache(C, capvalue);
@@ -1723,7 +1718,7 @@ public:
     capability_interface(twain_source* s);
     capability_interface(twain_source& s);
     capability_interface();
-    bool attach(twain_source& s);
+    bool attach(DTWAIN_SOURCE s);
     void detach();
 
     template <typename T>

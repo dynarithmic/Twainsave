@@ -28,19 +28,26 @@ class twain_characteristics
         dsm_search_order search_order;
         logger_details log_details;
         std::string temporary_dir;
+		bool app_modeless;
+		bool check_handles;
     
     public:
-        twain_characteristics() : dsmToUse(dsm_type::legacy_dsm), search_order(dsm_search_order::search_wso)
-        {}
+        twain_characteristics() : dsmToUse(dsm_type::legacy_dsm), 
+								  search_order(dsm_search_order::search_wso), app_modeless(false),
+								  check_handles(true) {}
         twain_characteristics& use_dsm(dsm_type dsm){ dsmToUse = dsm; return *this;}
         twain_characteristics& set_temporary_directory(const std::string& dir) { temporary_dir = dir; return *this; }
         twain_characteristics& set_app_info(const twain_app_info& info) { app_info = info; return *this; }
         twain_characteristics& set_logger_details(const logger_details& lo) { log_details = lo; return *this; }
         twain_characteristics& set_dsm_search_order(dsm_search_order so) { search_order = so; return *this; }
-        twain_app_info& get_app_info_ref() { return app_info; }
-        twain_app_info get_app_info() const { return app_info; }
+		twain_characteristics& set_app_modeless(bool bSet) { app_modeless = bSet; return *this; }
+		twain_characteristics& set_check_handles(bool bSet) { check_handles = bSet; return *this; }
+
+        twain_app_info& get_app_info() { return app_info; }
         dsm_type get_used_dsm() const { return dsmToUse; }
         dsm_search_order get_dsm_search_order() const { return search_order; }
         logger_details& get_logger_details() { return log_details; }
         std::string get_temporary_directory() const { return temporary_dir; }
+		bool is_app_modeless() const { return app_modeless; }
+		bool is_check_handles() const { return check_handles; }
 };

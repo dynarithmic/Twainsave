@@ -91,9 +91,9 @@ namespace dynarithmic
         capability_interface::source_cap_info::const_iterator capability_interface::cbegin() { return m_caps.cbegin(); }
         capability_interface::source_cap_info::const_iterator capability_interface::cend() { return m_caps.cend(); }
 
-        bool capability_interface::attach(twain_source& s)
+        bool capability_interface::attach(DTWAIN_SOURCE s)
         {
-            m_Source = &s;
+            m_Source = s;
             return fill_caps();
         }
 

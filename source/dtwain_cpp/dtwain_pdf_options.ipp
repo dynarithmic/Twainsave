@@ -18,7 +18,12 @@ FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
 DYNARITHMIC SOFTWARE. DYNARITHMIC SOFTWARE DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
 OF THIRD PARTY RIGHTS.
 */
-using pdf_page_size = paper_size;
+
+class pdf_options
+{
+    public:
+        using pdf_custom_scale = std::pair<double, double>;
+        using pdf_page_size = std::pair<double, double>;
 
 enum class pdf_orientation
 {
@@ -31,7 +36,6 @@ enum class pdf_page_scale
   none = DTWAIN_PDF_NOSCALING,
   fitpage = DTWAIN_PDF_FITPAGE,
   custom = DTWAIN_PDF_CUSTOMSCALE
-
 };
 
 enum class pdf_permission
@@ -55,6 +59,18 @@ enum class pdf_paper_size_custom
     variable = DTWAIN_PDF_VARIABLEPAGESIZE
 };
 
+    private:
+        std::string m_author;
+        std::string m_creator;
+        std::string m_producer;
+        std::string m_keywords;
+        std::string m_subject;
+        std::string m_title;
+        bool m_useASCII;
+        int m_jpegQuality;
+        pdf_orientation m_orientation;
+
+	public:
 class pdf_encryption_options
 {
     std::string m_user_password;
@@ -97,7 +113,8 @@ class pdf_encryption_options
        bool is_permission_set(pdf_permission perm) const;
 };
 
-#undef max
+        pdf_encryption_options m_encryptOptions;
+
 class pdf_page_size_options
 {
     public:
@@ -107,7 +124,7 @@ class pdf_page_size_options
         custom_size_type m_pagesize_custom;
         pdf_paper_size_custom m_size_opt;
     public:
-        static constexpr int default_size = std::numeric_limits<uint32_t>::max();
+				static constexpr int default_size = UINT32_MAX;
         pdf_page_size_options();        
         pdf_page_size_options& set_custom_size(uint32_t width, uint32_t height);
         pdf_page_size_options& set_page_size(paper_size ps);
@@ -119,6 +136,8 @@ class pdf_page_size_options
         bool is_custom_size_used() const;
 };
 
+        pdf_page_size_options m_size_options;
+
 class pdf_page_scale_options
 {
     public:
@@ -127,7 +146,7 @@ class pdf_page_scale_options
         pdf_page_scale m_pagescale;
         custom_scale_type m_pagescale_custom;
     public:
-        static constexpr double default_scale = std::numeric_limits<double>::max();
+				static constexpr double default_scale = DBL_MAX;
         pdf_page_scale_options();
         pdf_page_scale_options& set_custom_scale(double xScale, double yScale);
         pdf_page_scale_options& set_page_scale(pdf_page_scale ps);
@@ -137,27 +156,8 @@ class pdf_page_scale_options
         bool is_custom_scale_used() const;
 };
 
-class pdf_options
-{
-    public:
-        using pdf_custom_scale = std::pair<double, double>;
-        using pdf_page_size = std::pair<double, double>;
-        
-    private:
-        std::string m_author;
-        std::string m_creator;
-        std::string m_producer;
-        std::string m_keywords;
-        std::string m_subject;
-        std::string m_title;
-        bool m_useASCII;
-        int m_jpegQuality;
-        pdf_orientation m_orientation;
         pdf_page_scale_options m_scale_options;
-        pdf_page_size_options m_size_options;
-        pdf_encryption_options m_encryptOptions;
         
-    public:
         pdf_options();
         pdf_options& set_author(const std::string& value);
         pdf_options& set_creator(const std::string& value);

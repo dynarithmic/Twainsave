@@ -27,8 +27,7 @@ namespace dynarithmic
     namespace twain
     {
         twain_source::twain_source(DTWAIN_SOURCE theSource) : m_theSource(theSource), m_bIsSelected(false),
-                                                              m_bCloseable(false),
-                                                              m_capability_info(new capability_interface)
+                                                              m_bCloseable(false)
         {
             if (m_theSource)
                 attach(m_theSource);
@@ -45,9 +44,8 @@ namespace dynarithmic
 			if (this == &rhs)
 				return *this;
             swap(*this, rhs);
-            m_capability_info = std::move(rhs.m_capability_info);
             rhs.m_theSource = nullptr;
-            if (rhs.m_capability_info)
+            if (rhs.m_capability_listener)
                 m_capability_listener = std::move(rhs.m_capability_listener);
             else
                 m_capability_listener.reset();
@@ -76,6 +74,10 @@ namespace dynarithmic
             std::swap(left.m_cap_status_info_map, right.m_cap_status_info_map);
             std::swap(left.m_caps_to_test, right.m_caps_to_test);
             std::swap(left.m_twain_printer_info, right.m_twain_printer_info);
+			std::swap(left.m_capability_info, right.m_capability_info);
+			std::swap(left.m_feeder_info, right.m_feeder_info);
+			std::swap(left.m_filetransfer_info, right.m_filetransfer_info);
+			std::swap(left.m_duplex_info, right.m_duplex_info);
         }
 
         void twain_source::attach(DTWAIN_SOURCE source)
@@ -84,9 +86,12 @@ namespace dynarithmic
             if (source)
             {
                 get_source_info_internal();
-                m_capability_info->attach(*this);
+                m_capability_info.attach(source);
                 get_source_basic_cap_info(IS_SUPPORTED);
                 m_twain_printer_info.attach(*this);
+				m_filetransfer_info.attach(*this);
+				m_feeder_info.attach(*this);
+				m_duplex_info.attach(*this);
                 m_bIsSelected = true;
             }
             else
@@ -97,7 +102,7 @@ namespace dynarithmic
         {
             m_theSource = nullptr;
             m_bIsSelected = false;
-            m_capability_info->detach();
+            m_capability_info.detach();
         }
 
         void twain_source::invoke_callback(int which, int capValue, const capability_interface::cap_getter_info& gi, bool val)
@@ -210,8 +215,8 @@ namespace dynarithmic
                 {
                     auto tupleval = iter->second;
                     auto iter2 = m_cap_status_info_map.insert({ ct, cap_status_info() }).first;
-                    is_supported = m_capability_info->is_cap_supported(std::get<0>(tupleval));
-                    iter2->second.set_supported(m_capability_info->is_cap_supported(is_supported));
+                    is_supported = m_capability_info.is_cap_supported(std::get<0>(tupleval));
+                    iter2->second.set_supported(m_capability_info.is_cap_supported(is_supported));
                 }
             }
 
@@ -226,7 +231,7 @@ namespace dynarithmic
                     if (std::get<1>(tupleval) != boost::tribool::indeterminate_value)
                     {
                         auto iter2 = m_cap_status_info_map.insert({ ct, cap_status_info() }).first;
-                        auto retval = m_capability_info->get_cap_values(vl, std::get<1>(tupleval), gInfo);
+                        auto retval = m_capability_info.get_cap_values(vl, std::get<1>(tupleval), gInfo);
                         if (retval.first)
                         {
                             auto fnToCall = std::get<2>(tupleval);
@@ -249,7 +254,7 @@ namespace dynarithmic
             if (val != static_cast<decltype(val)>(acquire_characteristics::default_##x)) {\
                 twain_std_array<decltype(val), 1> dValues; \
                 dValues[0] = val; \
-                m_capability_info->set_##y(dValues); }
+                m_capability_info.set_##y(dValues); }
 
         void twain_source::prepare_halftones()
         {
@@ -257,17 +262,17 @@ namespace dynarithmic
             auto ht = ac.get_halftone();
             if (ht.empty())
                 return;
-            const auto bret = m_capability_info->set_bitdepthreduction(std::array<long, 1>{1});
+            const auto bret = m_capability_info.set_bitdepthreduction(std::array<long, 1>{1});
             if (!bret.first)
                 return;
-            m_capability_info->set_halftones(std::array<std::string, 1>{ht});
+            m_capability_info.set_halftones(std::array<std::string, 1>{ht});
         }
 
         void twain_source::prepare_acquisition()
         {
             acquire_characteristics& ac = m_acquire_characteristics;
             std::vector<long> vValues = {ac.is_duplex_mode()};
-            m_capability_info->set_duplexenabled(vValues);
+            m_capability_info.set_duplexenabled(vValues);
 
             {
                 double val = 0;
@@ -283,7 +288,7 @@ namespace dynarithmic
             }
 
             vValues[0] = ac.get_use_feeder() ? 1 : 0;
-            m_capability_info->set_feederenabled(vValues);
+            m_capability_info.set_feederenabled(vValues);
             if (ac.is_use_high_speed())
                 prepare_high_speed();
             {
@@ -479,7 +484,7 @@ namespace dynarithmic
             }
             twain_std_array<capability_interface::feederenabled_type, 1> arr;
             arr[0] = 1;
-            m_capability_info->set_feederenabled(arr);
+            m_capability_info.set_feederenabled(arr);
             if ( !get_cap_status(high_level_cap::feederenabled).is_enabled())
             {
                 status = true;
@@ -623,7 +628,7 @@ namespace dynarithmic
             return false;
         }
 
-        image_information twain_source::get_image_information() const
+        image_information twain_source::get_current_image_information() const
         {
             DTWAIN_FLOAT xRes, yRes;
             LONG width, length, numsamples;
@@ -653,8 +658,8 @@ namespace dynarithmic
         bool twain_source::can_use_high_speed() const
         {
             std::vector<long> v, v2;
-            m_capability_info->get_autoscan(v);
-            m_capability_info->get_maxbatchbuffers(v2);
+            m_capability_info.get_autoscan(v);
+            m_capability_info.get_maxbatchbuffers(v2);
             return (!v.empty() && !v2.empty() && v.front() == 1);
         }
 
@@ -674,11 +679,11 @@ namespace dynarithmic
                 return false;
             // check if autoscan is available, if so set it
             std::vector<capability_interface::autoscan_type> autoscan = {1};
-            auto retval = m_capability_info->set_autoscan(autoscan);
+            auto retval = m_capability_info.set_autoscan(autoscan);
             if (!retval.first)
                 return false;
             std::vector<capability_interface::maxbatchbuffers_type> batchbuffers;
-            retval = m_capability_info->get_maxbatchbuffers(batchbuffers);
+            retval = m_capability_info.get_maxbatchbuffers(batchbuffers);
             if (!retval.first || batchbuffers.empty())
                 return false;
             auto topvalue = batchbuffers.back();
@@ -692,7 +697,7 @@ namespace dynarithmic
             }
             batchbuffers[0] = topvalue;
             batchbuffers.resize(1);
-            return m_capability_info->set_maxbatchbuffers(batchbuffers).first;
+            return m_capability_info.set_maxbatchbuffers(batchbuffers).first;
         }
 
         HANDLE twain_source::get_current_image()
@@ -700,7 +705,9 @@ namespace dynarithmic
             return ::DTWAIN_GetCurrentAcquiredImage(get_source());
         }
 
-
-
+		bool twain_source::is_uienabled() const
+		{
+			return ::DTWAIN_IsUIEnabled(get_source()) ? true : false;
+		}
     }
 }

@@ -56,8 +56,11 @@ private:
     bool m_bCloseable = true;
     acquire_characteristics m_acquire_characteristics;
     buffered_transfer_info m_buffered_info;
+	file_transfer_info m_filetransfer_info;
     twain_printer_info m_twain_printer_info;
-    std::unique_ptr<capability_interface> m_capability_info;
+	feeder_info m_feeder_info;
+	duplex_info m_duplex_info;
+	mutable capability_interface m_capability_info;
     std::unique_ptr<capability_listener> m_capability_listener;
 
     mutable std::unordered_map<high_level_cap, cap_status_info> m_cap_status_info_map;
@@ -97,22 +100,23 @@ public:
     void set_cap_listener(T& val)
     { m_capability_listener = std::make_unique<T>(T()); }
 
-/*	template <typename T, bool isCloned=true>
-    void set_cap_listener(T& val)
-    { m_capability_listener = std::make_unique(val.clone()); }
-    */
-
     void invoke_callback(int which, int capvalue, const capability_interface::cap_getter_info& gi, bool val=true);
     void invoke_callback(int which, int capvalue, const capability_interface::cap_setter_info& si, bool val=true);
     DTWAIN_SOURCE get_source() const { return m_theSource; }
     twain_app_info get_source_info() const { return m_sourceInfo; }
     void set_pdf_options();
     HANDLE get_current_image();
+
     acquire_characteristics& get_acquire_characteristics() { return m_acquire_characteristics; }
     buffered_transfer_info& get_buffered_transfer_info() { return m_buffered_info; }
-    capability_interface& get_capability_interface() const { return *(m_capability_info.get()); }
-    bool can_use_high_speed() const;
+	file_transfer_info& get_file_transfer_info() { return m_filetransfer_info; }
+    capability_interface& get_capability_interface() { return m_capability_info; }
+    const capability_interface& get_capability_interface() const { return m_capability_info; }
+	feeder_info& get_feeder_info() { return m_feeder_info; }
+	duplex_info& get_duplex_info() { return m_duplex_info; }
     const cap_status_info& get_cap_status(high_level_cap cap) const;
+
+    bool can_use_high_speed() const;
 
     acquire_return_type acquire();
     byte_array get_custom_data() const;
@@ -121,9 +125,10 @@ public:
     bool is_open() const;
     bool is_selected() const;
     bool is_closeable() const;
+	bool is_uienabled() const;
     
     bool close();
-    image_information get_image_information() const;
+    image_information get_current_image_information() const;
 
     template <typename Container>
     bool get_pixel_types(Container& ct) const;

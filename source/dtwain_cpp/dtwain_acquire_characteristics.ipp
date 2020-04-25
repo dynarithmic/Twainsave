@@ -75,18 +75,18 @@ private:
 public:
     using lightsource_container = std::vector<lightsource_type>;
     using blankpage_detection_info = std::pair<bool, double>;
-    static constexpr double default_resolution = std::numeric_limits<double>::min();
-    static constexpr double default_rotation = default_resolution;
-    static constexpr double default_brightness = default_resolution;
-    static constexpr double default_contrast = default_resolution;
-    static constexpr double default_gamma = default_resolution;
-    static constexpr double default_threshold = default_resolution;
-    static constexpr double default_shadow = default_resolution;
-    static constexpr double default_highlight = default_resolution;
+    static constexpr double default_resolution = DBL_MIN;
+    static constexpr double default_rotation = DBL_MIN;
+    static constexpr double default_brightness = DBL_MIN;
+    static constexpr double default_contrast = DBL_MIN;
+    static constexpr double default_gamma = DBL_MIN;
+    static constexpr double default_threshold = DBL_MIN;
+    static constexpr double default_shadow = DBL_MIN;
+    static constexpr double default_highlight = DBL_MIN;
     static constexpr double default_blank_page_threshold = 98.0;
     static constexpr long default_compression = DTWAIN_CP_NONE;
-    static constexpr long default_orientation = std::numeric_limits<long>::min();
-    static constexpr long default_measure_unit = std::numeric_limits<long>::min();
+    static constexpr long default_orientation = LONG_MAX;
+    static constexpr long default_measure_unit = LONG_MIN;
     static constexpr long default_filmscan_mode = DTWAIN_LP_REFLECTIVE;
     static constexpr long default_indicators_mode = 1;
     static constexpr long default_autodeskew_mode = 0;
@@ -206,4 +206,3 @@ acquire_characteristics& acquire_characteristics::set_lightsources(const Contain
     std::copy(ct.begin(), ct.end(), std::back_inserter(m_lightsources));
     return *this;
 }
-

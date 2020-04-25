@@ -40,6 +40,7 @@ OF THIRD PARTY RIGHTS.
 #include <sstream>
 #include <type_traits>
 #include <unordered_map>
+#include <algorithm>
 #include "twainsave_verinfo.h"
 
 template <typename E>
@@ -139,8 +140,8 @@ struct scanner_options
 	int m_nOverwriteWidth;
 	std::unordered_map<std::string, dynarithmic::twain::measure_unit> m_MeasureUnitMap;
 	std::unordered_map<int, dynarithmic::twain::jobcontrol_type> m_JobControlMap;
-	std::unordered_map<std::string, dynarithmic::twain::pdf_permission> m_PDFEncryptMap;
-	std::unordered_map<std::string, dynarithmic::twain::pdf_permission> m_PDFEncryptMapOff;
+	std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMap;
+	std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMapOff;
 	std::unordered_map<std::string, std::pair<dynarithmic::twain::file_type, dynarithmic::twain::twain_compression_type>> m_MapMode2Map;
 	std::unordered_map<std::string, TW_UINT16> m_OptionToCapMap;
 	int twainsave_return_value;
@@ -261,27 +262,27 @@ struct scanner_options
 							INIT_TYPE_2(2, jobcontrol_type, exclude_separator) },
 
 						m_PDFEncryptMap{
-							INIT_TYPE(modify, pdf_permission, modify),
-							INIT_TYPE(copy, pdf_permission, copy),
-							INIT_TYPE(modannot, pdf_permission, modifyannotations),
-							INIT_TYPE(fillin, pdf_permission, fillin),
-							INIT_TYPE(extract, pdf_permission, extract),
-							INIT_TYPE(assembly, pdf_permission, assembly),
-							INIT_TYPE(degradeprint, pdf_permission, degradedprint),
-							INIT_TYPE(print, pdf_permission, print),
-							INIT_TYPE(all, pdf_permission, all)
+							INIT_TYPE(modify, pdf_options::pdf_permission, modify),
+							INIT_TYPE(copy, pdf_options::pdf_permission, copy),
+							INIT_TYPE(modannot, pdf_options::pdf_permission, modifyannotations),
+							INIT_TYPE(fillin, pdf_options::pdf_permission, fillin),
+							INIT_TYPE(extract, pdf_options::pdf_permission, extract),
+							INIT_TYPE(assembly, pdf_options::pdf_permission, assembly),
+							INIT_TYPE(degradeprint, pdf_options::pdf_permission, degradedprint),
+							INIT_TYPE(print, pdf_options::pdf_permission, print),
+							INIT_TYPE(all, pdf_options::pdf_permission, all)
 						},
 
 						m_PDFEncryptMapOff{
-							INIT_TYPE(nomodify, pdf_permission, modify),
-							INIT_TYPE(nocopy, pdf_permission, copy),
-							INIT_TYPE(nomodannot, pdf_permission, modifyannotations),
-							INIT_TYPE(nofillin, pdf_permission, fillin),
-							INIT_TYPE(noextract, pdf_permission, extract),
-							INIT_TYPE(noassembly, pdf_permission, assembly),
-							INIT_TYPE(nodegradeprint, pdf_permission, degradedprint),
-							INIT_TYPE(noprint, pdf_permission, print),
-							INIT_TYPE(none, pdf_permission, all)
+							INIT_TYPE(nomodify, pdf_options::pdf_permission, modify),
+							INIT_TYPE(nocopy, pdf_options::pdf_permission, copy),
+							INIT_TYPE(nomodannot, pdf_options::pdf_permission, modifyannotations),
+							INIT_TYPE(nofillin, pdf_options::pdf_permission, fillin),
+							INIT_TYPE(noextract, pdf_options::pdf_permission, extract),
+							INIT_TYPE(noassembly, pdf_options::pdf_permission, assembly),
+							INIT_TYPE(nodegradeprint, pdf_options::pdf_permission, degradedprint),
+							INIT_TYPE(noprint, pdf_options::pdf_permission, print),
+							INIT_TYPE(none, pdf_options::pdf_permission, all)
 						},
 
 		m_MapMode2Map{ {"bmp1_mode2",{dynarithmic::twain::file_type::bmp_source_mode, dynarithmic::twain::twain_compression_type::none}},
@@ -654,7 +655,7 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 			if (iter3 != varmap.end())
 			{
 				double val = s_options.m_dBlankThreshold;
-				val = (std::min)(std::max(0.0, val), 100.0);
+				val = (std::min)((std::max)(0.0, val), 100.0);
 				blank_handler.threshold = val;
 			}
 		}
@@ -701,11 +702,11 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 			{
 				uint32_t width, height;
 				strm >> width >> height;
-				pagesizeopts.set_custom_size(width, height).set_custom_option(pdf_paper_size_custom::custom);
+				pagesizeopts.set_custom_size(width, height).set_custom_option(pdf_options::pdf_paper_size_custom::custom);
 			}
 			else
 			if (word == "variable")
-				pagesizeopts.set_custom_option(pdf_paper_size_custom::variable);
+				pagesizeopts.set_custom_option(pdf_options::pdf_paper_size_custom::variable);
 			else
 				pagesizeopts.set_page_size(s_options.m_PageSizeMap[pdf_commands.m_strPaperSize]);
 
@@ -721,14 +722,14 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 					double xscale, yscale;
 					strm >> xscale >> yscale;
 					pagescaleopts.set_custom_scale(xscale, yscale);
-					pagescaleopts.set_page_scale(pdf_page_scale::custom);
+					pagescaleopts.set_page_scale(pdf_options::pdf_page_scale::custom);
 				}
 				else
 				if (word == "fitpage")
-					pagescaleopts.set_page_scale(pdf_page_scale::fitpage);
+					pagescaleopts.set_page_scale(pdf_options::pdf_page_scale::fitpage);
 				else
 				if (word == "noscale")
-					pagescaleopts.set_page_scale(pdf_page_scale::none);
+					pagescaleopts.set_page_scale(pdf_options::pdf_page_scale::none);
 			}
 			// encryption
 			bool encryption_on = boost::any_cast<bool>(varmap["pdfencrypt"].value());
@@ -763,7 +764,7 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 				std::vector<std::string>::size_type i;
 
 				// set of our permissions
-				std::set<pdf_permission> permissionContainer;
+				std::set<pdf_options::pdf_permission> permissionContainer;
 				for (i = 0; i < sAllPermissions.size(); ++i)
 				{
 					if (sAllPermissions[i] == "none")

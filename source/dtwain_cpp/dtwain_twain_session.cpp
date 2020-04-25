@@ -102,18 +102,26 @@ namespace dynarithmic
             auto& details = tw_characteristics.get_logger_details();
             const LONG log_destination = static_cast<LONG>(details.get_destination());
             const LONG log_verbosity = static_cast<LONG>(details.get_verbosity_aslong());
-            DTWAIN_SetTwainLogA(DTWAIN_LOG_USEFILE | log_verbosity, details.get_filename().c_str());
+            DTWAIN_SetTwainLogA(log_destination | log_verbosity, details.get_filename().c_str());
             if ( m_logger_callback.second )
                 DTWAIN_SetLoggerCallbackA(logger_callback_proc, reinterpret_cast<DTWAIN_LONG64>(this));
         }
 
         bool twain_session::open_dsm()
         {
+			if (!DTWAIN_IsTwainAvailable())
+				return false;
             if (!DTWAIN_IsInitialized())
             {
                 m_Handle = DTWAIN_SysInitialize();
                 if (!m_Handle)
                     return false;
+				
+				auto sz = DTWAIN_GetShortVersionStringA(nullptr, 0);
+				std::vector<char> retBuf(sz + 1);
+				DTWAIN_GetShortVersionStringA(retBuf.data(), retBuf.size());
+				short_name = retBuf.data();
+
                 if (tw_characteristics.get_logger_details().is_enabled())
                     setup_logging();
                 DTWAIN_SetTwainDSM(static_cast<LONG>(tw_characteristics.get_used_dsm()));
@@ -131,7 +139,7 @@ namespace dynarithmic
                 const bool twainStarted = DTWAIN_StartTwainSession(nullptr, nullptr) != 0;
                 if (twainStarted)
                 {
-                    auto& app_info = tw_characteristics.get_app_info_ref();
+                    auto& app_info = tw_characteristics.get_app_info();
                     app_info = *static_cast<TW_IDENTITY*>(DTWAIN_GetTwainAppID());
 
                     auto len = DTWAIN_GetDSMFullNameA(static_cast<LONG>(tw_characteristics.get_used_dsm()), nullptr, 0,
@@ -157,7 +165,7 @@ namespace dynarithmic
 
         twain_identity& twain_session::get_id()
         {
-            return tw_characteristics.get_app_info_ref();
+            return tw_characteristics.get_app_info();
         }
 
         TW_IDENTITY* twain_session::get_twain_id()
@@ -226,6 +234,11 @@ namespace dynarithmic
             tw_characteristics.get_logger_details().enable(b);
             if (m_Handle)
                 setup_logging();
+        }
+
+		std::string twain_session::get_short_version_name() const 
+		{
+			return short_name;
         }
     }
 };

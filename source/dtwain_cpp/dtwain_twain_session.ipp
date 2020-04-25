@@ -18,6 +18,8 @@ FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
 DYNARITHMIC SOFTWARE. DYNARITHMIC SOFTWARE DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
 OF THIRD PARTY RIGHTS.
 */
+#pragma warning( push )  // Stores the current warning state for every warning.
+#pragma warning( disable:4996)
 template <int N>
 struct source_selector
 {
@@ -61,6 +63,7 @@ class twain_session
         bool m_isInitialized = false;
         twain_characteristics tw_characteristics;
         std::string dsm_path;
+		std::string short_name;
         DTWAIN_HANDLE m_Handle;
         using callback_map_type = std::unordered_map<twain_source*, twain_listener*>;
         using logger_callback_type = std::pair<twain_session*, twain_logger*>;
@@ -152,6 +155,7 @@ class twain_session
         void call_logger(twain_logger* plogger, const char* msg);
         std::string get_dsm_path() const { return dsm_path; }
         static int call_dsm(TW_IDENTITY* pSource, TW_IDENTITY* pDest, LONG dg, LONG dat, LONG msg, void* pdata);
+		std::string get_short_version_name() const;
         bool close_dsm();
 
         template <typename Container>
@@ -165,6 +169,17 @@ class twain_session
                 return C.size();
             }
             return 0;
+        }
+
+        template <typename Container>
+        Container get_twain_sources() const
+        {
+			Container C;
+            static_assert(std::is_same<typename Container::value_type, twain_source_info>::value == 1,
+                "Container is not of type twain_source_info");
+            if (m_isInitialized)
+               get_twain_sources_impl(C);
+            return C;
         }
 
         size_t get_twain_sources(twain_source_info* twInfo) const
@@ -195,4 +210,4 @@ class twain_session
         twain_identity& get_id();
         TW_IDENTITY* get_twain_id();
 };
-
+#pragma warning(pop)
