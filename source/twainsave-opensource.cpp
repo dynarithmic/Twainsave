@@ -30,7 +30,8 @@ OF THIRD PARTY RIGHTS.
 #include <boost/uuid/uuid.hpp>            
 #include <boost/uuid/uuid_generators.hpp> 
 #include <boost/uuid/uuid_io.hpp>         
-#include "dtwain_cpp_interface.hpp"
+#include <boost/algorithm/string/predicate.hpp>
+#include <dynarithmic/twain/twain_source.hpp>
 #include <string>
 #include <iostream>
 #include <utility>
@@ -85,8 +86,8 @@ struct scanner_options
 	bool m_bUseADFOrFlatbed;
 	bool m_bAutobrightMode;
 	double m_brightness;
-	double m_contrast;
-	double m_gamma;
+    double m_dContrast;
+    double m_dGamma;
 	int m_bitsPerPixel;
 	int m_color;
 	bool m_bUseDuplex;
@@ -96,13 +97,13 @@ struct scanner_options
 	int m_Orientation;
 	bool m_bNoUI;
 	double m_dHighlight;
-	double m_threshold;
+    double m_dThreshold;
 	double m_dRotation;
 	bool m_bShowIndicator;
 	bool m_bShowUIOnly;
 	double m_dShadow;
 	bool m_bNoBlankPages;
-	double m_resolution;
+    double m_dResolution;
 	double m_dBlankThreshold;
 	bool m_bNegateImage;
 	bool m_bSelectByDialog;
@@ -123,10 +124,10 @@ struct scanner_options
 	bool m_bUseDSM2;
 	std::string m_strTempDirectory;
 	int m_DSMSearchOrder;
-	std::unordered_map<std::string, dynarithmic::twain::file_type> m_FileTypeMap;
-	std::unordered_map<int, dynarithmic::twain::color_type> m_ColorTypeMap;
-	std::unordered_map<int, dynarithmic::twain::image_orientation> m_OrientationTypeMap;
-	std::unordered_map<std::string, dynarithmic::twain::paper_size> m_PageSizeMap;
+    std::unordered_map<std::string, dynarithmic::twain::filetype_value::value_type> m_FileTypeMap;
+    std::unordered_map<int, dynarithmic::twain::color_value::value_type> m_ColorTypeMap;
+    std::unordered_map<int, dynarithmic::twain::orientation_value::value_type> m_OrientationTypeMap;
+    std::unordered_map<std::string, dynarithmic::twain::papersize_value::value_type> m_PageSizeMap;
 	std::array<long, 4> m_errorLevels;
 	bool m_bUseFileInc;
 	int m_FileIncrement;
@@ -138,11 +139,11 @@ struct scanner_options
 	int m_nJobControl;
 	int m_nOverwriteCount;
 	int m_nOverwriteWidth;
-	std::unordered_map<std::string, dynarithmic::twain::measure_unit> m_MeasureUnitMap;
-	std::unordered_map<int, dynarithmic::twain::jobcontrol_type> m_JobControlMap;
+    std::unordered_map<std::string, dynarithmic::twain::units_value::value_type> m_MeasureUnitMap;
+    std::unordered_map<int, dynarithmic::twain::jobcontrol_value::value_type> m_JobControlMap;
 	std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMap;
 	std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMapOff;
-	std::unordered_map<std::string, std::pair<dynarithmic::twain::file_type, dynarithmic::twain::twain_compression_type>> m_MapMode2Map;
+    std::unordered_map<std::string, std::pair<dynarithmic::twain::filetype_value::value_type, dynarithmic::twain::compression_value::value_type>> m_MapMode2Map;
 	std::unordered_map<std::string, TW_UINT16> m_OptionToCapMap;
 	int twainsave_return_value;
 	std::string m_strConfigFile;
@@ -151,115 +152,113 @@ struct scanner_options
 	scanner_options() : twainsave_return_value(RETURN_OK),
 							m_nOverwriteCount(1),
 							m_nOverwriteWidth(1),
-							m_bUseADF(false),
-							m_bUseADFOrFlatbed(false),
 							m_FileTypeMap{
-							INIT_TYPE(bmp, file_type, bmp),
-							INIT_TYPE(gif, file_type,gif),
-							INIT_TYPE(pcx, file_type,pcx),
-							INIT_TYPE(dcx, file_type,dcx),
-							INIT_TYPE(pdf, file_type,pdf),
-							INIT_TYPE(ico, file_type,windowsicon),
-							INIT_TYPE(png, file_type,png),
-							INIT_TYPE(tga, file_type,targa),
-							INIT_TYPE(psd, file_type,psd),
-							INIT_TYPE(emf, file_type,enhancedmetafile),
-							INIT_TYPE(wbmp, file_type,wirelessbmp),
-							INIT_TYPE(wmf, file_type,windowsmetafile),
-							INIT_TYPE(jpeg, file_type,jpeg),
-							INIT_TYPE(jp2, file_type,jpeg2k),
-							INIT_TYPE(tif1, file_type,tiffnocompress),
-							INIT_TYPE(tif2, file_type,tiffpackbits),
-							INIT_TYPE(tif3, file_type, tiffgroup3),
-							INIT_TYPE(tif4, file_type, tiffgroup4),
-							INIT_TYPE(tif5, file_type, tiffjpeg),
-							INIT_TYPE(tif6, file_type, tiffdeflate),
-							INIT_TYPE(tif7, file_type, tifflzw),
-							INIT_TYPE(ps1, file_type, postscript1),
-							INIT_TYPE(ps2, file_type, postscript2),
-							INIT_TYPE(webp, file_type, googlewebp) },
+                            INIT_TYPE(bmp, filetype_value, bmp),
+                            INIT_TYPE(gif, filetype_value,gif),
+                            INIT_TYPE(pcx, filetype_value,pcx),
+                            INIT_TYPE(dcx, filetype_value,dcx),
+                            INIT_TYPE(pdf, filetype_value,pdf),
+                            INIT_TYPE(ico, filetype_value,windowsicon),
+                            INIT_TYPE(png, filetype_value,png),
+                            INIT_TYPE(tga, filetype_value,targa),
+                            INIT_TYPE(psd, filetype_value,psd),
+                            INIT_TYPE(emf, filetype_value,enhancedmetafile),
+                            INIT_TYPE(wbmp, filetype_value,wirelessbmp),
+                            INIT_TYPE(wmf, filetype_value,windowsmetafile),
+                            INIT_TYPE(jpeg, filetype_value,jpeg),
+                            INIT_TYPE(jp2, filetype_value,jpeg2k),
+                            INIT_TYPE(tif1, filetype_value,tiffnocompress),
+                            INIT_TYPE(tif2, filetype_value,tiffpackbits),
+                            INIT_TYPE(tif3, filetype_value, tiffgroup3),
+                            INIT_TYPE(tif4, filetype_value, tiffgroup4),
+                            INIT_TYPE(tif5, filetype_value, tiffjpeg),
+                            INIT_TYPE(tif6, filetype_value, tiffdeflate),
+                            INIT_TYPE(tif7, filetype_value, tifflzw),
+                            INIT_TYPE(ps1, filetype_value, postscript1),
+                            INIT_TYPE(ps2, filetype_value, postscript2),
+                            INIT_TYPE(webp, filetype_value, googlewebp) },
 
 						m_ColorTypeMap{
-							INIT_TYPE_2(0, color_type, bw),
-							INIT_TYPE_2(1, color_type, gray),
-							INIT_TYPE_2(2, color_type, rgb) },
+                            INIT_TYPE_2(0, color_value, bw),
+                            INIT_TYPE_2(1, color_value, gray),
+                            INIT_TYPE_2(2, color_value, rgb) },
 
 							m_PageSizeMap{
-							INIT_TYPE(custom, paper_size, CUSTOM),
-							INIT_TYPE(variable, paper_size, VARIABLE),
-							INIT_TYPE(letter, paper_size, USLETTER),
-							INIT_TYPE(none, paper_size, NONE),
-							INIT_TYPE(legal, paper_size, USLEGAL),
-							INIT_TYPE(ledger, paper_size, USLEDGER),
-							INIT_TYPE(executive, paper_size, USEXECUTIVE),
-							INIT_TYPE(statement, paper_size, USSTATEMENT),
-							INIT_TYPE(businesscard, paper_size, BUSINESSCARD),
-							INIT_TYPE(4A0, paper_size, FOURA0),
-							INIT_TYPE(2A0, paper_size, TWOA0),
-							INIT_TYPE(JISB0, paper_size, JISB0),
-							INIT_TYPE(JISB1, paper_size, JISB1),
-							INIT_TYPE(JISB2, paper_size, JISB2),
-							INIT_TYPE(JISB3, paper_size, JISB3),
-							INIT_TYPE(JISB4, paper_size, JISB4),
-							INIT_TYPE(JISB5, paper_size, JISB5),
-							INIT_TYPE(JISB6, paper_size, JISB6),
-							INIT_TYPE(JISB7, paper_size, JISB7),
-							INIT_TYPE(JISB8, paper_size, JISB8),
-							INIT_TYPE(JISB9, paper_size, JISB9),
-							INIT_TYPE(JISB10, paper_size, JISB10),
-							INIT_TYPE(A0, paper_size, A0),
-							INIT_TYPE(A1, paper_size, A1),
-							INIT_TYPE(A2, paper_size, A2),
-							INIT_TYPE(A3, paper_size, A3),
-							INIT_TYPE(A4, paper_size, A4),
-							INIT_TYPE(A5, paper_size, A5),
-							INIT_TYPE(A6, paper_size, A6),
-							INIT_TYPE(A7, paper_size, A7),
-							INIT_TYPE(A8, paper_size, A8),
-							INIT_TYPE(A9, paper_size, A9),
-							INIT_TYPE(A10, paper_size, A10),
-							INIT_TYPE(B0, paper_size, ISOB0),
-							INIT_TYPE(B1, paper_size, ISOB1),
-							INIT_TYPE(B2, paper_size, ISOB2),
-							INIT_TYPE(B3, paper_size, ISOB3),
-							INIT_TYPE(B4, paper_size, ISOB4),
-							INIT_TYPE(B5, paper_size, ISOB5),
-							INIT_TYPE(B6, paper_size, ISOB6),
-							INIT_TYPE(B7, paper_size, ISOB7),
-							INIT_TYPE(B8, paper_size, ISOB8),
-							INIT_TYPE(B9, paper_size, ISOB9),
-							INIT_TYPE(B10, paper_size, ISOB10),
-							INIT_TYPE(C0, paper_size, C0),
-							INIT_TYPE(C1, paper_size, C1),
-							INIT_TYPE(C2, paper_size, C2),
-							INIT_TYPE(C3, paper_size, C3),
-							INIT_TYPE(C4, paper_size, C4),
-							INIT_TYPE(C5, paper_size, C5),
-							INIT_TYPE(C6, paper_size, C6),
-							INIT_TYPE(C7, paper_size, C7),
-							INIT_TYPE(C8, paper_size, C8),
-							INIT_TYPE(C9, paper_size, C9),
-							INIT_TYPE(C10, paper_size, C10) },
+                            INIT_TYPE(custom, papersize_value, CUSTOM),
+                            INIT_TYPE(variable, papersize_value, VARIABLE),
+                            INIT_TYPE(letter, papersize_value, USLETTER),
+                            INIT_TYPE(none, papersize_value, NONE),
+                            INIT_TYPE(legal, papersize_value, USLEGAL),
+                            INIT_TYPE(ledger, papersize_value, USLEDGER),
+                            INIT_TYPE(executive, papersize_value, USEXECUTIVE),
+                            INIT_TYPE(statement, papersize_value, USSTATEMENT),
+                            INIT_TYPE(businesscard, papersize_value, BUSINESSCARD),
+                            INIT_TYPE(4A0, papersize_value, FOURA0),
+                            INIT_TYPE(2A0, papersize_value, TWOA0),
+                            INIT_TYPE(JISB0, papersize_value, JISB0),
+                            INIT_TYPE(JISB1, papersize_value, JISB1),
+                            INIT_TYPE(JISB2, papersize_value, JISB2),
+                            INIT_TYPE(JISB3, papersize_value, JISB3),
+                            INIT_TYPE(JISB4, papersize_value, JISB4),
+                            INIT_TYPE(JISB5, papersize_value, JISB5),
+                            INIT_TYPE(JISB6, papersize_value, JISB6),
+                            INIT_TYPE(JISB7, papersize_value, JISB7),
+                            INIT_TYPE(JISB8, papersize_value, JISB8),
+                            INIT_TYPE(JISB9, papersize_value, JISB9),
+                            INIT_TYPE(JISB10, papersize_value, JISB10),
+                            INIT_TYPE(A0, papersize_value, A0),
+                            INIT_TYPE(A1, papersize_value, A1),
+                            INIT_TYPE(A2, papersize_value, A2),
+                            INIT_TYPE(A3, papersize_value, A3),
+                            INIT_TYPE(A4, papersize_value, A4),
+                            INIT_TYPE(A5, papersize_value, A5),
+                            INIT_TYPE(A6, papersize_value, A6),
+                            INIT_TYPE(A7, papersize_value, A7),
+                            INIT_TYPE(A8, papersize_value, A8),
+                            INIT_TYPE(A9, papersize_value, A9),
+                            INIT_TYPE(A10, papersize_value, A10),
+                            INIT_TYPE(B0, papersize_value, ISOB0),
+                            INIT_TYPE(B1, papersize_value, ISOB1),
+                            INIT_TYPE(B2, papersize_value, ISOB2),
+                            INIT_TYPE(B3, papersize_value, ISOB3),
+                            INIT_TYPE(B4, papersize_value, ISOB4),
+                            INIT_TYPE(B5, papersize_value, ISOB5),
+                            INIT_TYPE(B6, papersize_value, ISOB6),
+                            INIT_TYPE(B7, papersize_value, ISOB7),
+                            INIT_TYPE(B8, papersize_value, ISOB8),
+                            INIT_TYPE(B9, papersize_value, ISOB9),
+                            INIT_TYPE(B10, papersize_value, ISOB10),
+                            INIT_TYPE(C0, papersize_value, C0),
+                            INIT_TYPE(C1, papersize_value, C1),
+                            INIT_TYPE(C2, papersize_value, C2),
+                            INIT_TYPE(C3, papersize_value, C3),
+                            INIT_TYPE(C4, papersize_value, C4),
+                            INIT_TYPE(C5, papersize_value, C5),
+                            INIT_TYPE(C6, papersize_value, C6),
+                            INIT_TYPE(C7, papersize_value, C7),
+                            INIT_TYPE(C8, papersize_value, C8),
+                            INIT_TYPE(C9, papersize_value, C9),
+                            INIT_TYPE(C10, papersize_value, C10) },
 
 						m_MeasureUnitMap{
-							INIT_TYPE(inch, measure_unit, inch),
-							INIT_TYPE(cm, measure_unit, cm),
-							INIT_TYPE(pica, measure_unit, pica),
-							INIT_TYPE(point, measure_unit, point),
-							INIT_TYPE(twip, measure_unit, twip),
-							INIT_TYPE(pixel, measure_unit, pixel),
-							INIT_TYPE(mm, measure_unit, mm) },
+                            INIT_TYPE(inch, units_value, inches),
+                            INIT_TYPE(cm, units_value, centimeters),
+                            INIT_TYPE(pica, units_value, picas),
+                            INIT_TYPE(point, units_value, points),
+                            INIT_TYPE(twip, units_value, twips),
+                            INIT_TYPE(pixel, units_value, pixels),
+                            INIT_TYPE(mm, units_value, millimeters) },
 
 						m_OrientationTypeMap{
-							INIT_TYPE_2(0, image_orientation, orient_0),
-							INIT_TYPE_2(90, image_orientation, orient_90),
-							INIT_TYPE_2(180, image_orientation, orient_180),
-							INIT_TYPE_2(270, image_orientation, orient_270) },
+                            INIT_TYPE_2(0, orientation_value, orient_0),
+                            INIT_TYPE_2(90, orientation_value, orient_90),
+                            INIT_TYPE_2(180, orientation_value, orient_180),
+                            INIT_TYPE_2(270, orientation_value, orient_270) },
 
 						m_JobControlMap{
-							INIT_TYPE_2(0, jobcontrol_type, none),
-							INIT_TYPE_2(1, jobcontrol_type, include_separator),
-							INIT_TYPE_2(2, jobcontrol_type, exclude_separator) },
+                            INIT_TYPE_2(0, jobcontrol_value, none),
+                            INIT_TYPE_2(1, jobcontrol_value, include_separator),
+                            INIT_TYPE_2(2, jobcontrol_value, exclude_separator) },
 
 						m_PDFEncryptMap{
 							INIT_TYPE(modify, pdf_options::pdf_permission, modify),
@@ -285,34 +284,34 @@ struct scanner_options
 							INIT_TYPE(none, pdf_options::pdf_permission, all)
 						},
 
-		m_MapMode2Map{ {"bmp1_mode2",{dynarithmic::twain::file_type::bmp_source_mode, dynarithmic::twain::twain_compression_type::none}},
-				   {"bmp2_mode2",{ dynarithmic::twain::file_type::bmp_source_mode, dynarithmic::twain::twain_compression_type::rle4}},
-				   {"bmp3_mode2",{ dynarithmic::twain::file_type::bmp_source_mode, dynarithmic::twain::twain_compression_type::rle8}},
-				   {"bmp4_mode2",{ dynarithmic::twain::file_type::bmp_source_mode, dynarithmic::twain::twain_compression_type::bitfields}},
-				   {"dejavu_mode2",{ dynarithmic::twain::file_type::dejavu_source_mode, dynarithmic::twain::twain_compression_type::none}},
-				   { "exif_mode2",{ dynarithmic::twain::file_type::exif_source_mode, dynarithmic::twain::twain_compression_type::none }},
-				   { "fpx_mode2",{ dynarithmic::twain::file_type::fpx_source_mode, dynarithmic::twain::twain_compression_type::none }},
-				   { "jfif_mode2",{ dynarithmic::twain::file_type::jfif_source_mode, dynarithmic::twain::twain_compression_type::jpeg }},
-				   { "jpeg_mode2",{ dynarithmic::twain::file_type::jpeg, dynarithmic::twain::twain_compression_type::none }},
-				   { "jp2_mode2",{ dynarithmic::twain::file_type::jp2_source_mode, dynarithmic::twain::twain_compression_type::jpeg2k }},
-				   { "jpx_mode2",{ dynarithmic::twain::file_type::jpx_source_mode, dynarithmic::twain::twain_compression_type::none }},
-				   { "pdf_mode2",{ dynarithmic::twain::file_type::pdf_source_mode, dynarithmic::twain::twain_compression_type::none } },
-				   { "pdfa1_mode2",{ dynarithmic::twain::file_type::pdfa_source_mode, dynarithmic::twain::twain_compression_type::none } },
-				   { "pdfa2_mode2",{ dynarithmic::twain::file_type::pdfa2_source_mode, dynarithmic::twain::twain_compression_type::none } },
-				   { "pict_mode2",{ dynarithmic::twain::file_type::pict_source_mode, dynarithmic::twain::twain_compression_type::none } },
-				   { "png_mode2",{ dynarithmic::twain::file_type::png_source_mode, dynarithmic::twain::twain_compression_type::png } },
-				   { "spiff1_mode2",{ dynarithmic::twain::file_type::spiff_source_mode, dynarithmic::twain::twain_compression_type::jpeg } },
-				   { "spiff2_mode2",{ dynarithmic::twain::file_type::spiff_source_mode, dynarithmic::twain::twain_compression_type::jbig } },
-				   { "tiff1_mode2",{ dynarithmic::twain::file_type::tiff_source_mode, dynarithmic::twain::twain_compression_type::none } },
-				   { "tiff2_mode2",{ dynarithmic::twain::file_type::tiff_source_mode, dynarithmic::twain::twain_compression_type::group3_1d } },
-				   { "tiff3_mode2",{ dynarithmic::twain::file_type::tiff_source_mode, dynarithmic::twain::twain_compression_type::group3_1deol } },
-				   { "tiff4_mode2",{ dynarithmic::twain::file_type::tiff_source_mode, dynarithmic::twain::twain_compression_type::group3_2d } },
-				   { "tiff5_mode2",{ dynarithmic::twain::file_type::tiff_source_mode, dynarithmic::twain::twain_compression_type::group4} },
-				   { "tiff6_mode2",{ dynarithmic::twain::file_type::tiff_source_mode, dynarithmic::twain::twain_compression_type::jpeg } },
-				   { "tiff7_mode2",{ dynarithmic::twain::file_type::tiff_source_mode, dynarithmic::twain::twain_compression_type::lzw } },
-				   { "tiff8_mode2",{ dynarithmic::twain::file_type::tiff_source_mode, dynarithmic::twain::twain_compression_type::jbig } },
-				   { "tiff9_mode2",{ dynarithmic::twain::file_type::tiff_source_mode, dynarithmic::twain::twain_compression_type::zip } },
-				   { "xbm_mode2",{ dynarithmic::twain::file_type::xbm_source_mode, dynarithmic::twain::twain_compression_type::none} } },
+        m_MapMode2Map{ {"bmp1_mode2",{dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::none}},
+                   {"bmp2_mode2",{ dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::rle4}},
+                   {"bmp3_mode2",{ dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::rle8}},
+                   {"bmp4_mode2",{ dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::bitfields}},
+                   {"dejavu_mode2",{ dynarithmic::twain::filetype_value::dejavu_source_mode, dynarithmic::twain::compression_value::none}},
+                   { "exif_mode2",{ dynarithmic::twain::filetype_value::exif_source_mode, dynarithmic::twain::compression_value::none }},
+                   { "fpx_mode2",{ dynarithmic::twain::filetype_value::fpx_source_mode, dynarithmic::twain::compression_value::none }},
+                   { "jfif_mode2",{ dynarithmic::twain::filetype_value::jfif_source_mode, dynarithmic::twain::compression_value::jpeg }},
+                   { "jpeg_mode2",{ dynarithmic::twain::filetype_value::jpeg, dynarithmic::twain::compression_value::none }},
+                   { "jp2_mode2",{ dynarithmic::twain::filetype_value::jp2_source_mode, dynarithmic::twain::compression_value::jpeg2000 }},
+                   { "jpx_mode2",{ dynarithmic::twain::filetype_value::jpx_source_mode, dynarithmic::twain::compression_value::none }},
+                   { "pdf_mode2",{ dynarithmic::twain::filetype_value::pdf_source_mode, dynarithmic::twain::compression_value::none } },
+                   { "pdfa1_mode2",{ dynarithmic::twain::filetype_value::pdfa_source_mode, dynarithmic::twain::compression_value::none } },
+                   { "pdfa2_mode2",{ dynarithmic::twain::filetype_value::pdfa2_source_mode, dynarithmic::twain::compression_value::none } },
+                   { "pict_mode2",{ dynarithmic::twain::filetype_value::pict_source_mode, dynarithmic::twain::compression_value::none } },
+                   { "png_mode2",{ dynarithmic::twain::filetype_value::png_source_mode, dynarithmic::twain::compression_value::png } },
+                   { "spiff1_mode2",{ dynarithmic::twain::filetype_value::spiff_source_mode, dynarithmic::twain::compression_value::jpeg } },
+                   { "spiff2_mode2",{ dynarithmic::twain::filetype_value::spiff_source_mode, dynarithmic::twain::compression_value::jbig } },
+                   { "tiff1_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::none } },
+                   { "tiff2_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::group31D } },
+                   { "tiff3_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::group31DEOL } },
+                   { "tiff4_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::group32D } },
+                   { "tiff5_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::group4} },
+                   { "tiff6_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::jpeg } },
+                   { "tiff7_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::lzw } },
+                   { "tiff8_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::jbig } },
+                   { "tiff9_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::zip } },
+                   { "xbm_mode2",{ dynarithmic::twain::filetype_value::xbm_source_mode, dynarithmic::twain::compression_value::none} } },
 
 		m_OptionToCapMap{ {"autobright", ICAP_AUTOBRIGHT},
 						 {"deskew", ICAP_AUTOMATICDESKEW},
@@ -448,7 +447,7 @@ parse_return_type parse_options(int argc, char *argv[])
 			("blankthreshold", po::value< double >(&s_options.m_dBlankThreshold)->default_value(98), "Percentage threshold to determine if page is blank")
 			("brightness", po::value< double >(&s_options.m_brightness), "Brightness level (device must support brightness)")
 			("color", po::value< int >(&s_options.m_color)->default_value(0), "Color. 0=B/W, 1=8-bit Grayscale, 2=24 bit RGB. Default is 0")
-			("contrast", po::value< double >(&s_options.m_contrast), "Contrast level (device must support contrast)")
+            ("contrast", po::value< double >(&s_options.m_dContrast), "Contrast level (device must support contrast)")
 			("deskew", po::bool_switch(&s_options.m_bDeskew)->default_value(false), "Deskew image if skewed.  Device must support deskew")
 			("diagnose", po::value< int >(&s_options.m_nDiagnose)->default_value(0), "Create diagnostic log.  Level values 1, 2, 3 or 4.")
 			("diagnoselog", po::value< std::string >(&s_options.m_DiagnoseLog), "file name to store -diagnose messages")
@@ -456,7 +455,7 @@ parse_return_type parse_options(int argc, char *argv[])
 			("duplex", po::bool_switch(&s_options.m_bUseDuplex)->default_value(false), "turn on duplex unit")
 			("filename", po::value< std::string >(&s_options.m_filename)->default_value(descript_name), "file name to save acquired image(s)")
 			("filetype", po::value< std::string >(&s_options.m_filetype)->default_value("bmp"), "Image file type")
-			("gamma", po::value< double >(&s_options.m_gamma), "Gamma level (device must support gamma levels)")
+            ("gamma", po::value< double >(&s_options.m_dGamma), "Gamma level (device must support gamma levels)")
 			("help", "Show help screen")
 			("halftone", po::value< std::string >(&s_options.m_strHalftone)->default_value("none"), "Halftone effect to use when acquiring low resolution images")
 			("highlight", po::value< double >(&s_options.m_dHighlight), "Highlight level (device must support highlight)")
@@ -495,7 +494,7 @@ parse_return_type parse_options(int argc, char *argv[])
 			("pdfquality", po::value< int >(&pdf_commands.m_quality)->default_value(60), "set the JPEG quality factor for PDF files")
 			("pdforient", po::value< std::string >(&pdf_commands.m_strOrient)->default_value("portrait"), "Sets orientation to portrait or landscape")
 			("pdfscale", po::value< std::string >(&pdf_commands.m_strScale)->default_value("noscale"), "PDF page scaling")
-			("resolution", po::value< double >(&s_options.m_resolution), "Image resolution in dots per unit (see --unit)")
+            ("resolution", po::value< double >(&s_options.m_dResolution), "Image resolution in dots per unit (see --unit)")
 			("rotation", po::value< double >(&s_options.m_dRotation), "Rotate page by the specified number of degrees (device must support rotation)")
 			("saveoncancel", po::bool_switch(&s_options.m_bSaveOnCancel)->default_value(false), "Save image file even if acquisition canceled by user")
 			("selectbydialog", po::bool_switch(&s_options.m_bSelectByDialog)->default_value(true), "When selecting device, show \"Select Source\" dialog (Default)")
@@ -504,7 +503,7 @@ parse_return_type parse_options(int argc, char *argv[])
 			("shadow", po::value< double >(&s_options.m_dShadow), "Shadow level (device must support shadow levels)")
 			("showindicator", po::bool_switch(&s_options.m_bShowIndicator)->default_value(false), "Show progress indicator when no user-interface is chosen (-noui)")
 			("tempdir", po::value< std::string >(&s_options.m_strTempDirectory), "Temporary file directory")
-			("threshold", po::value< double >(&s_options.m_threshold), "Threshold level (device must support threshold)")
+            ("threshold", po::value< double >(&s_options.m_dThreshold), "Threshold level (device must support threshold)")
 			("transfermode", po::value< int >(&s_options.m_nTransferMode)->default_value(0), "Transfer mode. 0=Native, 1=Buffered")
 			("transparency", po::bool_switch(&s_options.m_bUseTransparencyUnit)->default_value(false), "Use transparency unit")
 			("uionly", po::bool_switch(&s_options.m_bShowUIOnly)->default_value(false), "Allow user interface to be shown without acquiring images")
@@ -533,18 +532,18 @@ twain_source select_the_source(twain_session& tsession, SelectType s)
 	return tsession.select_source(s);
 }
 
-template <typename Fn, typename T, typename CapType=T>
-void set_characteristic(twain_source& theSource, const T& value, Fn fn, 
-						const po::variables_map& varmap, const std::string& entry, 
-						int capvalue = 0, CapType captype=T())
+template <typename T>
+void test_characteristic(twain_source& theSource, // TWAIN source
+                         const T& value, // value to test
+                         const po::variables_map& varmap, 
+                         const std::string& entry, 
+                         int capvalue = 0)
 {
 	auto iter = varmap.find(entry);
 	if (iter != varmap.end())
 	{
-		acquire_characteristics& ac = theSource.get_acquire_characteristics();
 		if (!iter->second.defaulted())
 		{
-			(ac.*fn)(value);
 			if (capvalue && !varmap["verbose"].defaulted())
 			{
 				std::cout << "Checking if device supports " << entry << " ...\n";
@@ -555,9 +554,10 @@ void set_characteristic(twain_source& theSource, const T& value, Fn fn,
 				if (issupported)
 				{
 					// now test if the device can actually use the value set
-					std::vector<CapType> testArray;
+                    std::vector<T> testArray;
 					std::cout << "Testing if " << value << " can be used...\n";
-					if (theSource.get_capability_interface().get_cap_values(testArray, capvalue, capability_interface::get()).first)
+                    testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
+                    if ( !testArray.empty() )
 					{
 						bool valuefound = std::find(testArray.begin(), testArray.end(), value) != testArray.end();
 						std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
@@ -570,6 +570,16 @@ void set_characteristic(twain_source& theSource, const T& value, Fn fn,
 	}
 }
 
+std::string resolve_extension(std::string filetype)
+{
+    if (boost::starts_with(filetype, "tif"))
+        return "tif";
+    else
+    if (boost::starts_with(filetype, "ps"))
+        return "ps";
+    return filetype;
+}
+
 bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 {
 	// get the general acquire characteristics and set them
@@ -578,90 +588,140 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 	auto iter = s_options.m_FileTypeMap.find(s_options.m_filetype);
 	auto iterMode2 = s_options.m_MapMode2Map.find(s_options.m_filetype);
 
-	// set the file type
+    // set the file type, name
 	bool type1 = false;
 	bool type2 = false;
 	if ((type1 = (iter != s_options.m_FileTypeMap.end())) || 
 		(type2 = (iterMode2 != s_options.m_MapMode2Map.end())))
 	{
 		if (varmap["filename"].defaulted())
-			s_options.m_filename = default_name + "." + s_options.m_filetype;
+            s_options.m_filename = default_name + "." + resolve_extension(s_options.m_filetype);
 
 		// must set these
+        auto& fOptions = ac.get_file_transfer_options();
 		if (type1)
-			ac.set_file_type(iter->second);
+        {
+            fOptions.set_file_type(iter->second);
+            ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
+        }
 		else
-			ac.set_file_type(iterMode2->second.first).set_compression_type(iterMode2->second.second);
+        {
+            fOptions.set_file_type(iterMode2->second.first);
+            ac.get_general_options().set_transfer_type(transfer_type::file_using_source);
+        }
 
 		// set the file save mode for multiple pages
-		auto& save_mode = ac.get_multipage_save_info();
-		save_mode.set_save_mode(s_options.m_bMultiPage2?multipage_save_mode::save_uiclose : multipage_save_mode::save_default);
-		save_mode.set_save_incomplete(s_options.m_bSaveOnCancel);
+        ac.get_file_transfer_options().get_multipage_save_options().
+            set_save_mode(s_options.m_bMultiPage2?multipage_save_mode::save_uiclose : multipage_save_mode::save_default).
+            set_save_incomplete(s_options.m_bSaveOnCancel);
 
 		// set options, regardless if they appear on the command-line or not
-		ac.set_multi_page(s_options.m_bMultiPage)
-			.set_max_pages(s_options.m_NumPages)
-			.set_show_ui(!s_options.m_bNoUI)
-			.set_duplex_mode(s_options.m_bUseDuplex)
-			.set_negate_images(s_options.m_bNegateImage)
-			.set_uionly_mode(s_options.m_bShowUIOnly)
-			.set_filename_pattern(s_options.m_filename)
-			.set_max_acquisitions(s_options.m_bUIPerm ? DTWAIN_MAXACQUIRE : 1)
-			.set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
+        ac.get_file_transfer_options().
+            set_multi_page(s_options.m_bMultiPage).
+            set_filename_pattern(s_options.m_filename);
 
-		// only set these if specified on command line
-		set_characteristic<decltype(&acquire_characteristics::set_autobright_mode), bool, long>(mysource, s_options.m_bAutobrightMode, &acquire_characteristics::set_autobright_mode, varmap, "autobright", ICAP_AUTOBRIGHT);
-		set_characteristic<decltype(&acquire_characteristics::set_autodeskew_mode), bool, long>(mysource, s_options.m_bDeskew, &acquire_characteristics::set_autodeskew_mode, varmap, "deskew", ICAP_AUTOMATICDESKEW);
-		set_characteristic<decltype(&acquire_characteristics::set_autorotate_mode), bool, long>(mysource, s_options.m_bAutoRotateMode, &acquire_characteristics::set_autorotate_mode, varmap, "autorotate", ICAP_AUTOMATICROTATE);
-		set_characteristic(mysource, s_options.m_brightness, &acquire_characteristics::set_brightness, varmap, "brightness", ICAP_BRIGHTNESS);
-		set_characteristic<decltype(&acquire_characteristics::set_use_filmscan_mode), bool, long>(mysource, s_options.m_bUseTransparencyUnit, &acquire_characteristics::set_use_filmscan_mode, varmap, "transparency", ICAP_LIGHTPATH);
-		set_characteristic(mysource, s_options.m_contrast, &acquire_characteristics::set_contrast, varmap, "contrast", ICAP_CONTRAST);
-		set_characteristic(mysource, s_options.m_dHighlight, &acquire_characteristics::set_highlight, varmap, "highlight", ICAP_HIGHLIGHT);
-		set_characteristic(mysource, s_options.m_threshold, &acquire_characteristics::set_threshold, varmap, "threshold", ICAP_THRESHOLD);
-		set_characteristic(mysource, s_options.m_gamma, &acquire_characteristics::set_gamma, varmap, "gamma", ICAP_GAMMA);
-		set_characteristic(mysource, s_options.m_strHalftone, &acquire_characteristics::set_halftone, varmap, "halftone", ICAP_HALFTONES);
-		set_characteristic(mysource, s_options.m_resolution, &acquire_characteristics::set_resolution, varmap, "resolution", ICAP_XRESOLUTION);
-		set_characteristic(mysource, s_options.m_dRotation, &acquire_characteristics::set_rotation, varmap, "rotation", ICAP_ROTATION);
-		set_characteristic(mysource, s_options.m_dShadow, &acquire_characteristics::set_shadow, varmap, "shadow", ICAP_SHADOW);
-		set_characteristic<decltype(&acquire_characteristics::set_overscan_mode), bool, long>(mysource, s_options.m_bOverscanMode, &acquire_characteristics::set_overscan_mode, varmap, "overscan", ICAP_OVERSCAN);
-		set_characteristic<decltype(&acquire_characteristics::set_use_indicators), bool, long>(mysource, s_options.m_bShowIndicator, &acquire_characteristics::set_use_indicators, varmap, "showindicator", CAP_INDICATORS);
-		set_characteristic(mysource, static_cast<long>(s_options.m_ColorTypeMap[s_options.m_color]), &acquire_characteristics::set_color_type_i, varmap, "color", ICAP_PIXELTYPE);
-		set_characteristic(mysource, static_cast<long>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), &acquire_characteristics::set_measure_unit_i, varmap, "unitofmeasure", ICAP_UNITS);
-		set_characteristic(mysource, static_cast<long>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), &acquire_characteristics::set_paper_size_i, varmap, "papersize", ICAP_SUPPORTEDSIZES);
-		set_characteristic(mysource, static_cast<long>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), &acquire_characteristics::set_orientation_i, varmap, "orientation", ICAP_ORIENTATION);
-		set_characteristic(mysource, s_options.m_strImprinter, &acquire_characteristics::set_imprinter_string, varmap, "imprinterstring", CAP_PRINTER);
-		set_characteristic(mysource, static_cast<long>(s_options.m_JobControlMap[s_options.m_nJobControl]), &acquire_characteristics::set_jobcontrol_type_i, varmap, "jobcontrol", CAP_JOBCONTROL);
-		set_characteristic(mysource, static_cast<long>(s_options.m_bNoUIWait), &acquire_characteristics::set_wait_for_feeder_loaded, varmap, "nouiwait", CAP_PAPERDETECTABLE);
-		set_characteristic(mysource, static_cast<long>(s_options.m_NoUIWaitTime*1000), &acquire_characteristics::set_feeder_timeout, varmap, "nouiwaittime", CAP_PAPERDETECTABLE);
+        ac.get_general_options().
+            set_max_pages(s_options.m_NumPages).
+            set_max_acquisitions(s_options.m_bUIPerm ? DTWAIN_MAXACQUIRE : 1);
 
-		if (!varmap["autofeedorflatbed"].defaulted())
-			ac.set_wait_for_feeder_loaded(true).set_feeder_timeout(1).set_use_feeder_or_flatbed(true);
+        ac.get_paperhandling_options().
+            set_feederenabled(s_options.m_bUseADF).
+            set_feedermode(s_options.m_bUseADFOrFlatbed?feedermode_value::feeder_flatbed:feedermode_value::feeder).
+            set_feederwait(s_options.m_bNoUIWait?s_options.m_NoUIWaitTime:0).
+            set_duplexenabled(s_options.m_bUseDuplex);
+
+        ac.get_userinterface_options().
+            show(!s_options.m_bNoUI).
+            show_indicators(s_options.m_bShowIndicator).
+            show_onlyui(s_options.m_bShowUIOnly);
+
+        ac.get_imagetype_options().
+            set_halftone(s_options.m_strHalftone).
+            set_pixeltype(s_options.m_ColorTypeMap[s_options.m_color]).
+            set_negate(s_options.m_bNegateImage).
+            set_threshold(s_options.m_dThreshold);
+
+        ac.get_imageparamter_options().
+            set_autobright(s_options.m_bAutobrightMode).
+            set_brightness(s_options.m_brightness).
+            set_contrast(s_options.m_dContrast).
+            set_orientation(s_options.m_OrientationTypeMap[s_options.m_Orientation]).
+            set_rotation(s_options.m_dRotation).
+            set_shadow(s_options.m_dShadow).
+            set_highlight(s_options.m_dHighlight);
+
+        ac.get_autoadjust_options().
+            set_deskew(s_options.m_bDeskew).
+            set_rotate(s_options.m_bAutoRotateMode);
+
+        ac.get_deviceparams_options().
+            set_overscan(s_options.m_bOverscanMode).
+            set_lightpath(s_options.m_bUseTransparencyUnit ? lightpath_value::transmissive : lightpath_value::reflective).
+            set_units(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]);
+
+        ac.get_color_options().
+            set_gamma(s_options.m_dGamma);
+
+        ac.get_resolution_options().
+            set_resolution(s_options.m_dResolution, s_options.m_dResolution);
+
+        ac.get_pages_options().
+            set_supportedsize(s_options.m_PageSizeMap[s_options.m_strPaperSize]);
+
+        ac.get_imprinter_options().
+            set_string({ s_options.m_strImprinter });
+
+        ac.get_jobcontrol_options().
+            set_option(s_options.m_JobControlMap[s_options.m_nJobControl]);
+
+        // test the characteristics that have been set
+        test_characteristic(mysource, s_options.m_bAutobrightMode, varmap, "autobright", ICAP_AUTOBRIGHT);
+        test_characteristic(mysource, s_options.m_bDeskew, varmap, "deskew", ICAP_AUTOMATICDESKEW);
+        test_characteristic(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", ICAP_AUTOMATICROTATE);
+        test_characteristic(mysource, s_options.m_brightness, varmap, "brightness", ICAP_BRIGHTNESS);
+        test_characteristic(mysource, s_options.m_bUseTransparencyUnit?1:0, varmap, "transparency", ICAP_LIGHTPATH);
+        test_characteristic(mysource, s_options.m_dContrast, varmap, "contrast", ICAP_CONTRAST);
+        test_characteristic(mysource, s_options.m_dHighlight, varmap, "highlight", ICAP_HIGHLIGHT);
+        test_characteristic(mysource, s_options.m_dThreshold, varmap, "threshold", ICAP_THRESHOLD);
+        test_characteristic(mysource, s_options.m_dGamma, varmap, "gamma", ICAP_GAMMA);
+        test_characteristic(mysource, s_options.m_strHalftone, varmap, "halftone", ICAP_HALFTONES);
+        test_characteristic(mysource, s_options.m_dResolution, varmap, "resolution", ICAP_XRESOLUTION);
+        test_characteristic(mysource, s_options.m_dRotation, varmap, "rotation", ICAP_ROTATION);
+        test_characteristic(mysource, s_options.m_dShadow, varmap, "shadow", ICAP_SHADOW);
+        test_characteristic(mysource, s_options.m_bOverscanMode, varmap, "overscan", ICAP_OVERSCAN);
+        test_characteristic(mysource, s_options.m_bShowIndicator, varmap, "showindicator", CAP_INDICATORS);
+        test_characteristic(mysource, static_cast<long>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", ICAP_PIXELTYPE);
+        test_characteristic(mysource, static_cast<long>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", ICAP_UNITS);
+        test_characteristic(mysource, static_cast<long>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", ICAP_SUPPORTEDSIZES);
+        test_characteristic(mysource, static_cast<long>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", ICAP_ORIENTATION);
+        test_characteristic(mysource, s_options.m_strImprinter, varmap, "imprinterstring", CAP_PRINTER);
+        test_characteristic(mysource, static_cast<long>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", CAP_JOBCONTROL);
 
 		s_options.m_nOverwriteWidth = NumDigits(s_options.m_nOverwriteMax);
 
-		auto& file_rules = ac.get_filename_increment_rules();
-		file_rules.set_enabled(s_options.m_bUseFileInc)
-					.set_increment(s_options.m_FileIncrement)
-					.set_reset_count(false);
+        auto& file_rules = ac.get_file_transfer_options().get_filename_increment_rules();
+        file_rules.enable(s_options.m_bUseFileInc).
+                set_increment(s_options.m_FileIncrement).
+                use_reset_count(false);
 
-		// ui wait time
-		auto& blank_handler = ac.get_blank_image_handler();
-		auto iter2 = varmap.find("noblankpages");
-		if (iter2 != varmap.end())
+        // blank page handling
+        if (!varmap["noblankpages"].defaulted())
 		{
-			blank_handler.enabled = true;
-			blank_handler.discard_option = blank_image_discard_option::discard_all;
-			auto iter3 = varmap.find("blankpagethreshold");
-			if (iter3 != varmap.end())
+            auto& blank_handler = ac.get_blank_page_options();
+            blank_handler.
+                enable(true).
+                set_discard_option(blankpage_discard_option::discard_all);
+
+            if ( !varmap["blankpagethreshold"].defaulted())
 			{
 				double val = s_options.m_dBlankThreshold;
 				val = (std::min)((std::max)(0.0, val), 100.0);
-				blank_handler.threshold = val;
+                blank_handler.set_threshold(val);
 			}
 		}
 
-		auto area_iter = varmap.find("area");
-		if (area_iter != varmap.end())
+        // area of interest handling
+        if (!varmap["area"].defaulted())
 		{
 			// parse the area argument
 			std::istringstream strm(s_options.m_area);
@@ -675,8 +735,8 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 			}
 			if (area_values.size() == 4)
 			{
-				twain_frame tf(area_values[0], area_values[1], area_values[2], area_values[3]);
-				ac.set_use_area(true).set_acquire_area(tf);
+                dynarithmic::twain::twain_frame<double> tf(area_values[0], area_values[1], area_values[2], area_values[3]);
+                ac.get_pages_options().set_frame(tf);
 			}
 		}
 
@@ -702,11 +762,11 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 			{
 				uint32_t width, height;
 				strm >> width >> height;
-				pagesizeopts.set_custom_size(width, height).set_custom_option(pdf_options::pdf_paper_size_custom::custom);
+                pagesizeopts.set_custom_size(width, height).set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::custom);
 			}
 			else
 			if (word == "variable")
-				pagesizeopts.set_custom_option(pdf_options::pdf_paper_size_custom::variable);
+                pagesizeopts.set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::variable);
 			else
 				pagesizeopts.set_page_size(s_options.m_PageSizeMap[pdf_commands.m_strPaperSize]);
 
@@ -722,18 +782,18 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 					double xscale, yscale;
 					strm >> xscale >> yscale;
 					pagescaleopts.set_custom_scale(xscale, yscale);
-					pagescaleopts.set_page_scale(pdf_options::pdf_page_scale::custom);
+                    pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::custom);
 				}
 				else
 				if (word == "fitpage")
-					pagescaleopts.set_page_scale(pdf_options::pdf_page_scale::fitpage);
+                    pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::fitpage);
 				else
 				if (word == "noscale")
-					pagescaleopts.set_page_scale(pdf_options::pdf_page_scale::none);
+                    pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::none);
 			}
 			// encryption
 			bool encryption_on = boost::any_cast<bool>(varmap["pdfencrypt"].value());
-			if (encryption_on)
+            if (!encryption_on)
 			{
 				std::vector<std::string> encryptcommands = { 
 					"pdfownerpass", "pdfuserpass", "pdfrandowner",
@@ -744,12 +804,11 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 			if ( encryption_on )
 			{
 				auto& encrypt_opts = pdfopts.get_encryption_options();
-				encrypt_opts.set_use_encryption(true);
-				encrypt_opts.set_owner_password(pdf_commands.m_strOwnerPass);
-				encrypt_opts.set_user_password(pdf_commands.m_strUserPass);
-				encrypt_opts.set_use_random_owner(pdf_commands.m_bRandomOwner);
-				encrypt_opts.set_use_random_user(pdf_commands.m_bRandomUser);
-				encrypt_opts.set_use_strong_encryption(pdf_commands.m_bStrong);
+                encrypt_opts.use_encryption(true).
+                            set_owner_password(pdf_commands.m_strOwnerPass).
+                            set_user_password(pdf_commands.m_strUserPass).
+                            use_autogen_password(pdf_commands.m_bRandomOwner || pdf_commands.m_bRandomUser).
+                            use_strong_encryption(pdf_commands.m_bStrong);
 
 				// parse the permissions string
 				std::vector<std::string> sAllPermissions;
@@ -764,7 +823,7 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 				std::vector<std::string>::size_type i;
 
 				// set of our permissions
-				std::set<pdf_options::pdf_permission> permissionContainer;
+                std::set<dynarithmic::twain::pdf_options::pdf_permission> permissionContainer;
 				for (i = 0; i < sAllPermissions.size(); ++i)
 				{
 					if (sAllPermissions[i] == "none")
@@ -866,7 +925,8 @@ int start_acquisitions(const po::variables_map& varmap)
 	}
 	
 	// first start the TWAIN session
-	twain_characteristics tc;
+    twain_session ts;
+    twain_characteristics tc = ts.get_twain_characteristics();
 	auto iter = varmap.find("tempdir");
 	if (iter != varmap.end())
 		tc.set_temporary_directory(boost::any_cast<std::string>(iter->second.value()));
@@ -874,7 +934,7 @@ int start_acquisitions(const po::variables_map& varmap)
 	if (iter != varmap.end())
 	{
 		int so = boost::any_cast<int>(iter->second.value());
-		tc.set_dsm_search_order(static_cast<dsm_search_order>(so));
+        tc.set_dsm_search_order(so);
 	}
 	iter = varmap.find("diagnose");
 	if (!iter->second.defaulted())
@@ -882,7 +942,7 @@ int start_acquisitions(const po::variables_map& varmap)
 		bool logging_enabled = (iter != varmap.end());
 		if (iter != varmap.end())
 		{
-			auto& logdetails = tc.get_logger_details();
+            auto& logdetails = tc.get_logger_characteristics();
 			logdetails.set_verbosity(static_cast<logger_verbosity>(s_options.m_nDiagnose));
 			if (varmap.find("diagnoselog") != varmap.end())
 			{
@@ -906,7 +966,8 @@ int start_acquisitions(const po::variables_map& varmap)
 		}
 	}
 
-	twain_session ts(tc, true);
+    ts.start();
+
 	if (ts)
 	{
 		if (!s_options.m_strSelectName.empty())
@@ -915,7 +976,7 @@ int start_acquisitions(const po::variables_map& varmap)
 		if (s_options.m_bSelectDefault)
 			g_source = std::make_unique<twain_source>(ts.select_source(select_default(), false));
 		else
-			g_source = std::make_unique<twain_source>(ts.select_source(select_prompt(), false));
+            g_source = std::make_unique<twain_source>(ts.select_source(select_usedialog(), false));
 		if (!g_source->is_selected())
 		{
 			s_options.set_return_code(RETURN_TWAIN_SOURCE_CANCEL);
@@ -939,13 +1000,12 @@ int start_acquisitions(const po::variables_map& varmap)
 	if (g_source->is_open())
 	{
 		// check for pixel types
-		std::unordered_set<capability_interface::pixeltype_type> vPixelTypes;
-		g_source->get_pixel_types(vPixelTypes);
-		std::array<capability_interface::pixeltype_type, 3> supported_types = { DTWAIN_PT_BW, DTWAIN_PT_GRAY, DTWAIN_PT_RGB };
+        auto vPixelTypes = g_source->get_capability_interface().get_pixeltype();
+        std::array<ICAP_PIXELTYPE_::value_type, 3> supported_types = { DTWAIN_PT_BW, DTWAIN_PT_GRAY, DTWAIN_PT_RGB };
 		bool bfound = false;
 		for (size_t i = 0; i < supported_types.size(); ++i)
 		{
-			if (vPixelTypes.find(supported_types[i]) != vPixelTypes.end())
+            if (std::find(vPixelTypes.begin(), vPixelTypes.end(), supported_types[i]) != vPixelTypes.end())
 			{
 				bfound = true;
 				break;
@@ -963,7 +1023,7 @@ int start_acquisitions(const po::variables_map& varmap)
 		{
 			ts.register_listener(*g_source, *pCallback);
 			auto acq_return = g_source->acquire();
-			if (acq_return.first == acquire_return_code::acquire_timeout)
+            if (acq_return.first == dynarithmic::twain::twain_source::acquire_timeout)
 				s_options.set_return_code(RETURN_TIMEOUT_REACHED);
 			else
 				s_options.set_return_code(RETURN_OK);
@@ -1018,7 +1078,7 @@ parse_return_type parse_config_options(const std::string& filename)
 	}
 	CommandLine cmdLine(ifs);
 	auto args = cmdLine.get_arguments();
-	return parse_options(args.size(), args.data());
+    return parse_options(static_cast<int>(args.size()), args.data());
 }
 
 int main(int argc, char *argv[])

@@ -13,15 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="DTWAIN CPP">
-      <UniqueIdentifier>{540af9a1-2c8c-462d-9977-0cc3e06b8653}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DTWAIN CPP\Header Files">
-      <UniqueIdentifier>{31b22692-9941-44cb-a17f-32cd5a05ac1c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DTWAIN CPP\Source Files">
-      <UniqueIdentifier>{35636864-608b-4fac-a2f1-8baeaf96770a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -39,9 +30,6 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dtwain_cpp\dtwain_cpp_interface.hpp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -50,129 +38,10 @@
     <ClCompile Include="twainsave-opensource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_acquire_characteristics.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_buffered_transfer_info.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_capability_interface.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_duplex_info.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_feeder_info.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_file_transfer_info.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_image_handler.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_pdf_options.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_twain_array.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_twain_identity.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_twain_printer.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_twain_session.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dtwain_cpp\dtwain_twain_source.cpp">
-      <Filter>DTWAIN CPP\Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="twainsave-opernsource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="dtwain_cpp\dtwain_acquire_characteristics.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_buffered_transfer_info.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_capability_interface.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_duplex_info.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_feeder_info.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_file_transfer_info.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_image_handler.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_pdf_options.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_array.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_capbasics.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_characteristics.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_dsm.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_filetype.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_frame.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_identity.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_listener.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_logger.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_logger_details.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_printer.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_range.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_session.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_source.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_source_impl.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_timer.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_twfix32.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
-    <None Include="dtwain_cpp\dtwain_twain_types.ipp">
-      <Filter>DTWAIN CPP\Header Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

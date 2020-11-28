@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\dtwain_cpp;;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -106,7 +106,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\dtwain_cpp;;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -125,7 +125,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\dtwain_cpp;;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -146,7 +146,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\dtwain_cpp;;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -162,59 +162,17 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dtwain_cpp\dtwain_cpp_interface.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="twainsave_verinfo.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dtwain_cpp\dtwain_acquire_characteristics.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_buffered_transfer_info.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_capability_interface.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_duplex_info.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_feeder_info.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_file_transfer_info.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_image_handler.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_pdf_options.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_twain_array.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_twain_identity.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_twain_printer.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_twain_session.cpp" />
-    <ClCompile Include="dtwain_cpp\dtwain_twain_source.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="twainsave-opensource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="twainsave-opernsource.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="dtwain_cpp\dtwain_acquire_characteristics.ipp" />
-    <None Include="dtwain_cpp\dtwain_buffered_transfer_info.ipp" />
-    <None Include="dtwain_cpp\dtwain_capability_interface.ipp" />
-    <None Include="dtwain_cpp\dtwain_duplex_info.ipp" />
-    <None Include="dtwain_cpp\dtwain_feeder_info.ipp" />
-    <None Include="dtwain_cpp\dtwain_file_transfer_info.ipp" />
-    <None Include="dtwain_cpp\dtwain_image_handler.ipp" />
-    <None Include="dtwain_cpp\dtwain_pdf_options.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_array.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_capbasics.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_characteristics.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_dsm.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_filetype.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_frame.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_identity.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_listener.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_logger.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_logger_details.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_printer.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_range.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_session.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_source.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_source_impl.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_timer.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_twfix32.ipp" />
-    <None Include="dtwain_cpp\dtwain_twain_types.ipp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
