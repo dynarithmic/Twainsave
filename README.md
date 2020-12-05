@@ -5,6 +5,7 @@ Note that this version of TwainSave currently lacks some features of the commerc
 
 The current twainsave-opensource version is **1.05**.
 
+----
 
 # Differences in this version and the commercial version of TwainSave
 
@@ -21,10 +22,14 @@ The option for the open source version will be
     b) The output will by default go to the console instead of having to specify a file.  
   
 For item b), to output to a file just requires you to run twainsave-opensource and redirect the **--details** output to a file.  For example:  
-  
+ 
 **twainsave-opensource --details > details.log**
 
 will write the details to the file **details.log**
+
+4) Running **twainsave-opensource.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box, and if a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will be have a randomly generated file name (using a **.BMP** extension).  
+
+This differs from the commercial version of TwainSave, where the file name is required as a command-line argument.
 
 ----------
 
