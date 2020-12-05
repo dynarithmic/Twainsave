@@ -72,6 +72,33 @@ namespace twain {
          return "(Unknown TWAIN constant)";
     }
 
+
+    template <typename Iter>
+    static std::vector<std::pair<const char*, const char*>> 
+        to_string(Iter it1, Iter it2, const typename std::map<typename const std::iterator_traits<Iter>::value_type, std::pair<const char *, const char*>>& sMap)
+    {
+        std::vector<std::pair<const char *, const char*>> ret;
+        std::transform(it1, it2, std::back_inserter(ret), [&](auto val) { return dynarithmic::twain::to_string(val, sMap); });
+        return ret;
+    }
+
+    template <typename T, typename Container = std::vector<T>>
+    static std::vector<std::pair<const char*, const char *>> 
+        to_string(const Container& c, const typename std::map<const T, std::pair<const char *, const char*>>& sMap)
+    {
+        return to_string(std::begin(c), std::end(c), sMap);
+    }
+
+    template <typename T>
+    static std::pair<const char*, const char*>
+        to_string(const T& value, const typename std::map<const T, std::pair<const char *, const char*>>& sMap)
+    {
+        auto iter = sMap.find(value);
+        if (iter != sMap.end())
+            return iter->second;
+        return { "(Unknown TWAIN constant)", "(Unknown TWAIN constant)" };
+    }
+
     template <typename T>
     struct dtwain_underlying_type
     {
@@ -372,7 +399,9 @@ namespace twain {
             
         void initialize_cached_set()
         {
-            static std::vector<int> excluded_set = { CAP_DEVICEONLINE, CAP_DUPLEXENABLED, CAP_ENABLEDSUIONLY, ICAP_BITDEPTH, ICAP_FRAMES };
+            static std::vector<int> excluded_set = { CAP_DEVICEONLINE, CAP_DUPLEXENABLED, 
+                                                     CAP_ENABLEDSUIONLY, ICAP_BITDEPTH, ICAP_FRAMES, 
+                                                     ICAP_XRESOLUTION, ICAP_YRESOLUTION };
             for (auto& e : excluded_set)
                 m_cacheable_set.erase(e);
         }
@@ -874,7 +903,7 @@ namespace twain {
                     {
                         std::vector<bool> ct;
                         std::transform(v.begin(), v.end(), std::inserter(ct, ct.begin()),
-                            [&](long value) { return static_cast<bool>(value?true:false); });
+                            [&](long value) { return static_cast<bool>(value); });
                         retValue = ct;
                     }
                     break;

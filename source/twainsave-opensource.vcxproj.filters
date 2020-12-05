@@ -38,6 +38,9 @@
     <ClCompile Include="twainsave-opensource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="generate_details.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="twainsave-opernsource.rc">

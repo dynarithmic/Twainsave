@@ -27,24 +27,24 @@ OF THIRD PARTY RIGHTS.
 #include <unordered_set>
 #include <unordered_map>
 
-#define DTWAIN_DEFINE_STRING_MAP()  static const std::map<const value_type, const char *>& get_names() \
+#define DTWAIN_DEFINE_STRING_MAP()  static const std::map<const value_type, std::pair<const char *, const char*>>& get_names() \
         { \
-            static std::map<const value_type, const char *> sMap = \
+            static std::map<const value_type, std::pair<const char *, const char*>> sMap = \
             { 
 
-#define DTWAIN_ADD_MAP_ENTRY(a,b) { ##a##, #b },
+#define DTWAIN_ADD_MAP_ENTRY(a,b) { ##a##, {#b,#a} },
 #define DTWAIN_END_STRING_MAP() }; return sMap; }
 #define DTWAIN_ADD_TO_STRING1(a) template <typename Container = std::vector<a>> \
-                                static std::vector<const char *> to_string(const Container& c) \
+                                static std::vector<std::pair<const char *, const char*>> to_string(const Container& c) \
                                 { \
                                     return dynarithmic::twain::to_string(std::cbegin(c), std::cend(c), get_names()); \
                                 }\
                                  template <typename Iter> \
-                                 static std::vector<const char *> to_string(Iter it1, Iter it2) \
+                                 static std::vector<std::pair<const char *, const char*>> to_string(Iter it1, Iter it2) \
                                  { \
                                     return dynarithmic::twain::to_string(it1, it2, get_names()); \
                                  } \
-                                 static const char * to_string(a val) \
+                                 static std::pair<const char *, const char*> to_string(a val) \
                                  { \
                                     std::array<a, 1> v = {val}; \
                                     return to_string(v).front(); \

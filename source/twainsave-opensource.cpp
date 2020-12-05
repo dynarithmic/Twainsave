@@ -41,8 +41,11 @@ OF THIRD PARTY RIGHTS.
 #include <sstream>
 #include <type_traits>
 #include <unordered_map>
+#include <nlohmann\json.hpp>
 #include <algorithm>
 #include "twainsave_verinfo.h"
+
+std::string generate_details();
 
 template <typename E>
 constexpr auto to_underlying(E e) noexcept
@@ -116,6 +119,7 @@ struct scanner_options
 	bool m_bOverscanMode;
 	int m_NumPages;
 	std::string m_strPaperSize;
+    std::string m_strDetailsFile;
 	bool m_bNoUIWait;
 	int m_NoUIWaitTime;
 	bool m_bSaveOnCancel;
@@ -449,6 +453,7 @@ parse_return_type parse_options(int argc, char *argv[])
 			("color", po::value< int >(&s_options.m_color)->default_value(0), "Color. 0=B/W, 1=8-bit Grayscale, 2=24 bit RGB. Default is 0")
             ("contrast", po::value< double >(&s_options.m_dContrast), "Contrast level (device must support contrast)")
 			("deskew", po::bool_switch(&s_options.m_bDeskew)->default_value(false), "Deskew image if skewed.  Device must support deskew")
+            ("details", "Detail information on all available TWAIN devices.")
 			("diagnose", po::value< int >(&s_options.m_nDiagnose)->default_value(0), "Create diagnostic log.  Level values 1, 2, 3 or 4.")
 			("diagnoselog", po::value< std::string >(&s_options.m_DiagnoseLog), "file name to store -diagnose messages")
 			("dsmsearchorder", po::value< int >(&s_options.m_DSMSearchOrder)->default_value(0), "Directories TwainSave will search when locating TWAIN_32.DLL or TWAINDSM.DLL")
@@ -908,6 +913,7 @@ public:
 	}
 };
 
+
 int start_acquisitions(const po::variables_map& varmap) 
 {
 	if (varmap.count("version"))
@@ -920,6 +926,13 @@ int start_acquisitions(const po::variables_map& varmap)
 	if (varmap.count("help"))
 	{
 		std::cout << desc2;
+        s_options.set_return_code(RETURN_OK);
+        return RETURN_OK;
+    }
+    
+    if (varmap.count("details"))
+    {
+        std::cout << generate_details();
 		s_options.set_return_code(RETURN_OK);
 		return RETURN_OK;
 	}

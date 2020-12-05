@@ -47,7 +47,7 @@ namespace dynarithmic
         template <typename Container>
         inline bool is_valid_range(const Container& c)
         {
-            if ( c.size() < 5 )
+            if ( c.size() != 5 )
                 return false;
             auto iter = c.begin();
             auto low = *iter;
@@ -69,7 +69,7 @@ namespace dynarithmic
         {
             if (iter == iter2)
                  return false;
-            if ( std::distance(iter, iter2) < 5)
+            if ( std::distance(iter, iter2) != 5)
                 return false;
             auto low = *iter;
             auto iterNext = std::next(iter);

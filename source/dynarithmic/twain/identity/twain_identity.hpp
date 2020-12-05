@@ -26,6 +26,8 @@ OF THIRD PARTY RIGHTS.
 #include <string>
 #include <cstring>
 #include <algorithm>
+#include <sstream>
+#include <numeric>
 
 namespace dynarithmic
 {
@@ -84,6 +86,26 @@ namespace dynarithmic
             uint16_t get_language() const           {  return m_identity.Version.Language; }
             uint16_t get_country() const            {  return m_identity.Version.Country; } 
             std::string get_version_info() const    {  return m_identity.Version.Info; }    
+            static std::string get_supported_groups_string(uint32_t sgroups)
+            {
+                static const uint32_t dgroups[] = { DG_CONTROL, DG_IMAGE, DG_AUDIO, DF_DSM2, DF_APP2, DF_DS2 };
+                static const char * dgroupsStr[] = { "DG_CONTROL", "DG_IMAGE", "DG_AUDIO", "DF_DSM2", "DF_APP2", "DF_DS2" };
+                std::string ret;
+                int i = 0;
+                for (auto g : dgroups)
+                {
+                    if (sgroups & g)
+                    {
+                        if (i > 0)
+                            ret += ",";
+                        ret += dgroupsStr[i];
+                    }
+                    ++i;
+                }
+                if (ret.empty())
+                    return "<unknown>";
+                return ret;
+            }
 
             TW_IDENTITY& get_identity()             { return m_identity; };
             explicit operator const TW_IDENTITY*()
@@ -92,6 +114,53 @@ namespace dynarithmic
                 if (std::memcmp(&m_identity, &test, sizeof(TW_IDENTITY)) == 0) 
                     return nullptr; 
                 return &m_identity;
+            }
+
+            std::string to_json() const 
+            {
+                std::vector<std::string> jComponents;
+                std::vector<std::string> jVerComponents;
+                std::stringstream jstrm;
+                jstrm << "\"protocol-major\":" << m_identity.ProtocolMajor;
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"protocol-minor\":" << m_identity.ProtocolMinor;
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"supported-groups\":\"" << get_supported_groups_string(m_identity.SupportedGroups) << "\"";
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"manufacturer\":\"" << m_identity.Manufacturer << "\"";
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"product-family\":\"" << m_identity.ProductFamily << "\"";
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"product-name\":\"" << m_identity.ProductName << "\"";
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"version-majornum\":" << m_identity.Version.MajorNum;
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"version-minornum\":" << m_identity.Version.MinorNum;
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"version-language\":" << m_identity.Version.Language;
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"version-country\":" << m_identity.Version.Country;
+                jComponents.push_back(jstrm.str());
+                jstrm.str("");
+                jstrm << "\"version-info\":\"" << m_identity.Version.Info << "\"";
+                jComponents.push_back(jstrm.str());
+
+                std::string s1 = std::accumulate(jComponents.begin(), jComponents.end(), std::string(),
+                                       [](std::string& total, std::string& cur) { return total + "," + cur; }) + "}";
+                if (s1[0] == ',')
+                    s1 = s1.substr(1);
+                jstrm.str("");
+                jstrm << "{\"device-name\":\"" << m_identity.ProductName << "\", \"twain-identity\":{" << s1 << "}";
+                return jstrm.str();
             }
         };
     }

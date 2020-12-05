@@ -168,6 +168,7 @@
     <ClInclude Include="twainsave_verinfo.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="generate_details.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="twainsave-opensource.cpp" />
   </ItemGroup>
