@@ -16,7 +16,7 @@ The option for the open source version will be
 
 2)  The [32-bit DTWAIN dtwain32u.dll](https://github.com/dynarithmic/twain_library/tree/master/binaries/32bit) along with the resource files [twaininfo.txt](https://github.com/dynarithmic/twain_library/blob/master/binaries/32bit/twaininfo.txt) and [twainresourcestrings_english.txt](https://github.com/dynarithmic/twain_library/blob/master/binaries/32bit/twainresourcestrings_english.txt) must be available on the system PATH or in the same directory as twainsave-opensource.exe
 
-3) The **--details** listing differs from the commercial version's [**-detail**](http://www.dynarithmic.com/onlinehelp/twainsave/_details.htm) setting in two major ways:
+3) The **--details** listing differs from the commercial version's [**-detail**](http://www.dynarithmic.com/onlinehelp/twainsave/_details.htm) setting in two major ways:<br>
     a) The **--details** is in JSON format.  
     b) The output will by default go to the console instead of having to specify a file.  
   
@@ -46,4 +46,5 @@ These directories will usually be the same one you will find dtwain32u.lib, dtwa
 ## To-do list
 
 - Implement the **-verbose** and **-verboselog** option.
+
 
