@@ -70,6 +70,10 @@ namespace dynarithmic
             std::string m_Title;
             std::pair<int, int> m_pos;
             std::vector<int> m_flags;
+            std::string m_IncludeList;
+            std::string m_ExcludeList;
+            std::vector<std::pair<std::string, std::string>> m_NameMapping;
+
 #ifdef _WIN32
             HFONT m_hFont = NULL;
             HWND m_hWndParent = NULL;
@@ -79,9 +83,12 @@ namespace dynarithmic
             static constexpr int showcenterscreen = DTWAIN_DLG_CENTER_SCREEN; /*! Show TWAIN Select Source dialog centered on the entire screen */
             static constexpr int sortnames = DTWAIN_DLG_SORTNAMES; /*! Show TWAIN Select Source dialog with sorted Product Names */
             static constexpr int horzscroll = DTWAIN_DLG_HORIZONTALSCROLL; /*! Show TWAIN Select Source dialog with a horizontal scroll bar */
-            static constexpr int useposition = 128; /*! Use the position defined by twain_select_dialog::get_position() */
-            static constexpr int uselegacy = 512; /*! Use the legacy (default) TWAIN Select Source dialog. Customization is not possible if this flag is set */
-            static constexpr int none = 1024; /*! No options are set (in essence, use the legacy version) */
+            static constexpr int useincludelist = DTWAIN_DLG_USEINCLUDENAMES; /*! Use delimited Source names in the TWAIN Select Source dialog */
+            static constexpr int useexcludelist = DTWAIN_DLG_USEEXCLUDENAMES; /*! Do not display the Source names in the TWAIN Select Source dialog */
+            static constexpr int usenamemapping = DTWAIN_DLG_USENAMEMAPPING; /*! Maps the actual name of the Source to the aliased name */
+            static constexpr int useposition = 512; /*! Use the position defined by twain_select_dialog::get_position() */
+            static constexpr int uselegacy = 1024; /*! Use the legacy (default) TWAIN Select Source dialog. Customization is not possible if this flag is set */
+            static constexpr int none = 2048; /*! No options are set (in essence, use the legacy version) */
 
             /// Default constructor.
             /// 
@@ -93,6 +100,59 @@ namespace dynarithmic
             /// @returns The reference to the current object (**this**)
             /// @param[in] title The title to display in the TWAIN Select Source dialog
             twain_select_dialog& set_title(const std::string& title) { m_Title = title; return *this; }
+
+            /// Sets the list of pipe delimited TWAIN Source product names to display in Select Source dialog
+            /// 
+            /// The list of names is pipe-delimited.  If a name doesn't match an actual installed TWAIN source's 
+            /// product name, the name is ignored.  
+            /// @returns The reference to the current object (**this**)
+            /// @param[in] Pipe (|) delimited list of source product names
+            /// @see get_includename_list() set_flags()
+            /// @note The list is only used if the twain_select_dialog::useincludelist is set using set_flags()
+            twain_select_dialog& set_includename_list(const std::string& productList) { m_IncludeList = productList; return *this; }
+
+            /// Sets the list of pipe delimited TWAIN Source product names to exclude in Select Source dialog
+            /// 
+            /// The list of names is pipe-delimited.  If a name doesn't match an actual installed TWAIN source's 
+            /// product name, the name is ignored.  
+            /// @returns The reference to the current object (**this**)
+            /// @param[in] Pipe (|) delimited list of source product names
+            /// @see get_excludename_list() set_flags()
+            /// @note The list is only used if the twain_select_dialog::useexcludelist is set using set_flags()
+            twain_select_dialog& set_excludename_list(const std::string& productList) { m_ExcludeList = productList; return *this; }
+
+            /// Sets the mapping of TWAIN product names to aliased names that will be displayed in the TWAIN Source product names to exclude in Select Source dialog
+            /// 
+            /// @returns The reference to the current object (**this**)
+            template <typename Iter>
+            twain_select_dialog& set_name_mapping(Iter it1, Iter it2)
+            {
+                m_NameMapping.clear();
+                std::copy(it1, it2, std::back_inserter(m_NameMapping));
+                return *this;
+            }
+
+            /// Sets the mapping of TWAIN product names to aliased names that will be displayed in the TWAIN Source product names to exclude in Select Source dialog
+            /// 
+            /// @returns The reference to the current object (**this**)
+            twain_select_dialog& set_name_mapping(const std::vector<std::pair<std::string, std::string>>& vMap)
+            {
+                m_NameMapping = vMap;
+                return *this;
+            }
+
+            /// Sets the mapping of TWAIN product names to aliased names that will be displayed in the TWAIN Source product names to exclude in Select Source dialog
+            /// 
+            /// @returns The reference to the current object (**this**)
+            std::string get_name_mapping_s() const 
+            {
+                std::string ret;
+                for (auto& m : m_NameMapping)
+                    ret += m.first + "=" + m.second + "|";
+                if ( !ret.empty() )
+                ret.pop_back();
+                return ret;
+            }
 
             /// Sets the non-legacy dialog's position on the screen using absolute row and column positioning.  
             /// The positioning is oriented from the upper left corner of the display being row 0, column 0, and
@@ -139,6 +199,18 @@ namespace dynarithmic
             /// @returns The title that will be used when displaying the custom dialog
             /// @see set_title()
             std::string get_title() const { return m_Title; }
+
+            /// Gets the list of product names to display in TWAIN Select Source dialog is shown
+            /// 
+            /// @returns The title that will be used when displaying the custom dialog
+            /// @see set_title() set_includename_list() get_excludename_list() set_excludename_list()
+            std::string get_includename_list() const { return m_IncludeList; }
+
+            /// Gets the list of product names to exclude in TWAIN Select Source dialog is shown
+            /// 
+            /// @returns The title that will be used when displaying the custom dialog
+            /// @see set_title() set_includename_list() get_excludename_list() set_excludename_list()
+            std::string get_excludename_list() const { return m_ExcludeList; }
 
             /// Gets the title to be used when the TWAIN Select Source dialog is shown
             /// 

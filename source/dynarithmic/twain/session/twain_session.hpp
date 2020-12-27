@@ -132,10 +132,13 @@ namespace dynarithmic
                 if (allFlags & static_cast<LONG>(twain_select_dialog::useposition))
                     allFlags &= ~(DTWAIN_DLG_CENTER_SCREEN | DTWAIN_DLG_CENTER);
                 API_INSTANCE DTWAIN_SetTwainDialogFont(dlg.get_font());
-                return API_INSTANCE DTWAIN_SelectSource2A(dlg.get_parent_window(),
+                return API_INSTANCE DTWAIN_SelectSource2ExA(dlg.get_parent_window(),
                                             dlg.get_title().c_str(),
                                             position.first, 
                                             position.second,
+                                            dlg.get_includename_list().c_str(),
+                                            dlg.get_excludename_list().c_str(),
+                                            dlg.get_name_mapping_s().c_str(),
                                             allFlags); 
                                                                                                   
                 #else

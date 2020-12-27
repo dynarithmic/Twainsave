@@ -642,11 +642,29 @@ namespace twain {
             return C;
         }
 
+        /// Returns true if the capability is an extended capability supported by the device
+        /// 
+        /// @params[in] cap The capability value to test 
+        /// @returns **true** if the capability is an extended capability, **false** otherwise
+        bool is_extended_cap(twain_cap_type cap) const noexcept
+        {
+            return m_extended_caps.count(cap)?true:false;
+        }
+
+        /// Returns true if the capability is a custom capability supported by the device
+        /// 
+        /// @params[in] cap The capability value to test 
+        /// @returns **true** if the capability is an extended capability, **false** otherwise
+        bool is_custom_cap(twain_cap_type cap) const noexcept
+        {
+            return m_custom_caps.count(cap)?true:false;
+        }
+
         template <typename Container = std::vector<twain_cap_type>>
         Container get_extendedimage_caps() const
         {
             Container C;
-            std::transform(m_extendedimage_caps m_extendedimage_caps.begin(), m_extendedimage_caps.end(), std::inserter(C, C.end()), []
+            std::transform(m_extendedimage_caps.begin(), m_extendedimage_caps.end(), std::inserter(C, C.end()), []
             (const source_cap_info::value_type& v) { return v.first; });
             return C;
         }
