@@ -22,33 +22,33 @@
     <ProjectGuid>{77CD0083-5623-4B16-AF18-3F4597FA849C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>twainsavefree</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>twainsave-opensource</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -89,14 +89,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR_32);$(BOOST_LIBRARY_DIR_32)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dtwain32ud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)cpp_wrapper_lib;$(DTWAIN_LIBRARY_DIR_32);$(BOOST_LIBRARY_DIR_V140_32);$(BOOST_LIBRARY_DIR_V141_32);$(BOOST_LIBRARY_DIR_V142_32);$(BOOST_LIBRARY_DIR_V143_32)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cpp_wrapper_lib_$(PlatformArchitecture)UD.lib;dtwain32ud.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -106,14 +106,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR_64);$(BOOST_LIBRARY_DIR_64)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dtwain64ud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)cpp_wrapper_lib;$(DTWAIN_LIBRARY_DIR_64);$(BOOST_LIBRARY_DIR_V140_64);$(BOOST_LIBRARY_DIR_V141_64);$(BOOST_LIBRARY_DIR_V142_64);$(BOOST_LIBRARY_DIR_V143_64)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cpp_wrapper_lib_$(PlatformArchitecture)UD.lib;dtwain64ud.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -125,7 +125,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -133,8 +133,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR_32);$(BOOST_LIBRARY_DIR_32)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dtwain32u.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)cpp_wrapper_lib;$(DTWAIN_LIBRARY_DIR_32);$(BOOST_LIBRARY_DIR_V140_32);$(BOOST_LIBRARY_DIR_V141_32);$(BOOST_LIBRARY_DIR_V142_32);$(BOOST_LIBRARY_DIR_V143_32)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cpp_wrapper_lib_$(PlatformArchitecture)U.lib;dtwain32u.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,7 +146,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -154,8 +154,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR_64);$(BOOST_LIBRARY_DIR_64)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dtwain64u.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)cpp_wrapper_lib;$(DTWAIN_LIBRARY_DIR_64);$(BOOST_LIBRARY_DIR_V140_64);$(BOOST_LIBRARY_DIR_V141_64);$(BOOST_LIBRARY_DIR_V142_64);$(BOOST_LIBRARY_DIR_V143_64)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cpp_wrapper_lib_$(PlatformArchitecture)U.lib;dtwain64u.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

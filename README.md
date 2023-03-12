@@ -3,7 +3,7 @@ Free, open source version of Dynarithmic Software's [TwainSave-OpenSource](http:
 
 Note that this version of TwainSave currently lacks some features of the commercial version of TwainSave.  We are in the process of adding these features to this version periodically.  
 
-The current twainsave-opensource version is **1.06**.
+The current twainsave-opensource version is **1.07**.
 
 ----
 
@@ -35,13 +35,16 @@ This differs from the commercial version of TwainSave, where the file name is re
 
 # Building TwainSave from source
 
-If you want to build the source code, the requirements are the same as building the source for the Dynarithmic TWAIN library found [here](https://github.com/dynarithmic/twain_library/tree/master/source).  There is no need to rebuild DTWAIN first, however I would recommend you build DTWAIN first to ensure you have the correct requirements for building TwainSave.    
+If you want to build the source code, the requirements are the same as building the source for the Dynarithmic TWAIN library found [here](https://github.com/dynarithmic/twain_library_source). 
+
+This means that you will need an installation of the Boost C++ libraries, as well as set environment variables that point to the Boost header files and library files.
+
+There is no need to rebuild DTWAIN first, however I would recommend you build DTWAIN first to ensure you have the correct requirements for building TwainSave.    
   
 The only addition to the instructions above would be to define the following environment variables before starting Visual Studio:
 
 * DTWAIN_LIBRARY_DIR_32 -- Directory to the 32-bit DTWAIN import libraries.
 * DTWAIN_LIBRARY_DIR_64 -- Directory to the 64-bit DTWAIN import libraries.
-
 
 These directories will usually be the same one you will find dtwain32u.lib, dtwain64u.lib, etc.  The building of TwainSave will be using these environment variables to find the correct DTWAIN import libraries during the build process.
 

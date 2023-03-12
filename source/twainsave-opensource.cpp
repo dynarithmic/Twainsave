@@ -31,7 +31,10 @@ OF THIRD PARTY RIGHTS.
 #include <boost/uuid/uuid_generators.hpp> 
 #include <boost/uuid/uuid_io.hpp>         
 #include <boost/algorithm/string/predicate.hpp>
+#include <dynarithmic/twain/twain_session.hpp>
 #include <dynarithmic/twain/twain_source.hpp>
+#include <dynarithmic/twain/options/pdf_options.hpp>
+#include <dynarithmic/twain/acquire_characteristics/acquire_characteristics.hpp>
 #include <string>
 #include <iostream>
 #include <utility>
@@ -43,6 +46,7 @@ OF THIRD PARTY RIGHTS.
 #include <unordered_map>
 #include <nlohmann\json.hpp>
 #include <algorithm>
+#include <fstream>
 #include "twainsave_verinfo.h"
 
 std::string generate_details();
@@ -131,7 +135,7 @@ struct scanner_options
     std::unordered_map<std::string, dynarithmic::twain::filetype_value::value_type> m_FileTypeMap;
     std::unordered_map<int, dynarithmic::twain::color_value::value_type> m_ColorTypeMap;
     std::unordered_map<int, dynarithmic::twain::orientation_value::value_type> m_OrientationTypeMap;
-    std::unordered_map<std::string, dynarithmic::twain::papersize_value::value_type> m_PageSizeMap;
+    std::unordered_map<std::string, dynarithmic::twain::supportedsizes_value::value_type> m_PageSizeMap;
     std::array<long, 4> m_errorLevels;
     bool m_bUseFileInc;
     int m_FileIncrement;
@@ -419,7 +423,7 @@ std::string GetNewFileName(const std::string& fullpath, int inc, int maxWidth)
     auto ext_only = theStem.extension().native();
     std::string ext(ext_only.begin(), ext_only.end());
     std::ostringstream strm;
-    strm << "/" << file_part << OVERWRITE_PREFIXSTRING << std::setw(maxWidth) << std::setfill('0') << inc;
+    strm << ((vString.size()>1)?"/":"") << file_part << OVERWRITE_PREFIXSTRING << std::setw(maxWidth) << std::setfill('0') << inc;
     vString.back() = strm.str();
     auto retval = std::accumulate(vString.begin(), vString.end(), std::string());
     return retval += ext;
@@ -524,7 +528,7 @@ parse_return_type parse_options(int argc, char *argv[])
         po::notify(vm2);
         return{ true, vm2 };
     }
-    catch (const boost::program_options::error_with_option_name& e)
+    catch (const boost::program_options::error_with_option_name& /*e*/)
     {
         s_options.set_return_code(RETURN_BAD_COMMAND_LINE);
     }
@@ -606,34 +610,35 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
         auto& fOptions = ac.get_file_transfer_options();
         if (type1)
         {
-            fOptions.set_file_type(iter->second);
+            fOptions.set_type(iter->second);
             ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
         }
         else
         {
-            fOptions.set_file_type(iterMode2->second.first);
+            fOptions.set_type(iterMode2->second.first);
             ac.get_general_options().set_transfer_type(transfer_type::file_using_source);
         }
 
         // set the file save mode for multiple pages
-        ac.get_file_transfer_options().get_multipage_save_options().
+        ac.get_file_transfer_options().
+            get_multipage_save_options().
             set_save_mode(s_options.m_bMultiPage2?multipage_save_mode::save_uiclose : multipage_save_mode::save_default).
             set_save_incomplete(s_options.m_bSaveOnCancel);
 
         // set options, regardless if they appear on the command-line or not
         ac.get_file_transfer_options().
             set_multi_page(s_options.m_bMultiPage).
-            set_filename_pattern(s_options.m_filename);
+            set_name(s_options.m_filename);
 
         ac.get_general_options().
-            set_max_pages(s_options.m_NumPages).
+            set_max_page_count(s_options.m_NumPages).
             set_max_acquisitions(s_options.m_bUIPerm ? DTWAIN_MAXACQUIRE : 1);
 
         ac.get_paperhandling_options().
-            set_feederenabled(s_options.m_bUseADF).
+            enable_feeder(s_options.m_bUseADF).
             set_feedermode(s_options.m_bUseADFOrFlatbed?feedermode_value::feeder_flatbed:feedermode_value::feeder).
             set_feederwait(s_options.m_bNoUIWait?s_options.m_NoUIWaitTime:0).
-            set_duplexenabled(s_options.m_bUseDuplex);
+            enable_duplex(s_options.m_bUseDuplex);
 
         ac.get_userinterface_options().
             show(!s_options.m_bNoUI).
@@ -643,11 +648,11 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
         ac.get_imagetype_options().
             set_halftone(s_options.m_strHalftone).
             set_pixeltype(s_options.m_ColorTypeMap[s_options.m_color]).
-            set_negate(s_options.m_bNegateImage).
+            enable_negate(s_options.m_bNegateImage).
             set_threshold(s_options.m_dThreshold);
 
         ac.get_imageparamter_options().
-            set_autobright(s_options.m_bAutobrightMode).
+            enable_autobright(s_options.m_bAutobrightMode).
             set_brightness(s_options.m_brightness).
             set_contrast(s_options.m_dContrast).
             set_orientation(s_options.m_OrientationTypeMap[s_options.m_Orientation]).
@@ -656,8 +661,8 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
             set_highlight(s_options.m_dHighlight);
 
         ac.get_autoadjust_options().
-            set_deskew(s_options.m_bDeskew).
-            set_rotate(s_options.m_bAutoRotateMode);
+            enable_deskew(s_options.m_bDeskew).
+            enable_rotate(s_options.m_bAutoRotateMode);
 
         ac.get_deviceparams_options().
             set_overscan(s_options.m_bOverscanMode).
@@ -704,7 +709,7 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
 
         s_options.m_nOverwriteWidth = NumDigits(s_options.m_nOverwriteMax);
 
-        auto& file_rules = ac.get_file_transfer_options().get_filename_increment_rules();
+        auto& file_rules = ac.get_file_transfer_options().get_filename_increment_options();
         file_rules.enable(s_options.m_bUseFileInc).
                 set_increment(s_options.m_FileIncrement).
                 use_reset_count(false);
@@ -848,12 +853,12 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
     return true;
 }
 
-class STFCallback : public twain_listener
+class STFCallback : public twain_callback
 {
     scanner_options* m_pScannerOpts;
 
 public:
-    STFCallback(scanner_options *mSS) : twain_listener(), m_pScannerOpts(mSS)
+    STFCallback(scanner_options *mSS) : twain_callback(), m_pScannerOpts(mSS)
     {}
 
     int uiopenfailure(twain_source& source) override
@@ -913,7 +918,6 @@ public:
     }
 };
 
-
 int start_acquisitions(const po::variables_map& varmap) 
 {
     if (varmap.count("version"))
@@ -938,16 +942,15 @@ int start_acquisitions(const po::variables_map& varmap)
     }
 
     // first start the TWAIN session
-    twain_session ts;
-    twain_characteristics tc = ts.get_twain_characteristics();
+    twain_session ts(startup_mode::none);
     auto iter = varmap.find("tempdir");
     if (iter != varmap.end())
-        tc.set_temporary_directory(boost::any_cast<std::string>(iter->second.value()));
+        ts.set_temporary_directory(boost::any_cast<std::string>(iter->second.value()));
     iter = varmap.find("dsmsearchorder");
     if (iter != varmap.end())
     {
         int so = boost::any_cast<int>(iter->second.value());
-        tc.set_dsm_search_order(so);
+        ts.set_dsm_search_order(so);
     }
     iter = varmap.find("diagnose");
     if (!iter->second.defaulted())
@@ -955,7 +958,7 @@ int start_acquisitions(const po::variables_map& varmap)
         bool logging_enabled = (iter != varmap.end());
         if (iter != varmap.end())
         {
-            auto& logdetails = tc.get_logger_characteristics();
+            twain_logger logdetails;
             logdetails.set_verbosity(static_cast<logger_verbosity>(s_options.m_nDiagnose));
             if (varmap.find("diagnoselog") != varmap.end())
             {
@@ -976,6 +979,7 @@ int start_acquisitions(const po::variables_map& varmap)
                 logdetails.set_filename("stddiag.log");
             }
             logdetails.enable(logging_enabled);
+            ts.register_logger(logdetails);
         }
     }
 
@@ -989,7 +993,19 @@ int start_acquisitions(const po::variables_map& varmap)
         if (s_options.m_bSelectDefault)
             g_source = std::make_unique<twain_source>(ts.select_source(select_default(), false));
         else
-            g_source = std::make_unique<twain_source>(ts.select_source(select_usedialog(), false));
+        {
+            // Get a twain dialog to customize
+            twain_select_dialog twain_dialog;
+
+            // Customize the dialog
+            twain_dialog.
+                set_parent_window(nullptr).
+                set_title("TwainSave - OpenSource").
+                set_flags({ twain_select_dialog::showcenterscreen,
+                           twain_select_dialog::sortnames,
+                           twain_select_dialog::topmostwindow });
+            g_source = std::make_unique<twain_source>(ts.select_source(select_usedialog(twain_dialog), false));
+        }
         if (!g_source->is_selected())
         {
             s_options.set_return_code(RETURN_TWAIN_SOURCE_CANCEL);
@@ -1032,7 +1048,7 @@ int start_acquisitions(const po::variables_map& varmap)
 
         if (set_caps(*g_source, varmap))
         {
-            ts.register_listener(*g_source, STFCallback(&s_options)); 
+            ts.register_callback(*g_source, STFCallback(&s_options)); 
             auto acq_return = g_source->acquire();
             if (acq_return.first == dynarithmic::twain::twain_source::acquire_timeout)
                 s_options.set_return_code(RETURN_TIMEOUT_REACHED);
