@@ -15,9 +15,7 @@ The current twainsave-opensource version is **1.07**.
 The option for the open source version will be
 **twainsave-opensource --filename test.bmp**
 
-2)  The [32-bit DTWAIN dtwain32u.dll](https://github.com/dynarithmic/twain_library/tree/master/binaries/32bit) along with the resource files [twaininfo.txt](https://github.com/dynarithmic/twain_library/blob/master/binaries/32bit/twaininfo.txt) and [twainresourcestrings_english.txt](https://github.com/dynarithmic/twain_library/blob/master/binaries/32bit/twainresourcestrings_english.txt) must be available on the system PATH or in the same directory as twainsave-opensource.exe.  The current version of dtwain32u.dll must be at least **5.2.0.4** or above.
-
-3) The **--details** listing differs from the commercial version's [**-details**](http://www.dynarithmic.com/onlinehelp/twainsave/_details.htm) setting in two major ways:<br>
+2) The **--details** listing differs from the commercial version's [**-details**](http://www.dynarithmic.com/onlinehelp/twainsave/_details.htm) setting in two major ways:<br>
     a) The **--details** is in JSON format.  
     b) The output will by default go to the console instead of having to specify a file.  
   
@@ -27,7 +25,7 @@ For item b), to output to a file just requires you to run twainsave-opensource a
 
 will write the details to the file **details.log**
 
-4) Running **twainsave-opensource.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box, and if a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will be have a randomly generated file name (using a **.BMP** extension).  
+3) Running **twainsave-opensource.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box, and if a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will be have a randomly generated file name (using a **.BMP** extension).  
 
 This differs from the commercial version of TwainSave, where the file name is required as a command-line argument.
 
