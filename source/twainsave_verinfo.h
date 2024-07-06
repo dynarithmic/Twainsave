@@ -1,6 +1,6 @@
 /*
 This file is part of the Twainsave-opensource version
-Copyright (c) 2002-2020 Dynarithmic Software.
+Copyright (c) 2002-2024 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ OF THIRD PARTY RIGHTS.
 
 #define TWAINSAVE_MAJOR_VERSION 1
 #define TWAINSAVE_MINOR_VERSION 0
-#define TWAINSAVE_PATCH_VERSION 7
-#define TWAINSAVE_FULL_VERSION "1.0.7"
+#define TWAINSAVE_PATCH_VERSION 8
+#define TWAINSAVE_FULL_VERSION "1.0.8"
 
 #define TWAINSAVE_VERINFO_COMMENTS          "TwainSave Open Source\0"
 #define TWAINSAVE_VERINFO_COMPANYNAME       "Dynarithmic Software\0"
-#define TWAINSAVE_VERINFO_LEGALCOPYRIGHT	"Copyright © 2020-2023\0"
+#define TWAINSAVE_VERINFO_LEGALCOPYRIGHT	"Copyright © 2020-2024\0"
 #define TWAINSAVE_VERINFO_PRODUCTNAME		"TwainSave Open Source\0"
 #define TWAINSAVE_VERINFO_INTERNALNAME      "TwainSave_opensource.exe\0"
 #define TWAINSAVE_VERINFO_ORIGINALFILENAME  "TwainSave_opensource.exe\0"

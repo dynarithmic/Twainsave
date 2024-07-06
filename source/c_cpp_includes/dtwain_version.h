@@ -1,6 +1,6 @@
 /*
     This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-    Copyright (c) 2002-2023 Dynarithmic Software.
+    Copyright (c) 2002-2024 Dynarithmic Software.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -22,13 +22,19 @@
 #define DTWAIN_VERSION_H
 
 #define DTWAIN_MAJOR_VERSION           5
-#define DTWAIN_MINOR_VERSION           3
-#define DTWAIN_SUBMINOR_VERSION        0
-#define DTWAIN_PATCHLEVEL_VERSION      2
+#define DTWAIN_MINOR_VERSION           4
+#define DTWAIN_PATCHLEVEL_VERSION      5
 
-#define DTWAIN_VERINFO_BASEVERSION          "5.3"
-#define DTWAIN_VERINFO_FILEVERSION          "5.3.0.0"
-#define DTWAIN_VERINFO_PATCHLEVEL_VERSION   "2"
+#define DTWAIN_STRINGER_2_(x) #x
+#define DTWAIN_STRINGER_(x) DTWAIN_STRINGER_2_(x)
+
+#define DTWAIN_VERINFO_BASEVERSION          DTWAIN_STRINGER_(DTWAIN_MAJOR_VERSION) "." DTWAIN_STRINGER_(DTWAIN_MINOR_VERSION)
+#define DTWAIN_VERINFO_FILEVERSION          DTWAIN_VERINFO_BASEVERSION "." DTWAIN_STRINGER_(DTWAIN_PATCHLEVEL_VERSION)
+#define DTWAIN_VERINFO_PATCHLEVEL_VERSION   DTWAIN_STRINGER_2_(DTWAIN_PATCHLEVEL_VERSION)
+
+#ifdef _MSC_VER
+#pragma message ( "Compiling with DTWAIN Version " DTWAIN_VERINFO_FILEVERSION)
+#endif
 
 #ifdef USE_DTWAIN_DEBUG_LIB
     #define DTWAIN_DEVELOP_SUFFIX "d"
@@ -45,15 +51,24 @@
 		#define UNICODE_SUFFIX ""
 	#endif
 
+    #ifdef DTWAIN_LEAN_AND_MEAN
+        #define DTWAIN_LM_VERSION "_lm"
+    #else
+        #define DTWAIN_LM_VERSION ""
+    #endif
+
+    #define DTWAIN_BASE_NAME "dtwain"
 	#if defined (WIN64) || (_WIN64)
 		#define DTWAIN_OSPLATFORM "64"
-		#define DTWAIN_FILEDESCRIPTION  "dtwain64" UNICODE_SUFFIX DTWAIN_DEVELOP_SUFFIX
 	#else
 		#define DTWAIN_OSPLATFORM "32"
-		#define DTWAIN_FILEDESCRIPTION  "dtwain32" UNICODE_SUFFIX DTWAIN_DEVELOP_SUFFIX
 	#endif
+    #define DTWAIN_BASE_NAME_EX DTWAIN_BASE_NAME DTWAIN_OSPLATFORM
+    #define DTWAIN_FILEDESCRIPTION DTWAIN_BASE_NAME_EX UNICODE_SUFFIX DTWAIN_DEVELOP_SUFFIX DTWAIN_LM_VERSION
 	#define DTWAIN_DLLNAME      DTWAIN_FILEDESCRIPTION ".dll"
 	#define DTWAIN_IMPORTLIBNAME DTWAIN_FILEDESCRIPTION ".lib"
+    #define DTWAIN_ININAME DTWAIN_BASE_NAME_EX ".ini"
+    #define DTWAIN_ININAME_NATIVE _T(DTWAIN_ININAME)
 #endif
 
 #ifndef _WIN32

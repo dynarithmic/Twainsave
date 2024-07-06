@@ -1,4 +1,4 @@
-    /*
+/*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
 Copyright (c) 2002-2024 Dynarithmic Software.
 
@@ -18,31 +18,13 @@ FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
 DYNARITHMIC SOFTWARE. DYNARITHMIC SOFTWARE DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
 OF THIRD PARTY RIGHTS.
 */
-// timer used for document feeder access
-#ifndef DTWAIN_TWAIN_TIMER_HPP
-#define DTWAIN_TWAIN_TIMER_HPP
+// TWAIN application info (used by both the TWAIN Data Source Manager and Data Source
+#ifndef DTWAIN_TWAIN_COMPILER_DETAILS_HPP
+#define DTWAIN_TWAIN_COMPILER_DETAILS_HPP
 
-#include <chrono>
-
-namespace dynarithmic
-{
-    namespace twain
-    {
-        class twain_timer
-        {
-        public:
-            twain_timer() : beg_(clock_::now()) {}
-            void reset() { beg_ = clock_::now(); }
-            double elapsed() const {
-                return std::chrono::duration_cast<second_>
-                    (clock_::now() - beg_).count();
-            }
-
-        private:
-            typedef std::chrono::high_resolution_clock clock_;
-            typedef std::chrono::duration<double, std::ratio<1> > second_;
-            std::chrono::time_point<clock_> beg_;
-        };
-    }
-}
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
+    #define USING_CPP17 1
+#else
+    #define USING_CPP17 0
+#endif
 #endif

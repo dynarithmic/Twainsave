@@ -1,6 +1,6 @@
 /*
     This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-    Copyright (c) 2002-2023 Dynarithmic Software.
+    Copyright (c) 2002-2024 Dynarithmic Software.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -188,6 +188,8 @@ DTWAIN_SOURCE DLLENTRY_DEF DTWAIN_SelectSource2ExA(HWND hWndParent, LPCSTR szTit
 DTWAIN_SOURCE DLLENTRY_DEF DTWAIN_SelectSource2ExW(HWND hWndParent, LPCWSTR szTitle, LONG xPos, LONG yPos, LPCWSTR szIncludeNames, LPCWSTR szExcludeNames, LPCWSTR szNameMapping, LONG nOptions);
 DTWAIN_SOURCE DLLENTRY_DEF DTWAIN_SelectSourceByNameA(LPCSTR lpszName);
 DTWAIN_SOURCE DLLENTRY_DEF DTWAIN_SelectSourceByNameW(LPCWSTR lpszName);
+DTWAIN_SOURCE DLLENTRY_DEF DTWAIN_SelectSourceByNameWithOpenA(LPCSTR lpszName, DTWAIN_BOOL bOpen);
+DTWAIN_SOURCE DLLENTRY_DEF DTWAIN_SelectSourceByNameWithOpenW(LPCWSTR lpszName, DTWAIN_BOOL bOpen);
 HANDLE DLLENTRY_DEF DTWAIN_GetOCRTextA(DTWAIN_OCRENGINE Engine, LONG nPageNo, LPSTR Data, LONG dSize, LPLONG pActualSize, LONG nFlags);
 HANDLE DLLENTRY_DEF DTWAIN_GetOCRTextW(DTWAIN_OCRENGINE Engine, LONG nPageNo, LPWSTR Data, LONG dSize, LPLONG pActualSize, LONG nFlags);
 LONG DLLENTRY_DEF DTWAIN_ArrayFindStringA(DTWAIN_ARRAY pArray, LPCSTR pString);
@@ -287,7 +289,12 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_FrameGetAllStringA(DTWAIN_FRAME Frame, LPSTR Lef
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_FrameGetAllStringW(DTWAIN_FRAME Frame, LPWSTR Left, LPWSTR Top, LPWSTR Right, LPWSTR Bottom);
 DTWAIN_FRAME DLLENTRY_DEF DTWAIN_FrameCreateStringA(LPCSTR Left, LPCSTR Top, LPCSTR Right, LPCSTR Bottom);
 DTWAIN_FRAME DLLENTRY_DEF DTWAIN_FrameCreateStringW(LPCWSTR Left, LPCWSTR Top, LPCWSTR Right, LPCWSTR Bottom);
-
+LONG        DLLENTRY_DEF DTWAIN_GetSessionDetailsW(LPWSTR szBuf, LONG nSize, LONG indentFactor, BOOL bRefresh);
+LONG        DLLENTRY_DEF DTWAIN_GetSessionDetailsA(LPSTR szBuf, LONG nSize, LONG indentFactor, BOOL bRefresh);
+LONG        DLLENTRY_DEF DTWAIN_GetSourceDetailsA(LPCSTR szSources, LPSTR szBuf, LONG nSize, LONG indentFactor, BOOL bRefresh);
+LONG        DLLENTRY_DEF DTWAIN_GetSourceDetailsW(LPCWSTR szSources, LPWSTR szBuf, LONG nSize, LONG indentFactor, BOOL bRefresh);
+LONG        DLLENTRY_DEF DTWAIN_GetVersionCopyrightA(LPSTR lpszApp, LONG nLength);
+LONG        DLLENTRY_DEF DTWAIN_GetVersionCopyrightW(LPWSTR lpszApp, LONG nLength);
 
 #ifdef DTWAIN_ANSIDLL
     #define DTWAIN_CHARPTRTYPE LPSTR
@@ -324,6 +331,7 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_GetAppInfo(DTWAIN_CHARPTRTYPE szVerStr, 
 DTWAIN_SOURCE  DLLENTRY_DEF      DTWAIN_SelectSource2(HWND hWndParent, DTWAIN_CCHARPTRTYPE szTitle,LONG xPos, LONG yPos, LONG nOptions);
 DTWAIN_SOURCE  DLLENTRY_DEF      DTWAIN_SelectSource2Ex(HWND hWndParent, DTWAIN_CCHARPTRTYPE szTitle, LONG xPos, LONG yPos,DTWAIN_CCHARPTRTYPE szIncludeFilter,DTWAIN_CCHARPTRTYPE szExcludeFilter,DTWAIN_CCHARPTRTYPE szNameMapping,LONG nOptions);
 DTWAIN_SOURCE  DLLENTRY_DEF      DTWAIN_SelectSourceByName(DTWAIN_CCHARPTRTYPE lpszName);
+DTWAIN_SOURCE  DLLENTRY_DEF      DTWAIN_SelectSourceByNameWithOpen(DTWAIN_CCHARPTRTYPE lpszName, DTWAIN_BOOL bOpen);
 LONG           DLLENTRY_DEF      DTWAIN_GetSourceManufacturer(DTWAIN_SOURCE Source,DTWAIN_CHARPTRTYPE szProduct,LONG nMaxLen);
 LONG           DLLENTRY_DEF      DTWAIN_GetSourceProductFamily(DTWAIN_SOURCE Source,DTWAIN_CHARPTRTYPE szProduct,LONG nMaxLen);
 LONG           DLLENTRY_DEF      DTWAIN_GetSourceProductName(DTWAIN_SOURCE Source,DTWAIN_CHARPTRTYPE szProduct,LONG nMaxLen);
@@ -456,5 +464,7 @@ LONG        DLLENTRY_DEF DTWAIN_GetPaperSizeName(LONG paperNumber, DTWAIN_CHARPT
 LONG        DLLENTRY_DEF DTWAIN_GetPaperSizeName(LONG paperNumber, DTWAIN_CHARPTRTYPE outName, LONG nSize);
 LONG        DLLENTRY_DEF DTWAIN_GetTwainNameFromConstant(LONG lConstantType, LONG lTwainConstant, DTWAIN_CHARPTRTYPE lpszOut, LONG nSize);
 LONG        DLLENTRY_DEF DTWAIN_GetWindowsVersionInfo(DTWAIN_CHARPTRTYPE lpszBuffer, LONG nMaxLen);
-
+LONG        DLLENTRY_DEF DTWAIN_GetSessionDetails(DTWAIN_CHARPTRTYPE szBuf, LONG nSize, LONG indentFactor, BOOL bRefresh);
+LONG        DLLENTRY_DEF DTWAIN_GetSourceDetails(DTWAIN_CCHARPTRTYPE szSources, DTWAIN_CHARPTRTYPE szBuf, LONG nSize, LONG indentFactor, BOOL bRefresh);
+LONG        DLLENTRY_DEF DTWAIN_GetVersionCopyright(DTWAIN_CHARPTRTYPE lpszApp, LONG nLength);
 #endif

@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2022 Dynarithmic Software.
+Copyright (c) 2002-2024 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -466,6 +466,7 @@ namespace dynarithmic
         {
             typedef uint16_t value_type;
             static constexpr value_type  bmp = DTWAIN_BMP;
+            static constexpr value_type  bmprle = DTWAIN_BMP_RLE;
             static constexpr value_type  dcx = DTWAIN_DCX;
             static constexpr value_type  enhancedmetafile = DTWAIN_EMF;
             static constexpr value_type  gif = DTWAIN_GIF;
@@ -480,6 +481,7 @@ namespace dynarithmic
             static constexpr value_type  postscript3 = DTWAIN_POSTSCRIPT3;
             static constexpr value_type  psd = DTWAIN_PSD;
             static constexpr value_type  targa = DTWAIN_TGA;
+            static constexpr value_type  targarle = DTWAIN_TGA_RLE;
             static constexpr value_type  text = DTWAIN_TEXT;
             static constexpr value_type  tiffdeflate = DTWAIN_TIFFDEFLATE;
             static constexpr value_type  tiffgroup3 = DTWAIN_TIFFG3;
@@ -490,8 +492,10 @@ namespace dynarithmic
             static constexpr value_type  tiffpackbits = DTWAIN_TIFFPACKBITS;
             static constexpr value_type  windowsicon = DTWAIN_ICO;
             static constexpr value_type  windowsvistaicon = DTWAIN_ICO_VISTA;
+            static constexpr value_type  windowsiconresized = DTWAIN_ICO_RESIZED;
             static constexpr value_type  windowsmetafile = DTWAIN_WMF;
             static constexpr value_type  wirelessbmp = DTWAIN_WBMP;
+            static constexpr value_type  wirelessbmpresized = DTWAIN_WBMP_RESIZED;
             static constexpr value_type  portablebitmap = DTWAIN_PBM;
             static constexpr value_type  dcxmulti = DTWAIN_DCX;
             static constexpr value_type  pdfmulti = DTWAIN_PDFMULTI;
@@ -523,6 +527,18 @@ namespace dynarithmic
             static constexpr value_type  pdfa_source_mode = DTWAIN_FF_PDFA;
             static constexpr value_type  pdfa2_source_mode = DTWAIN_FF_PDFA2;
             static constexpr value_type  pdfraster_source_mode = DTWAIN_FF_PDFRASTER;
+        };
+
+        struct tiffcompress_value
+        {
+            typedef uint16_t value_type;
+            static constexpr value_type  deflate = DTWAIN_TIFFDEFLATE;
+            static constexpr value_type  group3 = DTWAIN_TIFFG3;
+            static constexpr value_type  group4 = DTWAIN_TIFFG4;
+            static constexpr value_type  jpeg = DTWAIN_TIFFJPEG;
+            static constexpr value_type  lzw = DTWAIN_TIFFLZW;
+            static constexpr value_type  nocompress = DTWAIN_TIFFNONE;
+            static constexpr value_type  packbits = DTWAIN_TIFFPACKBITS;
         };
 
         struct filmtype_value
@@ -1647,6 +1663,7 @@ namespace dynarithmic
             static constexpr filetype_value::value_type aSingle[] =
             {
                 filetype_value::bmp,
+                filetype_value::bmprle,
                 filetype_value::dcx,
                 filetype_value::enhancedmetafile,
                 filetype_value::gif,
@@ -1661,6 +1678,7 @@ namespace dynarithmic
                 filetype_value::postscript3,
                 filetype_value::psd,
                 filetype_value::targa,
+                filetype_value::targarle,
                 filetype_value::text,
                 filetype_value::tiffdeflate,
                 filetype_value::tiffgroup3,
@@ -1670,8 +1688,10 @@ namespace dynarithmic
                 filetype_value::tiffnocompress,
                 filetype_value::tiffpackbits,
                 filetype_value::windowsicon,
+                filetype_value::windowsiconresized,
                 filetype_value::windowsmetafile,
-                filetype_value::wirelessbmp
+                filetype_value::wirelessbmp,
+                filetype_value::wirelessbmpresized
             };
 
             static constexpr filetype_value::value_type aMulti [] = 
@@ -1742,6 +1762,7 @@ namespace dynarithmic
                 static std::unordered_set<filetype_value::value_type> supported_set =
                 {
                     filetype_value::bmp,
+                    filetype_value::bmprle,
                     filetype_value::dcx,
                     filetype_value::enhancedmetafile,
                     filetype_value::gif,
@@ -1756,6 +1777,7 @@ namespace dynarithmic
                     filetype_value::postscript3,
                     filetype_value::psd,
                     filetype_value::targa,
+                    filetype_value::targarle,
                     filetype_value::text,
                     filetype_value::tiffdeflate,
                     filetype_value::tiffgroup3,
@@ -1766,9 +1788,11 @@ namespace dynarithmic
                     filetype_value::tiffpackbits,
                     filetype_value::windowsicon,
                     filetype_value::windowsvistaicon,
+                    filetype_value::windowsiconresized,
                     filetype_value::portablebitmap,
                     filetype_value::windowsmetafile,
                     filetype_value::wirelessbmp,
+                    filetype_value::wirelessbmpresized,
                     filetype_value::dcxmulti,
                     filetype_value::pdfmulti,
                     filetype_value::postscript1multi,

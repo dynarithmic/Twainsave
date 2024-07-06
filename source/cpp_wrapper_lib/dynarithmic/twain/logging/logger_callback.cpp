@@ -1,4 +1,4 @@
-    /*
+/*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
 Copyright (c) 2002-2024 Dynarithmic Software.
 
@@ -18,31 +18,28 @@ FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
 DYNARITHMIC SOFTWARE. DYNARITHMIC SOFTWARE DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
 OF THIRD PARTY RIGHTS.
 */
-// timer used for document feeder access
-#ifndef DTWAIN_TWAIN_TIMER_HPP
-#define DTWAIN_TWAIN_TIMER_HPP
 
-#include <chrono>
+#include <dynarithmic/twain/twain_values.hpp>
+#include <dynarithmic/twain/session/twain_session.hpp>
+#include <dynarithmic/twain/logging/logger_callback.hpp>
 
 namespace dynarithmic
 {
     namespace twain
     {
-        class twain_timer
+        LRESULT CALLBACK logger_callback_proc(const char* msg, DTWAIN_LONG64 UserData)
         {
-        public:
-            twain_timer() : beg_(clock_::now()) {}
-            void reset() { beg_ = clock_::now(); }
-            double elapsed() const {
-                return std::chrono::duration_cast<second_>
-                    (clock_::now() - beg_).count();
+            const auto thisObject = reinterpret_cast<twain_session*>(UserData);
+            if (thisObject)
+            {
+                twain_session::logger_type& sesObject = thisObject->get_logger_type();
+                if (sesObject.second && sesObject.second->is_enabled())
+                {
+                    const auto& fn = sesObject.second;
+                    fn->log(msg);
+                }
             }
-
-        private:
-            typedef std::chrono::high_resolution_clock clock_;
-            typedef std::chrono::duration<double, std::ratio<1> > second_;
-            std::chrono::time_point<clock_> beg_;
-        };
+            return 1;
+        }
     }
 }
-#endif

@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2023 Dynarithmic Software.
+Copyright (c) 2002-2024 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ OF THIRD PARTY RIGHTS.
 #include <dynarithmic/twain/twain_session.hpp>
 #include <dynarithmic/twain/info/paperhandling_info.hpp>
 #include <dynarithmic/twain/types/twain_timer.hpp>
-#include <dynarithmic/twain/tostring/tojson.hpp>
 #include <dynarithmic/twain/source/twain_source_pimpl.hpp>
 
 namespace dynarithmic
@@ -585,10 +584,10 @@ namespace dynarithmic
             return;
         }
  
-        std::string& twain_source::get_details(bool refresh)
+        std::string& twain_source::get_details(dynarithmic::twain::details_info info)
         {
             bool bGetDetails = false;
-            if (!refresh)
+            if (!info.bRefresh)
             {
                 if (m_source_details.empty())
                     bGetDetails = true;
@@ -596,7 +595,13 @@ namespace dynarithmic
             else
                 bGetDetails = true;
             if (bGetDetails)
-                m_source_details = dynarithmic::twain::json_generator::generate_details(*m_pSession, { get_source_info().get_product_name() });
+            {
+                auto nChars = API_INSTANCE DTWAIN_GetSourceDetailsA(get_source_info().get_product_name().c_str(), nullptr, 0, info.indentFactor, TRUE); 
+                m_source_details.clear();
+                m_source_details.resize(nChars);
+                API_INSTANCE DTWAIN_GetSourceDetailsA(get_source_info().get_product_name().c_str(), &m_source_details[0], 
+                                                        static_cast<LONG>(m_source_details.size()), info.indentFactor, FALSE);
+            }
             return m_source_details;
         }
 
@@ -660,6 +665,34 @@ namespace dynarithmic
             return std::move(ih);
         }
 
+        std::vector<twain_source::custom_data_type> twain_source::get_custom_data() const
+        {
+            const capability_interface& ci = get_capability_interface();
+            if (!ci.is_customdsdata_supported())
+                return {};
+            long actualSize = 0;
+            if (!API_INSTANCE DTWAIN_GetCustomDSData(m_theSource, nullptr, 0, &actualSize, DTWAINGCD_COPYDATA))
+                return {};
+            if (actualSize > 0)
+            {
+                std::vector<custom_data_type> retContainer(actualSize);
+                API_INSTANCE DTWAIN_GetCustomDSData(m_theSource, retContainer.data(), actualSize, nullptr, DTWAINGCD_COPYDATA);
+                return retContainer;
+            }
+            return {};
+        }
+
+        bool twain_source::showui_only()
+        {
+            const capability_interface& ci = get_capability_interface();
+            if (!ci.is_customdsdata_supported())
+                return false;
+            if (!API_INSTANCE DTWAIN_ShowUIOnly(m_theSource))
+                return false;
+            return true;
+        }
+
+
         const capability_interface& twain_source::get_capability_interface() const noexcept { return *(m_pTwainSourceImpl->m_capability_info); }
         buffered_transfer_info& twain_source::get_buffered_transfer_info() noexcept { return *(m_pTwainSourceImpl->m_buffered_info); }
         acquire_characteristics& twain_source::get_acquire_characteristics() { return *(m_pTwainSourceImpl->m_acquire_characteristics); }
@@ -668,5 +701,7 @@ namespace dynarithmic
         bool twain_source::is_open() const { return API_INSTANCE DTWAIN_IsSourceOpen(m_theSource) ? true : false; }
         twain_source& twain_source::set_acquire_characteristics(const acquire_characteristics& ac) noexcept 
                     { *(m_pTwainSourceImpl->m_acquire_characteristics) = ac; return *this; }
+        bool twain_source::set_tiff_compress_type(tiffcompress_value::value_type compress_type) 
+             { return API_INSTANCE DTWAIN_SetTIFFCompressType(m_theSource, static_cast<LONG>(compress_type)); }
 	}
 }

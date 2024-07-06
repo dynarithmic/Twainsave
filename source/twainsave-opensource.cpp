@@ -47,6 +47,7 @@ OF THIRD PARTY RIGHTS.
 #include <nlohmann\json.hpp>
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 #include "twainsave_verinfo.h"
 
 std::string generate_details();
@@ -610,6 +611,9 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
         auto& fOptions = ac.get_file_transfer_options();
         if (type1)
         {
+            auto multipage_type = file_type_info::get_multipage_type(iter->second);
+            if (s_options.m_bMultiPage)
+                iter->second = multipage_type;
             fOptions.set_type(iter->second);
             ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
         }
@@ -918,6 +922,62 @@ public:
     }
 };
 
+using namespace dynarithmic::twain;
+
+struct twain_derived_logger : public twain_logger
+{
+    public:
+        enum logger_destination
+        {
+            todebug,
+            tofile,
+            toconsole
+        };
+        
+    private:
+        logger_destination m_destination;
+        std::string m_filename;
+
+    public:
+        twain_derived_logger() = default;
+        twain_derived_logger& set_destination(logger_destination destination)
+        {
+            m_destination = destination;
+            return *this;
+        }
+
+        twain_derived_logger& set_filename(std::string filename)
+        {
+            m_filename = filename;
+            return *this;
+        }
+
+        bool enable()
+        {
+            if (m_destination == logger_destination::tofile)
+                DTWAIN_SetTwainLogA(DTWAIN_LOG_USEFILE | get_verbosity_aslong(), m_filename.c_str());
+            else
+                DTWAIN_SetTwainLogA(get_verbosity_aslong(), "");
+            return true;
+        }
+
+        virtual void log(const char* msg) override
+        {
+            switch (m_destination)
+            {
+            case logger_destination::toconsole:
+                std::cout << msg << "\n";
+                break;
+            case logger_destination::todebug:
+                OutputDebugStringA(msg);
+                break;
+            case logger_destination::tofile:
+                break;
+            }
+        }
+};
+
+
 int start_acquisitions(const po::variables_map& varmap) 
 {
     if (varmap.count("version"))
@@ -958,28 +1018,28 @@ int start_acquisitions(const po::variables_map& varmap)
         bool logging_enabled = (iter != varmap.end());
         if (iter != varmap.end())
         {
-            twain_logger logdetails;
+            // create a logger and set the twain session to use the logger
+            auto& logdetails = ts.register_logger<twain_derived_logger>();
             logdetails.set_verbosity(static_cast<logger_verbosity>(s_options.m_nDiagnose));
             if (varmap.find("diagnoselog") != varmap.end())
             {
                 if (s_options.m_DiagnoseLog == "*")
-                    logdetails.set_destination(logger_destination::todebug);
+                    logdetails.set_destination(twain_derived_logger::logger_destination::todebug);
                 else
                 if (s_options.m_DiagnoseLog == "+")
-                    logdetails.set_destination(logger_destination::toconsole);
+                    logdetails.set_destination(twain_derived_logger::logger_destination::toconsole);
                 else
                 {
-                    logdetails.set_destination(logger_destination::tofile);
+                    logdetails.set_destination(twain_derived_logger::logger_destination::tofile);
                     logdetails.set_filename(s_options.m_DiagnoseLog);
                 }
             }
             else
             {
-                logdetails.set_destination(logger_destination::tofile);
+                logdetails.set_destination(twain_derived_logger::logger_destination::tofile);
                 logdetails.set_filename("stddiag.log");
             }
-            logdetails.enable(logging_enabled);
-            ts.register_logger(logdetails);
+            logdetails.enable();
         }
     }
 
