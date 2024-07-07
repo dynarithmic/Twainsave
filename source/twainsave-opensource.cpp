@@ -1,6 +1,6 @@
 /*
 This file is part of the Twainsave-opensource version
-Copyright (c) 2002-2020 Dynarithmic Software.
+Copyright (c) 2002-2024 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ OF THIRD PARTY RIGHTS.
 #include <sstream>
 #include <type_traits>
 #include <unordered_map>
-#include <nlohmann\json.hpp>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
