@@ -3,7 +3,7 @@ Free, open source version of Dynarithmic Software's [TwainSave](http://www.dynar
 
 Note that this version of TwainSave currently lacks some features of the commercial version of TwainSave.  We are in the process of adding these features to this version periodically.  
 
-The current open source Twainsave version is **1.07**.
+The current open source Twainsave version is **1.08**.
 
 ----
 
