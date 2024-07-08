@@ -382,7 +382,7 @@ struct pdf_controls
 using namespace dynarithmic::twain;
 namespace po = boost::program_options;
 
-po::options_description desc2;
+std::unique_ptr<po::options_description> desc2;
 
 int NumDigits(int x)
 {
@@ -443,9 +443,10 @@ parse_return_type parse_options(int argc, char *argv[])
     descript_name = default_name;
     std::replace_if(descript_name.begin(), descript_name.end(), [&](char ch) { return ch != '-'; }, 'x');
     po::command_line_style::style_t style = po::command_line_style::style_t(po::command_line_style::unix_style);
+    desc2 = std::make_unique<po::options_description>();
     try
     {
-        desc2.add_options()
+        desc2->add_options()
             ("area", po::value< std::string >(&s_options.m_area), "set acquisition area of image to acquire")
             ("autobright", po::bool_switch(&s_options.m_bAutobrightMode)->default_value(false), "turn on autobright feature")
             ("autofeed", po::bool_switch(&s_options.m_bUseADF)->default_value(false), "turn on automatic document feeder")
@@ -524,11 +525,11 @@ parse_return_type parse_options(int argc, char *argv[])
             ("version", "Display program version")
             ("@", po::value< std::string >(&s_options.m_strConfigFile), "Configuration file");
         po::variables_map vm2;
-        po::store(po::parse_command_line(argc, argv, desc2, style), vm2);
+        po::store(po::parse_command_line(argc, argv, *desc2, style), vm2);
         po::notify(vm2);
         return{ true, vm2 };
     }
-    catch (const boost::program_options::error_with_option_name& /*e*/)
+    catch (const boost::program_options::error_with_option_name& e)
     {
         s_options.set_return_code(RETURN_BAD_COMMAND_LINE);
     }
