@@ -184,7 +184,7 @@ namespace dynarithmic
             /// 
             /// @returns string representing the current temporary directory.
             /// @see set_dsm_search_order()
-            std::string get_dsm_search_order() const noexcept { return m_strSearchDirectory; }
+            std::string get_dsm_search_order() const noexcept { return m_strSearchOrder; }
 
             /// Gets the current user-defined directory for the TWAIN Data Source Manager to be searched
             /// 

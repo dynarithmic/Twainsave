@@ -162,6 +162,7 @@ struct scanner_options
                             m_nOverwriteWidth(1),
                             m_FileTypeMap{ 
                             INIT_TYPE(bmp, filetype_value, bmp),
+                            INIT_TYPE(bmprle, filetype_value, bmprle),
                             INIT_TYPE(gif, filetype_value,gif),
                             INIT_TYPE(pcx, filetype_value,pcx),
                             INIT_TYPE(dcx, filetype_value,dcx),
@@ -169,6 +170,7 @@ struct scanner_options
                             INIT_TYPE(ico, filetype_value,windowsicon),
                             INIT_TYPE(png, filetype_value,png),
                             INIT_TYPE(tga, filetype_value,targa),
+                            INIT_TYPE(tgarle, filetype_value, targarle),
                             INIT_TYPE(psd, filetype_value,psd),
                             INIT_TYPE(emf, filetype_value,enhancedmetafile),
                             INIT_TYPE(wbmp, filetype_value,wirelessbmp),
@@ -433,6 +435,7 @@ scanner_options s_options = {};
 pdf_controls pdf_commands = {};
 std::string default_name;
 std::string descript_name;
+std::string details_name;
 
 using parse_return_type = std::pair<bool, po::variables_map>;
 
@@ -587,6 +590,12 @@ std::string resolve_extension(std::string filetype)
     else
     if (boost::starts_with(filetype, "ps"))
         return "ps";
+    else
+    if (boost::starts_with(filetype, "bmp"))
+        return "bmp";
+    else
+    if (boost::starts_with(filetype, "tga"))
+        return "tga";
     return filetype;
 }
 
@@ -937,6 +946,7 @@ struct twain_derived_logger : public twain_logger
     private:
         logger_destination m_destination;
         std::string m_filename;
+        std::unique_ptr<std::ofstream> m_file;
 
     public:
         twain_derived_logger() = default;
@@ -955,9 +965,8 @@ struct twain_derived_logger : public twain_logger
         bool enable()
         {
             if (m_destination == logger_destination::tofile)
-                DTWAIN_SetTwainLogA(DTWAIN_LOG_USEFILE | get_verbosity_aslong(), m_filename.c_str());
-            else
-                DTWAIN_SetTwainLogA(get_verbosity_aslong(), "");
+                m_file = std::make_unique<std::ofstream>(m_filename);
+            twain_logger::enable();
             return true;
         }
 
@@ -965,13 +974,15 @@ struct twain_derived_logger : public twain_logger
         {
             switch (m_destination)
             {
-            case logger_destination::toconsole:
-                std::cout << msg << "\n";
-                break;
             case logger_destination::todebug:
-                OutputDebugStringA(msg);
+                {
+                    std::string msgTotal = msg;
+                    msgTotal.push_back('\n');
+                    OutputDebugStringA(msgTotal.c_str());
+                }
                 break;
             case logger_destination::tofile:
+                    *m_file << msg << "\n";
                 break;
             }
         }
@@ -1021,18 +1032,14 @@ int start_acquisitions(const po::variables_map& varmap)
             // create a logger and set the twain session to use the logger
             auto& logdetails = ts.register_logger<twain_derived_logger>();
             logdetails.set_verbosity(static_cast<logger_verbosity>(s_options.m_nDiagnose));
+            logdetails.set_filename("stddiag.log");
+            logdetails.set_destination(twain_derived_logger::logger_destination::tofile);
             if (varmap.find("diagnoselog") != varmap.end())
             {
                 if (s_options.m_DiagnoseLog == "*")
                     logdetails.set_destination(twain_derived_logger::logger_destination::todebug);
                 else
-                if (s_options.m_DiagnoseLog == "+")
-                    logdetails.set_destination(twain_derived_logger::logger_destination::toconsole);
-                else
-                {
-                    logdetails.set_destination(twain_derived_logger::logger_destination::tofile);
                     logdetails.set_filename(s_options.m_DiagnoseLog);
-                }
             }
             else
             {
