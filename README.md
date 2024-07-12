@@ -25,9 +25,20 @@ For item b), to output to a file just requires you to run twainsave-opensource a
 
 will write the details to the file **details.log**
 
-3) Running **twainsave-opensource.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box, and if a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will be have a randomly generated file name (using a **.BMP** extension).  
+3) Running **twainsave-opensource.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box.  If a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will be have a randomly generated file name (using a **.BMP** extension).  
 
-This differs from the commercial version of TwainSave, where the file name is required as a command-line argument.
+4) Running **twainsave-opensource.exe** without a --filename setting, but with a --filetype setting: If a device is selected, the name of the file will be randomly generated, with a file extension that matches the file type specified.
+   For example:
+
+   **twainsave-opensource --filetype pdf**
+
+   will result in a file created with a random name, with a **.pdf** extension.
+   
+6)   Note that the random names will have as the filename in a 128-bit GUID format, with leading and trailing **{}**.  For example:
+
+   {6B29FC40-CA47-1067-B31D-00DD010662DA}.pdf
+
+   would be a randomly generated pdf file.
 
 ----------
 
