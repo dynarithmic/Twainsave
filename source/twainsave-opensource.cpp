@@ -1,6 +1,6 @@
 /*
 This file is part of the Twainsave-opensource version
-Copyright (c) 2002-2020 Dynarithmic Software.
+Copyright (c) 2002-2024 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,9 +44,9 @@ OF THIRD PARTY RIGHTS.
 #include <sstream>
 #include <type_traits>
 #include <unordered_map>
-#include <nlohmann\json.hpp>
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 #include "twainsave_verinfo.h"
 
 std::string generate_details();
@@ -162,6 +162,7 @@ struct scanner_options
                             m_nOverwriteWidth(1),
                             m_FileTypeMap{ 
                             INIT_TYPE(bmp, filetype_value, bmp),
+                            INIT_TYPE(bmprle, filetype_value, bmprle),
                             INIT_TYPE(gif, filetype_value,gif),
                             INIT_TYPE(pcx, filetype_value,pcx),
                             INIT_TYPE(dcx, filetype_value,dcx),
@@ -169,6 +170,7 @@ struct scanner_options
                             INIT_TYPE(ico, filetype_value,windowsicon),
                             INIT_TYPE(png, filetype_value,png),
                             INIT_TYPE(tga, filetype_value,targa),
+                            INIT_TYPE(tgarle, filetype_value, targarle),
                             INIT_TYPE(psd, filetype_value,psd),
                             INIT_TYPE(emf, filetype_value,enhancedmetafile),
                             INIT_TYPE(wbmp, filetype_value,wirelessbmp),
@@ -382,7 +384,7 @@ struct pdf_controls
 using namespace dynarithmic::twain;
 namespace po = boost::program_options;
 
-po::options_description desc2;
+std::unique_ptr<po::options_description> desc2;
 
 int NumDigits(int x)
 {
@@ -433,6 +435,7 @@ scanner_options s_options = {};
 pdf_controls pdf_commands = {};
 std::string default_name;
 std::string descript_name;
+std::string details_name;
 
 using parse_return_type = std::pair<bool, po::variables_map>;
 
@@ -443,9 +446,10 @@ parse_return_type parse_options(int argc, char *argv[])
     descript_name = default_name;
     std::replace_if(descript_name.begin(), descript_name.end(), [&](char ch) { return ch != '-'; }, 'x');
     po::command_line_style::style_t style = po::command_line_style::style_t(po::command_line_style::unix_style);
+    desc2 = std::make_unique<po::options_description>();
     try
     {
-        desc2.add_options()
+        desc2->add_options()
             ("area", po::value< std::string >(&s_options.m_area), "set acquisition area of image to acquire")
             ("autobright", po::bool_switch(&s_options.m_bAutobrightMode)->default_value(false), "turn on autobright feature")
             ("autofeed", po::bool_switch(&s_options.m_bUseADF)->default_value(false), "turn on automatic document feeder")
@@ -524,11 +528,11 @@ parse_return_type parse_options(int argc, char *argv[])
             ("version", "Display program version")
             ("@", po::value< std::string >(&s_options.m_strConfigFile), "Configuration file");
         po::variables_map vm2;
-        po::store(po::parse_command_line(argc, argv, desc2, style), vm2);
+        po::store(po::parse_command_line(argc, argv, *desc2, style), vm2);
         po::notify(vm2);
         return{ true, vm2 };
     }
-    catch (const boost::program_options::error_with_option_name& /*e*/)
+    catch (const boost::program_options::error_with_option_name& e)
     {
         s_options.set_return_code(RETURN_BAD_COMMAND_LINE);
     }
@@ -586,6 +590,12 @@ std::string resolve_extension(std::string filetype)
     else
     if (boost::starts_with(filetype, "ps"))
         return "ps";
+    else
+    if (boost::starts_with(filetype, "bmp"))
+        return "bmp";
+    else
+    if (boost::starts_with(filetype, "tga"))
+        return "tga";
     return filetype;
 }
 
@@ -610,6 +620,9 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
         auto& fOptions = ac.get_file_transfer_options();
         if (type1)
         {
+            auto multipage_type = file_type_info::get_multipage_type(iter->second);
+            if (s_options.m_bMultiPage)
+                iter->second = multipage_type;
             fOptions.set_type(iter->second);
             ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
         }
@@ -918,6 +931,64 @@ public:
     }
 };
 
+using namespace dynarithmic::twain;
+
+struct twain_derived_logger : public twain_logger
+{
+    public:
+        enum logger_destination
+        {
+            todebug,
+            tofile,
+            toconsole
+        };
+        
+    private:
+        logger_destination m_destination;
+        std::string m_filename;
+        std::unique_ptr<std::ofstream> m_file;
+
+    public:
+        twain_derived_logger() = default;
+        twain_derived_logger& set_destination(logger_destination destination)
+        {
+            m_destination = destination;
+            return *this;
+        }
+
+        twain_derived_logger& set_filename(std::string filename)
+        {
+            m_filename = filename;
+            return *this;
+        }
+
+        bool enable()
+        {
+            if (m_destination == logger_destination::tofile)
+                m_file = std::make_unique<std::ofstream>(m_filename);
+            twain_logger::enable();
+            return true;
+        }
+
+        virtual void log(const char* msg) override
+        {
+            switch (m_destination)
+            {
+                case logger_destination::todebug:
+                {
+                    std::string msgTotal = msg;
+                    msgTotal.push_back('\n');
+                    OutputDebugStringA(msgTotal.c_str());
+                }
+                break;
+                case logger_destination::tofile:
+                    *m_file << msg << "\n";
+                break;
+            }
+        }
+};
+
+
 int start_acquisitions(const po::variables_map& varmap) 
 {
     if (varmap.count("version"))
@@ -958,28 +1029,24 @@ int start_acquisitions(const po::variables_map& varmap)
         bool logging_enabled = (iter != varmap.end());
         if (iter != varmap.end())
         {
-            twain_logger logdetails;
+            // create a logger and set the twain session to use the logger
+            auto& logdetails = ts.register_logger<twain_derived_logger>();
             logdetails.set_verbosity(static_cast<logger_verbosity>(s_options.m_nDiagnose));
+            logdetails.set_filename("stddiag.log");
+            logdetails.set_destination(twain_derived_logger::logger_destination::tofile);
             if (varmap.find("diagnoselog") != varmap.end())
             {
                 if (s_options.m_DiagnoseLog == "*")
-                    logdetails.set_destination(logger_destination::todebug);
+                    logdetails.set_destination(twain_derived_logger::logger_destination::todebug);
                 else
-                if (s_options.m_DiagnoseLog == "+")
-                    logdetails.set_destination(logger_destination::toconsole);
-                else
-                {
-                    logdetails.set_destination(logger_destination::tofile);
                     logdetails.set_filename(s_options.m_DiagnoseLog);
-                }
             }
             else
             {
-                logdetails.set_destination(logger_destination::tofile);
+                logdetails.set_destination(twain_derived_logger::logger_destination::tofile);
                 logdetails.set_filename("stddiag.log");
             }
-            logdetails.enable(logging_enabled);
-            ts.register_logger(logdetails);
+            logdetails.enable();
         }
     }
 

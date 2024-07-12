@@ -1,6 +1,6 @@
 /*
     This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-    Copyright (c) 2002-2023 Dynarithmic Software.
+    Copyright (c) 2002-2024 Dynarithmic Software.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -562,7 +562,7 @@
 #define DTWAIN_CNTYAFGHANISTAN             1001
 #define DTWAIN_CNTYALGERIA                  213
 #define DTWAIN_CNTYAMERICANSAMOA            684
-#define DTWAIN_CNTYANDORRA                  033
+#define DTWAIN_CNTYANDORRA                   33
 #define DTWAIN_CNTYANGOLA                  1002
 #define DTWAIN_CNTYANGUILLA                8090
 #define DTWAIN_CNTYANTIGUA                 8091
@@ -605,7 +605,7 @@
 #define DTWAIN_CNTYCONGO                   1011
 #define DTWAIN_CNTYCOOKIS                  1012
 #define DTWAIN_CNTYCOSTARICA               506
-#define DTWAIN_CNTYCUBA                     005
+#define DTWAIN_CNTYCUBA                     5
 #define DTWAIN_CNTYCYPRUS                   357
 #define DTWAIN_CNTYCZECHOSLOVAKIA            42
 #define DTWAIN_CNTYDENMARK                   45
@@ -849,8 +849,9 @@
 #define DTWAIN_ERR_ARRAYTYPE_MISMATCH (-1053)
 #define DTWAIN_ERR_SOURCENAME_NOTINSTALLED (-1054)
 #define DTWAIN_ERR_NO_MEMFILE_XFER       (-1055)
+#define DTWAIN_ERR_AREA_ARRAY_TOO_SMALL  (-1056)
 
-#define DTWAIN_ERR_LAST_1       DTWAIN_ERR_DEMO_NOFILETYPE
+#define DTWAIN_ERR_LAST_1       DTWAIN_ERR_AREA_ARRAY_TOO_SMALL
 
 #define TWAIN_ERR_LOW_MEMORY        (-1100)
 #define TWAIN_ERR_FALSE_ALARM       (-1101)
@@ -962,6 +963,7 @@
 #define DTWAIN_ERR_TWAINOPENSOURCEDSMNOTFOUND (-2076)
 #define DTWAIN_ERR_INVALID_DIRECTORY (-2077)
 #define DTWAIN_ERR_CREATE_DIRECTORY (-2078)
+#define DTWAIN_ERR_OCRLIBRARY_NOTFOUND (-2079)
 
 /* TwainSave errors */
 #define DTWAIN_TWAINSAVE_OK                (0)
@@ -1314,6 +1316,10 @@ DTWAIN DLL are not displayed */
 #define DTWAIN_DLG_USENAMEMAPPING       256
 #define DTWAIN_DLG_USEDEFAULTTITLE      512
 #define DTWAIN_DLG_TOPMOSTWINDOW        1024
+#define DTWAIN_DLG_OPENONSELECT         2048
+#define DTWAIN_DLG_OPENONSELECTOVERRIDE 4096
+#define DTWAIN_DLG_OPENONSELECTON       (DTWAIN_DLG_OPENONSELECT | DTWAIN_DLG_OPENONSELECTOVERRIDE)
+#define DTWAIN_DLG_OPENONSELECTOFF      (DTWAIN_DLG_OPENONSELECTOVERRIDE)
 
 /* DTWAIN Language resource constants */
 #define DTWAIN_RES_ENGLISH              0

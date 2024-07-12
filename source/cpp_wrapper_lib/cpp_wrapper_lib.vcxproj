@@ -39,7 +39,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{39c0a01f-b0c7-427c-b658-e2442f54c19e}</ProjectGuid>
     <RootNamespace>cppwrapperlib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win32_DTWAINDLL_U_D|Win32'" Label="Configuration">
@@ -174,8 +174,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)c_cpp_includes;$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR)</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
-      <LanguageStandard>stdcpp14</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -196,7 +195,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)c_cpp_includes;$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR)</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -218,8 +217,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)c_cpp_includes;$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -249,8 +247,7 @@
       <LanguageStandard>stdcpp14</LanguageStandard>
       <LanguageStandard>stdcpp14</LanguageStandard>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <LanguageStandard>stdcpp14</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -272,8 +269,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)c_cpp_includes;$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -294,7 +290,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)c_cpp_includes;$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR)</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -316,8 +312,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)c_cpp_includes;$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -346,7 +341,7 @@
       <LanguageStandard>stdcpp14</LanguageStandard>
       <LanguageStandard>stdcpp14</LanguageStandard>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -361,17 +356,36 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="buffered_transfer_info.cpp" />
+    <ClCompile Include="dynarithmic\twain\acquire_characteristics\acquire_characteristics.cpp" />
+    <ClCompile Include="dynarithmic\twain\logging\logger_callback.cpp" />
+    <ClCompile Include="dynarithmic\twain\session\twain_characteristics.cpp" />
     <ClCompile Include="options_base.cpp" />
     <ClCompile Include="paperhandling_info.cpp" />
     <ClCompile Include="pdf_text_element.cpp" />
-    <ClCompile Include="tojson.cpp" />
     <ClCompile Include="twain_callback.cpp" />
     <ClCompile Include="twain_session.cpp" />
     <ClCompile Include="twain_source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dynarithmic\twain\tostring\tojson.hpp" />
-    <ClInclude Include="dynarithmic\twain\tostring\tostring.hpp" />
+    <ClInclude Include="dynarithmic\twain\acquire_characteristics.hpp" />
+    <ClInclude Include="dynarithmic\twain\acquire_characteristics\acquire_characteristics.hpp" />
+    <ClInclude Include="dynarithmic\twain\capability_interface.hpp" />
+    <ClInclude Include="dynarithmic\twain\compiler_details.hpp" />
+    <ClInclude Include="dynarithmic\twain\dtwain_twain.hpp" />
+    <ClInclude Include="dynarithmic\twain\session\twain_characteristics.hpp" />
+    <ClInclude Include="dynarithmic\twain\twain_callback.hpp" />
+    <ClInclude Include="dynarithmic\twain\twain_details.hpp" />
+    <ClInclude Include="dynarithmic\twain\twain_session.hpp" />
+    <ClInclude Include="dynarithmic\twain\twain_source.hpp" />
+    <ClInclude Include="dynarithmic\twain\twain_values.hpp" />
+    <ClInclude Include="dynarithmic\twain\types\twain_array.hpp" />
+    <ClInclude Include="dynarithmic\twain\types\twain_callback.hpp" />
+    <ClInclude Include="dynarithmic\twain\types\twain_capbasics.hpp" />
+    <ClInclude Include="dynarithmic\twain\types\twain_frame.hpp" />
+    <ClInclude Include="dynarithmic\twain\types\twain_range.hpp" />
+    <ClInclude Include="dynarithmic\twain\types\twain_timer.hpp" />
+    <ClInclude Include="dynarithmic\twain\types\twain_types.hpp" />
+    <ClInclude Include="dynarithmic\twain\types\underlying_type.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -91,12 +91,13 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)cpp_wrapper_lib;$(DTWAIN_LIBRARY_DIR_32);$(BOOST_LIBRARY_DIR_V140_32);$(BOOST_LIBRARY_DIR_V141_32);$(BOOST_LIBRARY_DIR_V142_32);$(BOOST_LIBRARY_DIR_V143_32)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cpp_wrapper_lib_$(PlatformArchitecture)UD.lib;dtwain32ud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR);$(BOOST_LIBRARY_DIR_V140_32);$(BOOST_LIBRARY_DIR_V141_32);$(BOOST_LIBRARY_DIR_V142_32);$(BOOST_LIBRARY_DIR_V143_32)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -108,12 +109,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)cpp_wrapper_lib;$(DTWAIN_LIBRARY_DIR_64);$(BOOST_LIBRARY_DIR_V140_64);$(BOOST_LIBRARY_DIR_V141_64);$(BOOST_LIBRARY_DIR_V142_64);$(BOOST_LIBRARY_DIR_V143_64)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cpp_wrapper_lib_$(PlatformArchitecture)UD.lib;dtwain64ud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR);$(BOOST_LIBRARY_DIR_V140_64);$(BOOST_LIBRARY_DIR_V141_64);$(BOOST_LIBRARY_DIR_V142_64);$(BOOST_LIBRARY_DIR_V143_64)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -127,15 +129,19 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)cpp_wrapper_lib;$(DTWAIN_LIBRARY_DIR_32);$(BOOST_LIBRARY_DIR_V140_32);$(BOOST_LIBRARY_DIR_V141_32);$(BOOST_LIBRARY_DIR_V142_32);$(BOOST_LIBRARY_DIR_V143_32)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cpp_wrapper_lib_$(PlatformArchitecture)U.lib;dtwain32u.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR);$(BOOST_LIBRARY_DIR_V140_32);$(BOOST_LIBRARY_DIR_V141_32);$(BOOST_LIBRARY_DIR_V142_32);$(BOOST_LIBRARY_DIR_V143_32)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetDir)$(TargetFileName) $(TargetDir)twainsave.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -148,26 +154,60 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\;$(DTWAIN_INCLUDE_DIR);$(SolutionDir)cpp_wrapper_lib;$(BOOST_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)cpp_wrapper_lib;$(DTWAIN_LIBRARY_DIR_64);$(BOOST_LIBRARY_DIR_V140_64);$(BOOST_LIBRARY_DIR_V141_64);$(BOOST_LIBRARY_DIR_V142_64);$(BOOST_LIBRARY_DIR_V143_64)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cpp_wrapper_lib_$(PlatformArchitecture)U.lib;dtwain64u.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR);$(BOOST_LIBRARY_DIR_V140_64);$(BOOST_LIBRARY_DIR_V141_64);$(BOOST_LIBRARY_DIR_V142_64);$(BOOST_LIBRARY_DIR_V143_64)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetDir)$(TargetFileName) $(TargetDir)twainsave64.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\acquire_characteristics.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\acquire_characteristics\acquire_characteristics.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\capability_interface.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\capability_interface\capability_interface.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\compiler_details.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\dtwain_twain.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\logging\logger_callback.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\session\twain_characteristics.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\twain_callback.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\twain_details.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\twain_session.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\twain_source.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\types\twain_array.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\types\twain_callback.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\types\twain_capbasics.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\types\twain_frame.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\types\twain_range.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\types\twain_timer.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\types\twain_types.hpp" />
+    <ClInclude Include="cpp_wrapper_lib\dynarithmic\twain\types\underlying_type.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="twainsave_verinfo.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cpp_wrapper_lib\buffered_transfer_info.cpp" />
+    <ClCompile Include="cpp_wrapper_lib\dynarithmic\twain\acquire_characteristics\acquire_characteristics.cpp" />
+    <ClCompile Include="cpp_wrapper_lib\dynarithmic\twain\logging\logger_callback.cpp" />
+    <ClCompile Include="cpp_wrapper_lib\dynarithmic\twain\session\twain_characteristics.cpp" />
+    <ClCompile Include="cpp_wrapper_lib\options_base.cpp" />
+    <ClCompile Include="cpp_wrapper_lib\paperhandling_info.cpp" />
+    <ClCompile Include="cpp_wrapper_lib\pdf_text_element.cpp" />
+    <ClCompile Include="cpp_wrapper_lib\twain_callback.cpp" />
+    <ClCompile Include="cpp_wrapper_lib\twain_session.cpp" />
+    <ClCompile Include="cpp_wrapper_lib\twain_source.cpp" />
     <ClCompile Include="generate_details.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="twainsave-opensource.cpp" />

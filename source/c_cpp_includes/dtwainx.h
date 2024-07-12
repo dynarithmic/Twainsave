@@ -1,6 +1,6 @@
 /*
     This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-    Copyright (c) 2002-2023 Dynarithmic Software.
+    Copyright (c) 2002-2024 Dynarithmic Software.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -70,6 +70,8 @@ LONG           DLLENTRY_DEF      DTWAIN_GetAPIHandleStatus(DTWAIN_HANDLE pHandle
 /* DTWAIN Message Notification functions */
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_EnableMsgNotify(DTWAIN_BOOL bSet);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsMsgNotifyEnabled(VOID_PROTOTYPE);
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_EnableTripletsNotify(DTWAIN_BOOL bSet);
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsNotifyTripletsEnabled();
 
 /* Callback procedure for alternate DTWAIN message notification */
 DTWAIN_CALLBACK_PROC DLLENTRY_DEF DTWAIN_SetCallback(DTWAIN_CALLBACK_PROC Fn,LONG UserData);
@@ -89,6 +91,7 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_OpenSource(DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_CloseSource(DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_EnumSources(LPDTWAIN_ARRAY lpArray);
 DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_EnumSourcesEx(VOID_PROTOTYPE);
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsSourceValid(DTWAIN_SOURCE Source);
 
 DTWAIN_SOURCE  DLLENTRY_DEF      DTWAIN_SelectSource(VOID_PROTOTYPE);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_CloseSourceUI( DTWAIN_SOURCE Source);
@@ -99,6 +102,8 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SetDefaultSource( DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsSourceAcquiring( DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsSourceAcquiringEx(DTWAIN_SOURCE Source, BOOL bUIOnly);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsSourceOpen( DTWAIN_SOURCE Source);
+DTWAIN_SOURCE  DLLENTRY_DEF      DTWAIN_SelectSourceWithOpen(DTWAIN_BOOL bOpen);
+DTWAIN_SOURCE  DLLENTRY_DEF      DTWAIN_SelectDefaultSourceWithOpen(DTWAIN_BOOL bOpen);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsAcquiring(VOID_PROTOTYPE);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsMemFileXferSupported(DTWAIN_SOURCE Source);
 
@@ -605,6 +610,7 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsBlankPageDetectionOn(DTWAIN_SOURCE Source);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetBlankPageDetectionEx(DTWAIN_SOURCE Source, DTWAIN_FLOAT threshold,
                                                         LONG autodetect, LONG detectOpts, DTWAIN_BOOL bSet);
 LONG DLLENTRY_DEF DTWAIN_IsDIBBlank(HANDLE hDib, DTWAIN_FLOAT threshold);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_DeleteDIB(HANDLE hDib);
 
 /* Audio */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumAudioXferMechs(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY pArray);
@@ -937,6 +943,10 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetCurrentTwainTriplet(TW_IDENTITY* pAppID, TW_I
 DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumSupportedFileTypes(VOID_PROTOTYPE);
 DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumSupportedMultiPageFileTypes(VOID_PROTOTYPE);
 DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumSupportedSinglePageFileTypes(VOID_PROTOTYPE);
+
+/* Customize doubling the page count if acquiring in duplex mode */
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetDoublePageCountOnDuplex(DTWAIN_SOURCE Source, DTWAIN_BOOL bDoubleCount);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsDoublePageCountOnDuplex(DTWAIN_SOURCE Source);
 
 #include "dtwstrfn.h"
 
