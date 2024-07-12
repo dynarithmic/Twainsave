@@ -7,7 +7,7 @@ Currently, close to all of the functionality that is in the commercial version o
 
 Note that there are two copies of the Twainsave executable files for each architecture (32-bit and 64-bit).  In the <a href="https://github.com/dynarithmic/twainsave/tree/master-staging/binaries/32-bit" target="_blank">32-bit version of Twainsave</a>, you will see **twainsave.exe**, and **twainsave-opensource.exe**, and for the <a href="https://github.com/dynarithmic/twainsave/tree/master-staging/binaries/64-bit" target="_blank">64-bit version of Twainsave</a>, the executable files are **twainsave-opensource.exe** and **twainsave64.exe**.  
 
-The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**).  
+The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
 The new documentation for the open source version of TwainSave is basically the same as the commercial version, with some differences.  The documentation is in Windows help (.CHM) format, and will be found in the **32-bit** and **64-bit** executable directories.  In the near future, online HTML documentation will be provided.
 
