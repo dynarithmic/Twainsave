@@ -12,7 +12,7 @@ The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opens
 The new documentation for the open source version of TwainSave is basically the same as the commercial version, with some differences.  The documentation is in Windows help (.CHM) format, and will be found in the **32-bit** and **64-bit** executable directories.  In the near future, online HTML documentation will be provided.
 
 ----
-The current open source Twainsave version is **1.08**.
+The current open source Twainsave version is **1.0.8**.
 
 ----
 
