@@ -974,14 +974,14 @@ struct twain_derived_logger : public twain_logger
         {
             switch (m_destination)
             {
-            case logger_destination::todebug:
+                case logger_destination::todebug:
                 {
                     std::string msgTotal = msg;
                     msgTotal.push_back('\n');
                     OutputDebugStringA(msgTotal.c_str());
                 }
                 break;
-            case logger_destination::tofile:
+                case logger_destination::tofile:
                     *m_file << msg << "\n";
                 break;
             }

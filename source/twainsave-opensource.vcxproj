@@ -139,6 +139,9 @@
       <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR);$(BOOST_LIBRARY_DIR_V140_32);$(BOOST_LIBRARY_DIR_V141_32);$(BOOST_LIBRARY_DIR_V142_32);$(BOOST_LIBRARY_DIR_V143_32)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetDir)$(TargetFileName) $(TargetDir)twainsave.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -161,6 +164,9 @@
       <AdditionalLibraryDirectories>$(DTWAIN_LIBRARY_DIR);$(BOOST_LIBRARY_DIR_V140_64);$(BOOST_LIBRARY_DIR_V141_64);$(BOOST_LIBRARY_DIR_V142_64);$(BOOST_LIBRARY_DIR_V143_64)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetDir)$(TargetFileName) $(TargetDir)twainsave64.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
