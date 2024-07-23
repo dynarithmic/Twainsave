@@ -198,7 +198,7 @@ namespace dynarithmic
                 options_base::apply(*this, ac.get_userinterface_options());
 
             if (allAppliers[acquire_characteristics::apply_imageparameter])
-                options_base::apply(*this, ac.get_imageparamter_options());
+                options_base::apply(*this, ac.get_imageparameter_options());
 
             if (allAppliers[acquire_characteristics::apply_audiblealarms])
                 options_base::apply(*this, ac.get_audiblealarms_options());
@@ -294,6 +294,10 @@ namespace dynarithmic
             general_options& gOpts = ac.get_general_options();
             API_INSTANCE DTWAIN_SetMaxAcquisitions(m_theSource, gOpts.get_max_acquisitions());
 
+            // If non-TWAIN scaling is enabled, enable it now
+            auto& imageOptions = ac.get_imageparameter_options();
+            if (imageOptions.is_force_scaling_enabled())
+                API_INSTANCE DTWAIN_SetAcquireImageScale(m_theSource, imageOptions.get_xscaling(), imageOptions.get_yscaling());
             set_pdf_options();
         }
 

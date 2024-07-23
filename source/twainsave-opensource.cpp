@@ -30,6 +30,7 @@ OF THIRD PARTY RIGHTS.
 #include <boost/uuid/uuid.hpp>            
 #include <boost/uuid/uuid_generators.hpp> 
 #include <boost/uuid/uuid_io.hpp>         
+#include <boost/dll/runtime_symbol_info.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <dynarithmic/twain/twain_session.hpp>
 #include <dynarithmic/twain/twain_source.hpp>
@@ -47,6 +48,7 @@ OF THIRD PARTY RIGHTS.
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include "..\simpleini\SimpleIni.h"
 #include "twainsave_verinfo.h"
 
 std::string generate_details();
@@ -82,6 +84,10 @@ constexpr auto to_underlying(E e) noexcept
 #define RETURN_UIONLY_SUPPORT_ERROR     14  
 #define RETURN_COMMANDFILE_NOT_FOUND    15
 #define RETURN_COMMANDFILE_OPEN_ERROR   16
+
+#define TWAINSAVE_DEFAULT_TITLE "TwainSave - OpenSource"
+#define TWAINSAVE_INI_FILE "twainsave.ini"
+
 std::unique_ptr<dynarithmic::twain::twain_source> g_source;
 
 struct scanner_options
@@ -142,11 +148,13 @@ struct scanner_options
     int m_nTransferMode;
     int m_nDiagnose;
     std::string m_DiagnoseLog;
+    std::string m_scaling;
     bool m_bUseTransparencyUnit;
     std::string m_strUnitOfMeasure;
     int m_nJobControl;
     int m_nOverwriteCount;
     int m_nOverwriteWidth;
+    std::string m_strLanguage;
     std::unordered_map<std::string, dynarithmic::twain::units_value::value_type> m_MeasureUnitMap;
     std::unordered_map<int, dynarithmic::twain::jobcontrol_value::value_type> m_JobControlMap;
     std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMap;
@@ -155,6 +163,17 @@ struct scanner_options
     std::unordered_map<std::string, TW_UINT16> m_OptionToCapMap;
     int twainsave_return_value;
     std::string m_strConfigFile;
+    struct TwainDialogConfig
+    {
+        std::string m_strTwainTitle = TWAINSAVE_DEFAULT_TITLE;
+        bool m_sortedNames = true;
+        bool m_horizscroll = false;
+        bool m_topmost = true;
+        std::string m_language = "default";
+        std::pair<int, int> m_position = { (std::numeric_limits<int>::min)(), (std::numeric_limits<int>::min)() };
+    };
+    TwainDialogConfig m_DialogConfig;
+
     bool m_bUseVerbose;
 
     scanner_options() : twainsave_return_value(RETURN_OK),
@@ -475,6 +494,7 @@ parse_return_type parse_options(int argc, char *argv[])
             ("imprinterstring", po::value< std::string >(&s_options.m_strImprinter), "Set imprinter string")
             ("incvalue", po::value< int >(&s_options.m_FileIncrement)->default_value(1), "File name counter")
             ("jobcontrol", po::value< int >(&s_options.m_nJobControl)->default_value(0), "0=none, 1=include job page, 2=exclude job page")
+            ("language", po::value< std::string >(&s_options.m_strLanguage), "Set language in Twain dialog")
             ("multipage", po::bool_switch(&s_options.m_bMultiPage)->default_value(false), "Save to multipage file")
             ("multipage2", po::bool_switch(&s_options.m_bMultiPage2)->default_value(false), "Save to multipage file only after closing UI")
             ("negate", po::bool_switch(&s_options.m_bNegateImage)->default_value(false), "Negates (reverses polarity) of acquired images")
@@ -510,6 +530,7 @@ parse_return_type parse_options(int argc, char *argv[])
             ("resolution", po::value< double >(&s_options.m_dResolution), "Image resolution in dots per unit (see --unit)")
             ("rotation", po::value< double >(&s_options.m_dRotation), "Rotate page by the specified number of degrees (device must support rotation)")
             ("saveoncancel", po::bool_switch(&s_options.m_bSaveOnCancel)->default_value(false), "Save image file even if acquisition canceled by user")
+            ("scale", po::value< std::string >(&s_options.m_scaling), "set x/y scaling options")
             ("selectbydialog", po::bool_switch(&s_options.m_bSelectByDialog)->default_value(true), "When selecting device, show \"Select Source\" dialog (Default)")
             ("selectbyname", po::value< std::string >(&s_options.m_strSelectName), "Select TWAIN device by specifying device product name")
             ("selectdefault", po::bool_switch(&s_options.m_bSelectDefault)->default_value(false), "Select the default TWAIN device automatically")
@@ -599,137 +620,11 @@ std::string resolve_extension(std::string filetype)
     return filetype;
 }
 
-bool set_caps(twain_source& mysource, const po::variables_map& varmap)
+void set_blank_page_options(twain_source& mysource, const po::variables_map& varmap)
 {
-    // get the general acquire characteristics and set them
-    auto& ac = mysource.get_acquire_characteristics();
-
-    auto iter = s_options.m_FileTypeMap.find(s_options.m_filetype);
-    auto iterMode2 = s_options.m_MapMode2Map.find(s_options.m_filetype);
-
-    // set the file type, name
-    bool type1 = false;
-    bool type2 = false;
-    if ((type1 = (iter != s_options.m_FileTypeMap.end())) || 
-        (type2 = (iterMode2 != s_options.m_MapMode2Map.end())))
-    {
-        if (varmap["filename"].defaulted())
-            s_options.m_filename = default_name + "." + resolve_extension(s_options.m_filetype);
-
-        // must set these
-        auto& fOptions = ac.get_file_transfer_options();
-        if (type1)
-        {
-            auto multipage_type = file_type_info::get_multipage_type(iter->second);
-            if (s_options.m_bMultiPage)
-                iter->second = multipage_type;
-            fOptions.set_type(iter->second);
-            ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
-        }
-        else
-        {
-            fOptions.set_type(iterMode2->second.first);
-            ac.get_general_options().set_transfer_type(transfer_type::file_using_source);
-        }
-
-        // set the file save mode for multiple pages
-        ac.get_file_transfer_options().
-            get_multipage_save_options().
-            set_save_mode(s_options.m_bMultiPage2?multipage_save_mode::save_uiclose : multipage_save_mode::save_default).
-            set_save_incomplete(s_options.m_bSaveOnCancel);
-
-        // set options, regardless if they appear on the command-line or not
-        ac.get_file_transfer_options().
-            set_multi_page(s_options.m_bMultiPage).
-            set_name(s_options.m_filename);
-
-        ac.get_general_options().
-            set_max_page_count(s_options.m_NumPages).
-            set_max_acquisitions(s_options.m_bUIPerm ? DTWAIN_MAXACQUIRE : 1);
-
-        ac.get_paperhandling_options().
-            enable_feeder(s_options.m_bUseADF).
-            set_feedermode(s_options.m_bUseADFOrFlatbed?feedermode_value::feeder_flatbed:feedermode_value::feeder).
-            set_feederwait(s_options.m_bNoUIWait?s_options.m_NoUIWaitTime:0).
-            enable_duplex(s_options.m_bUseDuplex);
-
-        ac.get_userinterface_options().
-            show(!s_options.m_bNoUI).
-            show_indicators(s_options.m_bShowIndicator).
-            show_onlyui(s_options.m_bShowUIOnly);
-
-        ac.get_imagetype_options().
-            set_halftone(s_options.m_strHalftone).
-            set_pixeltype(s_options.m_ColorTypeMap[s_options.m_color]).
-            enable_negate(s_options.m_bNegateImage).
-            set_threshold(s_options.m_dThreshold);
-
-        ac.get_imageparamter_options().
-            enable_autobright(s_options.m_bAutobrightMode).
-            set_brightness(s_options.m_brightness).
-            set_contrast(s_options.m_dContrast).
-            set_orientation(s_options.m_OrientationTypeMap[s_options.m_Orientation]).
-            set_rotation(s_options.m_dRotation).
-            set_shadow(s_options.m_dShadow).
-            set_highlight(s_options.m_dHighlight);
-
-        ac.get_autoadjust_options().
-            enable_deskew(s_options.m_bDeskew).
-            enable_rotate(s_options.m_bAutoRotateMode);
-
-        ac.get_deviceparams_options().
-            set_overscan(s_options.m_bOverscanMode).
-            set_lightpath(s_options.m_bUseTransparencyUnit ? lightpath_value::transmissive : lightpath_value::reflective).
-            set_units(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]);
-
-        ac.get_color_options().
-            set_gamma(s_options.m_dGamma);
-
-        ac.get_resolution_options().
-            set_resolution(s_options.m_dResolution, s_options.m_dResolution);
-
-        ac.get_pages_options().
-            set_supportedsize(s_options.m_PageSizeMap[s_options.m_strPaperSize]);
-
-        ac.get_imprinter_options().
-            set_string({ s_options.m_strImprinter });
-
-        ac.get_jobcontrol_options().
-            set_option(s_options.m_JobControlMap[s_options.m_nJobControl]);
-
-        // test the characteristics that have been set
-        test_characteristic(mysource, s_options.m_bAutobrightMode, varmap, "autobright", ICAP_AUTOBRIGHT);
-        test_characteristic(mysource, s_options.m_bDeskew, varmap, "deskew", ICAP_AUTOMATICDESKEW);
-        test_characteristic(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", ICAP_AUTOMATICROTATE);
-        test_characteristic(mysource, s_options.m_brightness, varmap, "brightness", ICAP_BRIGHTNESS);
-        test_characteristic(mysource, s_options.m_bUseTransparencyUnit?1:0, varmap, "transparency", ICAP_LIGHTPATH);
-        test_characteristic(mysource, s_options.m_dContrast, varmap, "contrast", ICAP_CONTRAST);
-        test_characteristic(mysource, s_options.m_dHighlight, varmap, "highlight", ICAP_HIGHLIGHT);
-        test_characteristic(mysource, s_options.m_dThreshold, varmap, "threshold", ICAP_THRESHOLD);
-        test_characteristic(mysource, s_options.m_dGamma, varmap, "gamma", ICAP_GAMMA);
-        test_characteristic(mysource, s_options.m_strHalftone, varmap, "halftone", ICAP_HALFTONES);
-        test_characteristic(mysource, s_options.m_dResolution, varmap, "resolution", ICAP_XRESOLUTION);
-        test_characteristic(mysource, s_options.m_dRotation, varmap, "rotation", ICAP_ROTATION);
-        test_characteristic(mysource, s_options.m_dShadow, varmap, "shadow", ICAP_SHADOW);
-        test_characteristic(mysource, s_options.m_bOverscanMode, varmap, "overscan", ICAP_OVERSCAN);
-        test_characteristic(mysource, s_options.m_bShowIndicator, varmap, "showindicator", CAP_INDICATORS);
-        test_characteristic(mysource, static_cast<long>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", ICAP_PIXELTYPE);
-        test_characteristic(mysource, static_cast<long>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", ICAP_UNITS);
-        test_characteristic(mysource, static_cast<long>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", ICAP_SUPPORTEDSIZES);
-        test_characteristic(mysource, static_cast<long>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", ICAP_ORIENTATION);
-        test_characteristic(mysource, s_options.m_strImprinter, varmap, "imprinterstring", CAP_PRINTER);
-        test_characteristic(mysource, static_cast<long>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", CAP_JOBCONTROL);
-
-        s_options.m_nOverwriteWidth = NumDigits(s_options.m_nOverwriteMax);
-
-        auto& file_rules = ac.get_file_transfer_options().get_filename_increment_options();
-        file_rules.enable(s_options.m_bUseFileInc).
-                set_increment(s_options.m_FileIncrement).
-                use_reset_count(false);
-
-        // blank page handling
         if (!varmap["noblankpages"].defaulted())
         {
+        auto& ac = mysource.get_acquire_characteristics();
             auto& blank_handler = ac.get_blank_page_options();
             blank_handler.
                 enable(true).
@@ -742,10 +637,30 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
                 blank_handler.set_threshold(val);
             }
         }
+}
 
-        // area of interest handling
+void set_scale_options(twain_source& mysource, const po::variables_map& varmap)
+{
+    if (!varmap["scale"].defaulted())
+    {
+        auto& ac = mysource.get_acquire_characteristics();
+        auto& infoOptions = ac.get_imageparameter_options();
+
+        // parse the scaling information
+        std::istringstream strm(s_options.m_scaling);
+        double xscale = 100, yscale = 100;
+        strm >> xscale >> yscale;
+        xscale /= 100.0;
+        yscale /= 100.0;
+        infoOptions.enable_forced_scaling(true).set_xscaling(xscale).set_yscaling(yscale);
+    }
+}
+
+void set_areaofinterest_options(twain_source& mysource, const po::variables_map& varmap)
+{
         if (!varmap["area"].defaulted())
         {
+        auto& ac = mysource.get_acquire_characteristics();
             // parse the area argument
             std::istringstream strm(s_options.m_area);
             std::vector<double> area_values;
@@ -762,10 +677,13 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
                 ac.get_pages_options().set_frame(tf);
             }
         }
+}
 
-        // set pdf options
+void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
+{
         if (boost::any_cast<std::string>(varmap["filetype"].value()) == "pdf")
         {
+        auto& ac = mysource.get_acquire_characteristics();
             auto& pdfopts = ac.get_pdf_options();
             pdfopts.set_author(pdf_commands.m_strAuthor)
                 .set_creator(pdf_commands.m_strCreator)
@@ -793,7 +711,7 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
             else
                 pagesizeopts.set_page_size(s_options.m_PageSizeMap[pdf_commands.m_strPaperSize]);
 
-            // get scale options
+        // get PDF scale options
             {
                 auto& pagescaleopts = pdfopts.get_page_scale_options();
                 std::istringstream strm(pdf_commands.m_strPaperSize);
@@ -860,6 +778,147 @@ bool set_caps(twain_source& mysource, const po::variables_map& varmap)
                 encrypt_opts.set_permissions(permissionContainer);
             }
         }
+    }
+
+bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
+{
+    // get the general acquire characteristics and set them
+    auto& ac = mysource.get_acquire_characteristics();
+
+    auto iter = s_options.m_FileTypeMap.find(s_options.m_filetype);
+    auto iterMode2 = s_options.m_MapMode2Map.find(s_options.m_filetype);
+
+    // set the file type, name
+    bool type1 = false;
+    bool type2 = false;
+    if ((type1 = (iter != s_options.m_FileTypeMap.end())) || 
+        (type2 = (iterMode2 != s_options.m_MapMode2Map.end())))
+    {
+        if (varmap["filename"].defaulted())
+            s_options.m_filename = default_name + "." + resolve_extension(s_options.m_filetype);
+
+        // must set these
+        auto& fOptions = ac.get_file_transfer_options();
+        if (type1)
+        {
+            auto multipage_type = file_type_info::get_multipage_type(iter->second);
+            if (s_options.m_bMultiPage)
+                iter->second = multipage_type;
+            fOptions.set_type(iter->second);
+            ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
+        }
+    else
+        {
+            fOptions.set_type(iterMode2->second.first);
+            ac.get_general_options().set_transfer_type(transfer_type::file_using_source);
+        }
+
+        // set the file save mode for multiple pages
+        ac.get_file_transfer_options().
+            get_multipage_save_options().
+            set_save_mode(s_options.m_bMultiPage2?multipage_save_mode::save_uiclose : multipage_save_mode::save_default).
+            set_save_incomplete(s_options.m_bSaveOnCancel);
+
+        // set options, regardless if they appear on the command-line or not
+        ac.get_file_transfer_options().
+            set_multi_page(s_options.m_bMultiPage).
+            set_name(s_options.m_filename);
+
+        ac.get_general_options().
+            set_max_page_count(s_options.m_NumPages).
+            set_max_acquisitions(s_options.m_bUIPerm ? DTWAIN_MAXACQUIRE : 1);
+
+        ac.get_paperhandling_options().
+            enable_feeder(s_options.m_bUseADF).
+            set_feedermode(s_options.m_bUseADFOrFlatbed?feedermode_value::feeder_flatbed:feedermode_value::feeder).
+            set_feederwait(s_options.m_bNoUIWait?s_options.m_NoUIWaitTime:0).
+            enable_duplex(s_options.m_bUseDuplex);
+
+        ac.get_userinterface_options().
+            show(!s_options.m_bNoUI).
+            show_indicators(s_options.m_bShowIndicator).
+            show_onlyui(s_options.m_bShowUIOnly);
+
+        ac.get_imagetype_options().
+            set_halftone(s_options.m_strHalftone).
+            set_pixeltype(s_options.m_ColorTypeMap[s_options.m_color]).
+            enable_negate(s_options.m_bNegateImage).
+            set_threshold(s_options.m_dThreshold);
+
+        ac.get_imageparameter_options().
+            enable_autobright(s_options.m_bAutobrightMode).
+            set_brightness(s_options.m_brightness).
+            set_contrast(s_options.m_dContrast).
+            set_orientation(s_options.m_OrientationTypeMap[s_options.m_Orientation]).
+            set_rotation(s_options.m_dRotation).
+            set_shadow(s_options.m_dShadow).
+            set_highlight(s_options.m_dHighlight);
+
+        ac.get_autoadjust_options().
+            enable_deskew(s_options.m_bDeskew).
+            enable_rotate(s_options.m_bAutoRotateMode);
+
+        ac.get_deviceparams_options().
+            set_overscan(s_options.m_bOverscanMode).
+            set_lightpath(s_options.m_bUseTransparencyUnit ? lightpath_value::transmissive : lightpath_value::reflective).
+            set_units(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]);
+
+        ac.get_color_options().
+            set_gamma(s_options.m_dGamma);
+
+        ac.get_resolution_options().
+            set_resolution(s_options.m_dResolution, s_options.m_dResolution);
+
+        ac.get_pages_options().
+            set_supportedsize(s_options.m_PageSizeMap[s_options.m_strPaperSize]);
+
+        ac.get_imprinter_options().
+            set_string({ s_options.m_strImprinter });
+
+        ac.get_jobcontrol_options().
+            set_option(s_options.m_JobControlMap[s_options.m_nJobControl]);
+
+        // test the characteristics that have been set
+        test_characteristic(mysource, s_options.m_bAutobrightMode, varmap, "autobright", ICAP_AUTOBRIGHT);
+        test_characteristic(mysource, s_options.m_bDeskew, varmap, "deskew", ICAP_AUTOMATICDESKEW);
+        test_characteristic(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", ICAP_AUTOMATICROTATE);
+        test_characteristic(mysource, s_options.m_brightness, varmap, "brightness", ICAP_BRIGHTNESS);
+        test_characteristic(mysource, s_options.m_bUseTransparencyUnit?1:0, varmap, "transparency", ICAP_LIGHTPATH);
+        test_characteristic(mysource, s_options.m_dContrast, varmap, "contrast", ICAP_CONTRAST);
+        test_characteristic(mysource, s_options.m_dHighlight, varmap, "highlight", ICAP_HIGHLIGHT);
+        test_characteristic(mysource, s_options.m_dThreshold, varmap, "threshold", ICAP_THRESHOLD);
+        test_characteristic(mysource, s_options.m_dGamma, varmap, "gamma", ICAP_GAMMA);
+        test_characteristic(mysource, s_options.m_strHalftone, varmap, "halftone", ICAP_HALFTONES);
+        test_characteristic(mysource, s_options.m_dResolution, varmap, "resolution", ICAP_XRESOLUTION);
+        test_characteristic(mysource, s_options.m_dRotation, varmap, "rotation", ICAP_ROTATION);
+        test_characteristic(mysource, s_options.m_dShadow, varmap, "shadow", ICAP_SHADOW);
+        test_characteristic(mysource, s_options.m_bOverscanMode, varmap, "overscan", ICAP_OVERSCAN);
+        test_characteristic(mysource, s_options.m_bShowIndicator, varmap, "showindicator", CAP_INDICATORS);
+        test_characteristic(mysource, static_cast<long>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", ICAP_PIXELTYPE);
+        test_characteristic(mysource, static_cast<long>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", ICAP_UNITS);
+        test_characteristic(mysource, static_cast<long>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", ICAP_SUPPORTEDSIZES);
+        test_characteristic(mysource, static_cast<long>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", ICAP_ORIENTATION);
+        test_characteristic(mysource, s_options.m_strImprinter, varmap, "imprinterstring", CAP_PRINTER);
+        test_characteristic(mysource, static_cast<long>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", CAP_JOBCONTROL);
+
+        s_options.m_nOverwriteWidth = NumDigits(s_options.m_nOverwriteMax);
+
+        auto& file_rules = ac.get_file_transfer_options().get_filename_increment_options();
+        file_rules.enable(s_options.m_bUseFileInc).
+                set_increment(s_options.m_FileIncrement).
+                use_reset_count(false);
+
+        // blank page handling
+        set_blank_page_options(mysource, varmap);
+
+        // area of interest handling
+        set_areaofinterest_options(mysource, varmap);
+
+        // set scale options
+        set_scale_options(mysource, varmap);
+
+        // set pdf options
+        set_pdf_options(mysource, varmap);
     }
     else
         return false;
@@ -984,6 +1043,9 @@ struct twain_derived_logger : public twain_logger
                 case logger_destination::tofile:
                     *m_file << msg << "\n";
                 break;
+                case logger_destination::toconsole:
+                    std::cout << msg << "\n";
+                break;
             }
         }
 };
@@ -1054,6 +1116,15 @@ int start_acquisitions(const po::variables_map& varmap)
 
     if (ts)
     {
+        // Load the language for the TWAIN dialog, diagnose logs, etc.
+        if (!varmap["language"].defaulted())
+        {
+            if (s_options.m_DialogConfig.m_language == "default")
+                ts.set_language_resource(s_options.m_strLanguage);
+            else
+                ts.set_language_resource(s_options.m_DialogConfig.m_language);
+        }
+
         if (!s_options.m_strSelectName.empty())
             g_source = std::make_unique<twain_source>(ts.select_source(select_byname(s_options.m_strSelectName), false));
         else
@@ -1065,12 +1136,27 @@ int start_acquisitions(const po::variables_map& varmap)
             twain_select_dialog twain_dialog;
 
             // Customize the dialog
+            std::vector<int> vFlags;
+            if (s_options.m_DialogConfig.m_position == std::make_pair((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::min)()))
+                vFlags.push_back(twain_select_dialog::showcenterscreen);
+            else
+                twain_dialog.set_position(s_options.m_DialogConfig.m_position);
+
+            if (s_options.m_DialogConfig.m_horizscroll)
+                vFlags.push_back(twain_select_dialog::horzscroll);
+
+            if (s_options.m_DialogConfig.m_topmost)
+                vFlags.push_back(twain_select_dialog::topmostwindow);
+
+            if (s_options.m_DialogConfig.m_sortedNames)
+                vFlags.push_back(twain_select_dialog::sortnames);
+
             twain_dialog.
                 set_parent_window(nullptr).
-                set_title("TwainSave - OpenSource").
-                set_flags({ twain_select_dialog::showcenterscreen,
-                           twain_select_dialog::sortnames,
-                           twain_select_dialog::topmostwindow });
+                set_title(s_options.m_DialogConfig.m_strTwainTitle).
+                set_flags(vFlags);
+
+            // Show the TWAIN Select Source dialog
             g_source = std::make_unique<twain_source>(ts.select_source(select_usedialog(twain_dialog), false));
         }
         if (!g_source->is_selected())
@@ -1113,7 +1199,7 @@ int start_acquisitions(const po::variables_map& varmap)
             return RETURN_COLORSPACE_NOT_SUPPORTED;
         }
 
-        if (set_caps(*g_source, varmap))
+        if (set_device_options(*g_source, varmap))
         {
             ts.register_callback(*g_source, STFCallback(&s_options)); 
             auto acq_return = g_source->acquire();
@@ -1126,6 +1212,49 @@ int start_acquisitions(const po::variables_map& varmap)
     }
     return 0;
 }
+
+
+std::string GetTwainSaveExecutionPath()
+{
+    const auto symlocation = boost::dll::symbol_location("twainsave-opensource.exe");
+    return symlocation.parent_path().string();
+}
+
+void LoadCustomResourcesFromIni()
+{
+    // Load the resources
+    CSimpleIniA customProfile;
+    auto s = GetTwainSaveExecutionPath();
+    if (s.back() != '\\')
+        s.push_back('\\');
+    s += TWAINSAVE_INI_FILE;
+    auto err = customProfile.LoadFile(s.c_str());
+    if (err != SI_OK)
+        return;
+    s_options.m_DialogConfig.m_strTwainTitle = customProfile.GetValue("Twain Dialog", "title", TWAINSAVE_DEFAULT_TITLE);
+    if (s_options.m_DialogConfig.m_strTwainTitle.empty())
+        s_options.m_DialogConfig.m_strTwainTitle = TWAINSAVE_DEFAULT_TITLE;
+    auto sSorted = customProfile.GetBoolValue("Twain Dialog", "sortednames", true);
+    s_options.m_DialogConfig.m_sortedNames = sSorted;
+    std::string position = customProfile.GetValue("Twain Dialog", "position", "center");
+    if (position != "center")
+    {
+        int xpos = 0, ypos = 0;
+        std::istringstream strm(position);
+        strm >> xpos >> ypos;
+        s_options.m_DialogConfig.m_position = { xpos,ypos };
+    }
+
+    auto sHorzScroll = customProfile.GetBoolValue("Twain Dialog", "horizscroll", true);
+    s_options.m_DialogConfig.m_horizscroll = sHorzScroll;
+
+    auto sTopmost = customProfile.GetBoolValue("Twain Dialog", "topmost", true);
+    s_options.m_DialogConfig.m_topmost = sTopmost;
+
+    auto sLanguage = customProfile.GetValue("Twain Dialog", "language", "default");
+    s_options.m_DialogConfig.m_language = sLanguage;
+}
+
 
 class CommandLine
 {
@@ -1177,6 +1306,7 @@ parse_return_type parse_config_options(const std::string& filename)
 
 int main(int argc, char *argv[])
 {
+    LoadCustomResourcesFromIni();
     auto retval = parse_options(argc, argv);
 
     if (retval.first)
