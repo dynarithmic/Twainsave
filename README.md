@@ -12,7 +12,7 @@ The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opens
 The new documentation for the open source version of TwainSave is basically the same as the commercial version, with some differences.  The documentation is in Windows help (.CHM) format, and will be found in the **32-bit** and **64-bit** executable directories.  In the near future, online HTML documentation will be provided.
 
 ----
-The current open source Twainsave version is **1.0.8**.
+The current open source Twainsave version is **1.0.9**.
 
 ----
 
@@ -34,6 +34,8 @@ For item b), to output to a file just requires you to run twainsave-opensource a
 
 will write the details to the file **details.log**
 
+3) The **--thumbnail** option has been renamed to **--scale**.
+
 3) Running **twainsave.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box.  If a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will be have a randomly generated file name (using a **.BMP** extension).  
 
 4) Running **twainsave.exe** without a --filename setting, but with a --filetype setting: If a device is selected, the name of the file will be randomly generated, with a file extension that matches the file type specified.
@@ -47,6 +49,7 @@ will write the details to the file **details.log**
     {6B29FC40-CA47-1067-B31D-00DD010662DA}.pdf
 
    would be a randomly generated pdf file.
+   
 
 ----------
 
