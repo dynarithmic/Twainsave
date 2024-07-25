@@ -7,9 +7,14 @@ Currently, close to all of the functionality that is in the commercial version o
 
 Note that there are two copies of the Twainsave executable files for each architecture (32-bit and 64-bit).  In the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/32-bit" target="_blank">32-bit version of Twainsave</a>, you will see **twainsave.exe**, and **twainsave-opensource.exe**, and for the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/64-bit" target="_blank">64-bit version of Twainsave</a>, the executable files are **twainsave-opensource.exe** and **twainsave64.exe**.  
 
-The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
+# Getting started
+There currently isn't an installation package, so the installation will be manual (but very simple).
 
-The new documentation for the open source version of TwainSave is basically the same as the commercial version, with some differences.  The documentation is in Windows help (.CHM) format, and will be found in the **32-bit** and **64-bit** executable directories.  In the near future, online HTML documentation will be provided.
+To get started, you can copy all the files from the TwainSave 32-bit folder to an empty folder on your computer.  Then you can either run Twainsave.exe directly from that folder, or set a PATH to the folder and run TwainSave.exe.
+
+For 64-bit TwainSave, create another empty folder and copy all of the components in the 64-bit folder to the empty folder.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
+
+The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
 ----
 The current open source Twainsave version is **1.0.9**.
