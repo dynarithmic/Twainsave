@@ -116,6 +116,8 @@ struct scanner_options
     bool m_bShowUIOnly;
     double m_dShadow;
     bool m_bNoBlankPages;
+    bool m_bNoConsole;
+    bool m_bNoPause;
     double m_dResolution;
     double m_dBlankThreshold;
     bool m_bNegateImage;
@@ -424,11 +426,7 @@ std::vector<std::string> SplitPath(const boost::filesystem::path &src)
 {
     std::vector<std::string> elements;
     for (const auto &p : src)
-    {
-        auto name = p.filename().native();
-        std::string s(name.begin(), name.end());
-        elements.push_back(s);
-    }
+        elements.push_back(p.filename().string()); 
     return elements;
 }
 
@@ -438,11 +436,11 @@ std::string GetNewFileName(const std::string& fullpath, int inc, int maxWidth)
     auto newName = vString.back();
     boost::filesystem::path theStem(newName);
 
-    auto filename_only = theStem.stem().native();
-    std::string file_part(filename_only.begin(), filename_only.end());
+    // Get just the filename part
+    std::string file_part = theStem.stem().string();
 
-    auto ext_only = theStem.extension().native();
-    std::string ext(ext_only.begin(), ext_only.end());
+    // Get just the extension
+    auto ext = theStem.extension().string();
     std::ostringstream strm;
     strm << ((vString.size()>1)?"/":"") << file_part << OVERWRITE_PREFIXSTRING << std::setw(maxWidth) << std::setfill('0') << inc;
     vString.back() = strm.str();
@@ -499,6 +497,8 @@ parse_return_type parse_options(int argc, char *argv[])
             ("multipage2", po::bool_switch(&s_options.m_bMultiPage2)->default_value(false), "Save to multipage file only after closing UI")
             ("negate", po::bool_switch(&s_options.m_bNegateImage)->default_value(false), "Negates (reverses polarity) of acquired images")
             ("noblankpages", po::bool_switch(&s_options.m_bNoBlankPages)->default_value(false), "Remove blank pages")
+            ("noconsole", po::bool_switch(&s_options.m_bNoConsole)->default_value(false), "Start TwainSave without a console window")
+            ("nopause", po::bool_switch(&s_options.m_bNoPause)->default_value(false), "Do not pause TwainSave if --noconsole is used")
             ("noui", po::bool_switch(&s_options.m_bNoUI)->default_value(false), "turn off device user interface")
             ("nouiwait", po::bool_switch(&s_options.m_bNoUIWait)->default_value(false), "Do not display Source user interface and wait for feeder loaded before acquiring")
             ("nouiwaittime", po::value< int >(&s_options.m_NoUIWaitTime)->default_value(120), "Time to wait (in seconds) for feeder loaded.")
@@ -553,7 +553,7 @@ parse_return_type parse_options(int argc, char *argv[])
         po::notify(vm2);
         return{ true, vm2 };
     }
-    catch (const boost::program_options::error_with_option_name& e)
+    catch (const boost::program_options::error_with_option_name& /*e*/)
     {
         s_options.set_return_code(RETURN_BAD_COMMAND_LINE);
     }
@@ -824,27 +824,32 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
             set_multi_page(s_options.m_bMultiPage).
             set_name(s_options.m_filename);
 
+        // set the max page count and the total number of acquisitions to attempt
         ac.get_general_options().
             set_max_page_count(s_options.m_NumPages).
             set_max_acquisitions(s_options.m_bUIPerm ? DTWAIN_MAXACQUIRE : 1);
 
+        // Set the feeder and duplex options
         ac.get_paperhandling_options().
             enable_feeder(s_options.m_bUseADF).
             set_feedermode(s_options.m_bUseADFOrFlatbed?feedermode_value::feeder_flatbed:feedermode_value::feeder).
             set_feederwait(s_options.m_bNoUIWait?s_options.m_NoUIWaitTime:0).
             enable_duplex(s_options.m_bUseDuplex);
 
+        // Turn on/of the user interface
         ac.get_userinterface_options().
             show(!s_options.m_bNoUI).
             show_indicators(s_options.m_bShowIndicator).
             show_onlyui(s_options.m_bShowUIOnly);
 
+        // turn on/off halftoning, negation, threshold, pixel type
         ac.get_imagetype_options().
             set_halftone(s_options.m_strHalftone).
             set_pixeltype(s_options.m_ColorTypeMap[s_options.m_color]).
             enable_negate(s_options.m_bNegateImage).
             set_threshold(s_options.m_dThreshold);
 
+        // brightness, contrast, rotation, etc.
         ac.get_imageparameter_options().
             enable_autobright(s_options.m_bAutobrightMode).
             set_brightness(s_options.m_brightness).
@@ -854,10 +859,12 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
             set_shadow(s_options.m_dShadow).
             set_highlight(s_options.m_dHighlight);
 
+        // deskew and rotation
         ac.get_autoadjust_options().
             enable_deskew(s_options.m_bDeskew).
             enable_rotate(s_options.m_bAutoRotateMode);
 
+        // film scanning, units
         ac.get_deviceparams_options().
             set_overscan(s_options.m_bOverscanMode).
             set_lightpath(s_options.m_bUseTransparencyUnit ? lightpath_value::transmissive : lightpath_value::reflective).
@@ -1053,6 +1060,8 @@ struct twain_derived_logger : public twain_logger
 
 int start_acquisitions(const po::variables_map& varmap) 
 {
+    if (s_options.m_bNoConsole)
+        ShowWindow(GetConsoleWindow(), SW_HIDE);
     if (varmap.count("version"))
     {
         std::cout << "twainsave-opensource " << TWAINSAVE_FULL_VERSION << "\n";
@@ -1069,6 +1078,13 @@ int start_acquisitions(const po::variables_map& varmap)
     
     if (varmap.count("details"))
     {
+        auto s = generate_details();
+        if (s_options.m_bNoConsole)
+        {
+            DWORD d;
+            WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
+        }
+        else
         std::cout << generate_details();
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
@@ -1112,6 +1128,7 @@ int start_acquisitions(const po::variables_map& varmap)
         }
     }
 
+    // Start the TWAIN session
     ts.start();
 
     if (ts)
@@ -1199,9 +1216,12 @@ int start_acquisitions(const po::variables_map& varmap)
             return RETURN_COLORSPACE_NOT_SUPPORTED;
         }
 
+        // Set all of the options specified by the user
         if (set_device_options(*g_source, varmap))
         {
             ts.register_callback(*g_source, STFCallback(&s_options)); 
+
+            // Start the acquisition
             auto acq_return = g_source->acquire();
             if (acq_return.first == dynarithmic::twain::twain_source::acquire_timeout)
                 s_options.set_return_code(RETURN_TIMEOUT_REACHED);
@@ -1316,5 +1336,15 @@ int main(int argc, char *argv[])
         if ( retval.first )
             start_acquisitions(retval.second);
     }
+    if (s_options.m_bNoConsole && !s_options.m_bNoPause)
+    {
+        // display a pause message
+        std::string s = "\nPress any key to continue...";
+        DWORD d;
+        WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
+        char buffer[10];
+        ReadConsoleA(GetStdHandle(STD_INPUT_HANDLE), buffer, 1, &d, NULL);
+    }
     return s_options.get_return_code();
 }
+
