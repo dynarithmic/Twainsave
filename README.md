@@ -49,9 +49,9 @@ will write the details to the file **details.log**
    **twainsave --filetype pdf**
    will result in a file created with a random name, with a **.pdf** extension.
    
-6)   Note that the random names will have as the filename in a 128-bit GUID format, with leading and trailing **{}**.  For example:
+6)   Note that the random names will have as the filename in a 128-bit GUID format.  For example:
 
-    6B29FC40-CA47-1067-B31D-00DD010662DA.pdf
+    6b29fc40-ca47-1067-b31d-00dd010662da.pdf
 
    would be a randomly generated pdf file.
    
