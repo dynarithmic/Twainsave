@@ -51,7 +51,7 @@ will write the details to the file **details.log**
    
 6)   Note that the random names will have as the filename in a 128-bit GUID format, with leading and trailing **{}**.  For example:
 
-    {6B29FC40-CA47-1067-B31D-00DD010662DA}.pdf
+    6B29FC40-CA47-1067-B31D-00DD010662DA.pdf
 
    would be a randomly generated pdf file.
    
