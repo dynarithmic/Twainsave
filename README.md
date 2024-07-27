@@ -1,5 +1,5 @@
 # Twainsave
-Twainsave is a free, open source version of Dynarithmic Software's [TwainSave](http://www.dynarithmic.com/onlinehelp/twainsave/index.html) command-line program to access TWAIN devices and convert scanned pages to image files (BMP, JPEG, TIFF, etc).  This version is licensed under the Apache 2.0 license.  
+Twainsave is a free, open source version of Dynarithmic Software's [TwainSave](http://www.dynarithmic.com/onlinehelp5/twainsave_opensource/Introduction.html) command-line program to access TWAIN devices and convert scanned pages to image files (BMP, JPEG, TIFF, etc).  This version is licensed under the Apache 2.0 license.  
 
 Note that this version of TwainSave currently lacks some features of the commercial version of TwainSave.  We are in the process of adding these features to the open source version periodically.  
 
@@ -7,12 +7,17 @@ Currently, close to all of the functionality that is in the commercial version o
 
 Note that there are two copies of the Twainsave executable files for each architecture (32-bit and 64-bit).  In the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/32-bit" target="_blank">32-bit version of Twainsave</a>, you will see **twainsave.exe**, and **twainsave-opensource.exe**, and for the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/64-bit" target="_blank">64-bit version of Twainsave</a>, the executable files are **twainsave-opensource.exe** and **twainsave64.exe**.  
 
+# Getting started
+There currently isn't an installation package, so the installation will be manual (but very simple).
+
+To get started, you can copy all the files from the TwainSave 32-bit folder to an empty folder on your computer.  Then you can either run Twainsave.exe directly from that folder, or set a PATH to the folder and run TwainSave.exe.
+
+For 64-bit TwainSave, create another empty folder and copy all of the components in the 64-bit folder to the empty folder.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
+
 The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
-The new documentation for the open source version of TwainSave is basically the same as the commercial version, with some differences.  The documentation is in Windows help (.CHM) format, and will be found in the **32-bit** and **64-bit** executable directories.  In the near future, online HTML documentation will be provided.
-
 ----
-The current open source Twainsave version is **1.0.8**.
+The current open source Twainsave version is **1.0.9**.
 
 ----
 
@@ -34,6 +39,8 @@ For item b), to output to a file just requires you to run twainsave-opensource a
 
 will write the details to the file **details.log**
 
+3) The **--thumbnail** option has been renamed to **--scale**.
+
 3) Running **twainsave.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box.  If a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will be have a randomly generated file name (using a **.BMP** extension).  
 
 4) Running **twainsave.exe** without a --filename setting, but with a --filetype setting: If a device is selected, the name of the file will be randomly generated, with a file extension that matches the file type specified.
@@ -42,11 +49,12 @@ will write the details to the file **details.log**
    **twainsave --filetype pdf**
    will result in a file created with a random name, with a **.pdf** extension.
    
-6)   Note that the random names will have as the filename in a 128-bit GUID format, with leading and trailing **{}**.  For example:
+6)   Note that the random names will have as the filename in a 128-bit GUID format.  For example:
 
-    {6B29FC40-CA47-1067-B31D-00DD010662DA}.pdf
+    6b29fc40-ca47-1067-b31d-00dd010662da.pdf
 
    would be a randomly generated pdf file.
+   
 
 ----------
 
