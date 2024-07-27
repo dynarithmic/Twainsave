@@ -64,6 +64,9 @@ If you want to build the source code, the requirements are the same as building 
 
 This means that you will need an installation of the Boost C++ libraries, as well as set environment variables that point to the Boost header files and library files.
 
+In addition, you must have the import libraries **dtwain32u.lib** and **dtwain64u.lib** available.  These libraries can be found in the DTWAIN binary folders, in the **release_libraries.zip** archive in both the 
+[32-bit](https://github.com/dynarithmic/twain_library/tree/master/binaries/32bit) and [64-bit](https://github.com/dynarithmic/twain_library/tree/master/binaries/64bit) folders.
+
 There is no need to rebuild DTWAIN first, however I would recommend you build DTWAIN first to ensure you have the correct requirements for building TwainSave.    
   
 The only addition to the instructions above would be to define the following environment variables before starting Visual Studio:
