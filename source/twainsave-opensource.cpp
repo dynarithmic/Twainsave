@@ -622,21 +622,21 @@ std::string resolve_extension(std::string filetype)
 
 void set_blank_page_options(twain_source& mysource, const po::variables_map& varmap)
 {
-        if (!varmap["noblankpages"].defaulted())
-        {
+    if (!varmap["noblankpages"].defaulted())
+    {
         auto& ac = mysource.get_acquire_characteristics();
-            auto& blank_handler = ac.get_blank_page_options();
-            blank_handler.
-                enable(true).
-                set_discard_option(blankpage_discard_option::discard_all);
+        auto& blank_handler = ac.get_blank_page_options();
+        blank_handler.
+            enable(true).
+            set_discard_option(blankpage_discard_option::discard_all);
 
-            if ( !varmap["blankpagethreshold"].defaulted())
-            {
-                double val = s_options.m_dBlankThreshold;
-                val = (std::min)((std::max)(0.0, val), 100.0);
-                blank_handler.set_threshold(val);
-            }
+        if (!varmap["blankpagethreshold"].defaulted())
+        {
+            double val = s_options.m_dBlankThreshold;
+            val = (std::min)((std::max)(0.0, val), 100.0);
+            blank_handler.set_threshold(val);
         }
+    }
 }
 
 void set_scale_options(twain_source& mysource, const po::variables_map& varmap)
@@ -658,127 +658,127 @@ void set_scale_options(twain_source& mysource, const po::variables_map& varmap)
 
 void set_areaofinterest_options(twain_source& mysource, const po::variables_map& varmap)
 {
-        if (!varmap["area"].defaulted())
-        {
+    if (!varmap["area"].defaulted())
+    {
         auto& ac = mysource.get_acquire_characteristics();
-            // parse the area argument
-            std::istringstream strm(s_options.m_area);
-            std::vector<double> area_values;
-            double value;
-            int numItems = 0;
-            while (strm >> value && numItems < 5)
-            {
-                area_values.push_back(value);
-                ++numItems;
-            }
-            if (area_values.size() == 4)
-            {
-                dynarithmic::twain::twain_frame<double> tf(area_values[0], area_values[1], area_values[2], area_values[3]);
-                ac.get_pages_options().set_frame(tf);
-            }
+        // parse the area argument
+        std::istringstream strm(s_options.m_area);
+        std::vector<double> area_values;
+        double value;
+        int numItems = 0;
+        while (strm >> value && numItems < 5)
+        {
+            area_values.push_back(value);
+            ++numItems;
         }
+        if (area_values.size() == 4)
+        {
+            dynarithmic::twain::twain_frame<double> tf(area_values[0], area_values[1], area_values[2], area_values[3]);
+            ac.get_pages_options().set_frame(tf);
+        }
+    }
 }
 
 void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
 {
-        if (boost::any_cast<std::string>(varmap["filetype"].value()) == "pdf")
-        {
+    if (boost::any_cast<std::string>(varmap["filetype"].value()) == "pdf")
+    {
         auto& ac = mysource.get_acquire_characteristics();
-            auto& pdfopts = ac.get_pdf_options();
-            pdfopts.set_author(pdf_commands.m_strAuthor)
-                .set_creator(pdf_commands.m_strCreator)
-                .set_producer(pdf_commands.m_strProducer)
-                .set_keywords(pdf_commands.m_strKeywords)
-                .set_subject(pdf_commands.m_strSubject)
-                .set_title(pdf_commands.m_strTitle)
-                .set_use_ASCII(pdf_commands.m_bAscii)
-                .set_jpeg_quality(pdf_commands.m_quality);
+        auto& pdfopts = ac.get_pdf_options();
+        pdfopts.set_author(pdf_commands.m_strAuthor)
+            .set_creator(pdf_commands.m_strCreator)
+            .set_producer(pdf_commands.m_strProducer)
+            .set_keywords(pdf_commands.m_strKeywords)
+            .set_subject(pdf_commands.m_strSubject)
+            .set_title(pdf_commands.m_strTitle)
+            .set_use_ASCII(pdf_commands.m_bAscii)
+            .set_jpeg_quality(pdf_commands.m_quality);
 
-            auto& pagesizeopts = pdfopts.get_page_size_options();
-            std::istringstream strm(pdf_commands.m_strPaperSize);
-            std::string word;
-            strm >> word;
+        auto& pagesizeopts = pdfopts.get_page_size_options();
+        std::istringstream strm(pdf_commands.m_strPaperSize);
+        std::string word;
+        strm >> word;
 
-            if (word == "custom")
-            {
-                uint32_t width, height;
-                strm >> width >> height;
-                pagesizeopts.set_custom_size(width, height).set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::custom);
-            }
-            else
+        if (word == "custom")
+        {
+            uint32_t width, height;
+            strm >> width >> height;
+            pagesizeopts.set_custom_size(width, height).set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::custom);
+        }
+        else
             if (word == "variable")
                 pagesizeopts.set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::variable);
             else
                 pagesizeopts.set_page_size(s_options.m_PageSizeMap[pdf_commands.m_strPaperSize]);
 
         // get PDF scale options
-            {
-                auto& pagescaleopts = pdfopts.get_page_scale_options();
-                std::istringstream strm(pdf_commands.m_strPaperSize);
-                std::string word;
-                strm >> word;
+        {
+            auto& pagescaleopts = pdfopts.get_page_scale_options();
+            std::istringstream strm(pdf_commands.m_strPaperSize);
+            std::string word;
+            strm >> word;
 
-                if (word == "custom")
-                {
-                    double xscale, yscale;
-                    strm >> xscale >> yscale;
-                    pagescaleopts.set_custom_scale(xscale, yscale);
-                    pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::custom);
-                }
-                else
-                if (word == "fitpage")
-                    pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::fitpage);
-                else
-                if (word == "noscale")
-                    pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::none);
-            }
-            // encryption
-            bool encryption_on = boost::any_cast<bool>(varmap["pdfencrypt"].value());
-            if (!encryption_on)
+            if (word == "custom")
             {
-                std::vector<std::string> encryptcommands = { 
-                    "pdfownerpass", "pdfuserpass", "pdfrandowner",
-                    "pdfranduser", "pdfpermit", "pdf128" };
-                encryption_on = std::find_if(encryptcommands.begin(), encryptcommands.end(), [&](const std::string& s)
+                double xscale, yscale;
+                strm >> xscale >> yscale;
+                pagescaleopts.set_custom_scale(xscale, yscale);
+                pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::custom);
+            }
+            else
+            if (word == "fitpage")
+                pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::fitpage);
+            else
+            if (word == "noscale")
+                pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::none);
+        }
+        // encryption
+        bool encryption_on = boost::any_cast<bool>(varmap["pdfencrypt"].value());
+        if (!encryption_on)
+        {
+            std::vector<std::string> encryptcommands = {
+                "pdfownerpass", "pdfuserpass", "pdfrandowner",
+                "pdfranduser", "pdfpermit", "pdf128" };
+            encryption_on = std::find_if(encryptcommands.begin(), encryptcommands.end(), [&](const std::string& s)
                 { return !varmap[s].defaulted(); }) != encryptcommands.end();
-            }
-            if ( encryption_on )
+        }
+        if (encryption_on)
+        {
+            auto& encrypt_opts = pdfopts.get_encryption_options();
+            encrypt_opts.use_encryption(true).
+                set_owner_password(pdf_commands.m_strOwnerPass).
+                set_user_password(pdf_commands.m_strUserPass).
+                use_autogen_password(pdf_commands.m_bRandomOwner || pdf_commands.m_bRandomUser).
+                use_strong_encryption(pdf_commands.m_bStrong);
+
+            // parse the permissions string
+            std::vector<std::string> sAllPermissions;
+            std::istringstream ss(pdf_commands.m_strPermissions);
+            std::string buf;
+
+            while (ss >> buf)
+                sAllPermissions.push_back(buf);
+
+            // Set the permissions here
+            LONG Permissions = 0;
+            std::vector<std::string>::size_type i;
+
+            // set of our permissions
+            std::set<dynarithmic::twain::pdf_options::pdf_permission> permissionContainer;
+            for (i = 0; i < sAllPermissions.size(); ++i)
             {
-                auto& encrypt_opts = pdfopts.get_encryption_options();
-                encrypt_opts.use_encryption(true).
-                            set_owner_password(pdf_commands.m_strOwnerPass).
-                            set_user_password(pdf_commands.m_strUserPass).
-                            use_autogen_password(pdf_commands.m_bRandomOwner || pdf_commands.m_bRandomUser).
-                            use_strong_encryption(pdf_commands.m_bStrong);
-
-                // parse the permissions string
-                std::vector<std::string> sAllPermissions;
-                std::istringstream ss(pdf_commands.m_strPermissions);
-                std::string buf;
-
-                while (ss >> buf)
-                    sAllPermissions.push_back(buf);
-
-                // Set the permissions here
-                LONG Permissions = 0;
-                std::vector<std::string>::size_type i;
-
-                // set of our permissions
-                std::set<dynarithmic::twain::pdf_options::pdf_permission> permissionContainer;
-                for (i = 0; i < sAllPermissions.size(); ++i)
-                {
-                    if (sAllPermissions[i] == "none")
-                        permissionContainer.clear();
-                    if (s_options.m_PDFEncryptMap.find(sAllPermissions[i]) != s_options.m_PDFEncryptMap.end())
-                        permissionContainer.insert(s_options.m_PDFEncryptMap[sAllPermissions[i]]);
-                    if (s_options.m_PDFEncryptMapOff.find(sAllPermissions[i]) != s_options.m_PDFEncryptMapOff.end())
-                        permissionContainer.erase(s_options.m_PDFEncryptMapOff[sAllPermissions[i]]);
-                }
-
-                encrypt_opts.set_permissions(permissionContainer);
+                if (sAllPermissions[i] == "none")
+                    permissionContainer.clear();
+                if (s_options.m_PDFEncryptMap.find(sAllPermissions[i]) != s_options.m_PDFEncryptMap.end())
+                    permissionContainer.insert(s_options.m_PDFEncryptMap[sAllPermissions[i]]);
+                if (s_options.m_PDFEncryptMapOff.find(sAllPermissions[i]) != s_options.m_PDFEncryptMapOff.end())
+                    permissionContainer.erase(s_options.m_PDFEncryptMapOff[sAllPermissions[i]]);
             }
+
+            encrypt_opts.set_permissions(permissionContainer);
         }
     }
+}
 
 bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
 {
@@ -807,7 +807,7 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
             fOptions.set_type(iter->second);
             ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
         }
-    else
+        else
         {
             fOptions.set_type(iterMode2->second.first);
             ac.get_general_options().set_transfer_type(transfer_type::file_using_source);
@@ -1085,7 +1085,7 @@ int start_acquisitions(const po::variables_map& varmap)
             WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
         }
         else
-        std::cout << generate_details();
+            std::cout << generate_details();
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
