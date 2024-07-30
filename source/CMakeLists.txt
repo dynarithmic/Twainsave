@@ -5,12 +5,12 @@ include_directories(${PROJECT_SOURCE_DIR}/cpp_wrapper_lib
                     $ENV{BOOST_INCLUDE_DIR})
 link_directories($ENV{DTWAIN_LIBRARY_DIR}
                  $ENV{BOOST_LIBRARY_DIR_V142_64}
-	 	             $ENV{BOOST_LIBRARY_DIR_V142_32}
+                 $ENV{BOOST_LIBRARY_DIR_V142_32}
                  $ENV{BOOST_LIBRARY_DIR_V143_64}
-	 	             $ENV{BOOST_LIBRARY_DIR_V143_32})
+                 $ENV{BOOST_LIBRARY_DIR_V143_32})
 add_definitions(-DUNICODE -D_UNICODE)
 add_executable(twainsave-opensource
-	  ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/acquire_characteristics.cpp
+    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/acquire_characteristics.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/buffered_transfer_info.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/logger_callback.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_characteristics.cpp
