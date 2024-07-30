@@ -17,7 +17,7 @@ For 64-bit TwainSave, create another empty folder and copy all of the components
 The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
 ----
-The current open source Twainsave version is **1.0.9**.
+The current open source Twainsave version is **1.0.10**.
 
 ----
 
