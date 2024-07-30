@@ -1071,7 +1071,7 @@ int start_acquisitions(const po::variables_map& varmap)
 
     if (varmap.count("help"))
     {
-        std::cout << desc2;
+        std::cout << *desc2;
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
