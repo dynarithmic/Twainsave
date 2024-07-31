@@ -103,6 +103,7 @@ struct scanner_options
     double m_dGamma;
     int m_bitsPerPixel;
     int m_color;
+    int m_nPrinter;
     bool m_bUseDuplex;
     bool m_bDeskew;
     bool m_bAutoRotateMode;
@@ -492,6 +493,7 @@ parse_return_type parse_options(int argc, char *argv[])
             ("help", "Show help screen")
             ("halftone", po::value< std::string >(&s_options.m_strHalftone)->default_value("none"), "Halftone effect to use when acquiring low resolution images")
             ("highlight", po::value< double >(&s_options.m_dHighlight), "Highlight level (device must support highlight)")
+            ("imprinter", po::value< int >(&s_options.m_nPrinter)->default_value(-1), "Select imprinter to use (0-7)")
             ("imprinterstring", po::value< std::string >(&s_options.m_strImprinter), "Set imprinter string")
             ("incvalue", po::value< int >(&s_options.m_FileIncrement)->default_value(1), "File name counter")
             ("jobcontrol", po::value< int >(&s_options.m_nJobControl)->default_value(0), "0=none, 1=include job page, 2=exclude job page")
@@ -915,8 +917,15 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
         ac.get_pages_options().
             set_supportedsize(s_options.m_PageSizeMap[s_options.m_strPaperSize]);
 
-        ac.get_imprinter_options().
-            set_string({ s_options.m_strImprinter });
+        // Imprinter options
+        auto& imprinter_options = ac.get_imprinter_options();
+        if (!s_options.m_strImprinter.empty())
+        {
+            if (!varmap["imprinter"].defaulted())
+                imprinter_options.set_printer({ static_cast<TW_UINT16>(s_options.m_nPrinter) });
+            imprinter_options.set_string({ s_options.m_strImprinter });
+            imprinter_options.enable(true);
+        }
 
         ac.get_jobcontrol_options().
             set_option(s_options.m_JobControlMap[s_options.m_nJobControl]);
