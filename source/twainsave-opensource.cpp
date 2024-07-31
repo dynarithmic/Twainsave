@@ -212,7 +212,10 @@ struct scanner_options
                         m_ColorTypeMap{
                             INIT_TYPE_2(0, color_value, bw),
                             INIT_TYPE_2(1, color_value, gray),
-                            INIT_TYPE_2(2, color_value, rgb) },
+                            INIT_TYPE_2(2, color_value, rgb),
+                            INIT_TYPE_2(3, color_value, palette),
+                            INIT_TYPE_2(4, color_value, cmy),
+                            INIT_TYPE_2(5, color_value, cmyk) },
 
                             m_PageSizeMap{
                             INIT_TYPE(custom, papersize_value, CUSTOM),
@@ -475,7 +478,7 @@ parse_return_type parse_options(int argc, char *argv[])
             ("bitsperpixel", po::value< int >(&s_options.m_bitsPerPixel), "Image bits-per-pixel.  Default is current device setting")
             ("blankthreshold", po::value< double >(&s_options.m_dBlankThreshold)->default_value(98), "Percentage threshold to determine if page is blank")
             ("brightness", po::value< double >(&s_options.m_brightness), "Brightness level (device must support brightness)")
-            ("color", po::value< int >(&s_options.m_color)->default_value(0), "Color. 0=B/W, 1=8-bit Grayscale, 2=24 bit RGB. Default is 0")
+            ("color", po::value< int >(&s_options.m_color)->default_value(0), "Color. 0=B/W, 1=8-bit Grayscale, 2=24 bit RGB, 3=Palette, 4=CMY, 5=CMYK. Default is 0")
             ("contrast", po::value< double >(&s_options.m_dContrast), "Contrast level (device must support contrast)")
             ("deskew", po::bool_switch(&s_options.m_bDeskew)->default_value(false), "Deskew image if skewed.  Device must support deskew")
             ("details", "Detail information on all available TWAIN devices.")
@@ -1199,7 +1202,7 @@ int start_acquisitions(const po::variables_map& varmap)
     {
         // check for pixel types
         auto vPixelTypes = g_source->get_capability_interface().get_pixeltype();
-        std::array<ICAP_PIXELTYPE_::value_type, 3> supported_types = { DTWAIN_PT_BW, DTWAIN_PT_GRAY, DTWAIN_PT_RGB };
+        std::array<ICAP_PIXELTYPE_::value_type, 6> supported_types = { DTWAIN_PT_BW, DTWAIN_PT_GRAY, DTWAIN_PT_RGB, DTWAIN_PT_PALETTE, DTWAIN_PT_CMY, DTWAIN_PT_CMYK };
         bool bfound = false;
         for (size_t i = 0; i < supported_types.size(); ++i)
         {
