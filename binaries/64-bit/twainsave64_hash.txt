@@ -1,9 +1,9 @@
 Hashes for TwainSave64.exe and TwainSave-opensource.exe
 -----------------------------------------------------
-MD5: 4d2a1ba9449c9b39106a35e6149d1be5
-SHA1: 86c9ec33205cf18adec96fae05d671824e781a27
-SHA256: aad40aad7a5d630c8394426487cc37c730dcbede6859d10752e5ebecfc16b0ec
-SHA512: 5f9160c0859cbe9ea152a619d62b216860eb70c55cf05916234275cb29e234849efeea38edd3fb868f2993bacd5fb3e8f16e1fe99f919730505b5ffd547fef24
+MD5: 4742620c8a6c520a6f800aa29ae9bc4a
+SHA1: 00449966382d398bebb3a9ec76bd7d75b0bfceb0
+SHA256: ca527ce3dee22e86f4fafc284bc08834bbad7a292a5df5d051270d95c6e6c7cd
+SHA512: fae04e28099103aa55f797432c644e917a837550c44bce2873a26a95b88ab89343e9e2418fb3e579b7b540c9c2cd015c3d9bb032abdce4ade809a79d2fba2a03
 
 
 Hashes for TwainSave_help.chm
