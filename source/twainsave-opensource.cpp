@@ -570,6 +570,50 @@ twain_source select_the_source(twain_session& tsession, SelectType s)
 }
 
 template <typename T>
+struct RangeCharacteristicTester
+{
+    static void test(twain_source& theSource, std::string entry, T value, int capvalue = 0)
+    {
+        // now test if the device can actually use the value set
+        std::vector<T> testArray;
+        std::cout << "Testing if " << value << " can be used...\n";
+        testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
+
+        bool valuefound = false;
+
+        // This should be expanded if the returned array is a range
+        dynarithmic::twain::twain_range<T> testRangeX(testArray);
+        if (testRangeX.is_valid())
+            valuefound = testRangeX.value_exists(value);
+        else
+            valuefound = std::find(testArray.begin(), testArray.end(), value) != testArray.end();
+        std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
+            << " support the value " << value << " that you are using for --" << entry << "\n";
+    }
+};
+
+template <typename T>
+struct GenericCharacteristicTester
+{
+    static void test(twain_source& theSource, std::string entry, T value, int capvalue = 0)
+    {
+        // now test if the device can actually use the value set
+        std::vector<T> testArray;
+        std::cout << "Testing if " << value << " can be used...\n";
+        testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
+        bool valuefound = std::find(testArray.begin(), testArray.end(), value) != testArray.end();
+        std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
+            << " support the value " << value << " that you are using for --" << entry << "\n";
+    }
+};
+
+template <typename T>
+struct DummyCharacteristicTester
+{
+    static void test(twain_source&, std::string, T value, int) {}
+};
+
+template <typename T, typename ValueTester = DummyCharacteristicTester<T>>
 void test_characteristic(twain_source& theSource, // TWAIN source
                          const T& value, // value to test
                          const po::variables_map& varmap, 
@@ -589,18 +633,7 @@ void test_characteristic(twain_source& theSource, // TWAIN source
                 std::cout << (issupported?"Success!  ":"Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
                     << "support the \"--" << entry << "\" capability\n";
                 if (issupported)
-                {
-                    // now test if the device can actually use the value set
-                    std::vector<T> testArray;
-                    std::cout << "Testing if " << value << " can be used...\n";
-                    testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
-                    if ( !testArray.empty() )
-                    {
-                        bool valuefound = std::find(testArray.begin(), testArray.end(), value) != testArray.end();
-                        std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
-                                << " support the value " << value << " that you are using. capability\n";
-                    }
-                }
+                    ValueTester::test(theSource, entry, value, capvalue);
             }
             std::cout << "\n";
         }
@@ -892,24 +925,26 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
         test_characteristic(mysource, s_options.m_bAutobrightMode, varmap, "autobright", ICAP_AUTOBRIGHT);
         test_characteristic(mysource, s_options.m_bDeskew, varmap, "deskew", ICAP_AUTOMATICDESKEW);
         test_characteristic(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", ICAP_AUTOMATICROTATE);
-        test_characteristic(mysource, s_options.m_brightness, varmap, "brightness", ICAP_BRIGHTNESS);
         test_characteristic(mysource, s_options.m_bUseTransparencyUnit?1:0, varmap, "transparency", ICAP_LIGHTPATH);
-        test_characteristic(mysource, s_options.m_dContrast, varmap, "contrast", ICAP_CONTRAST);
-        test_characteristic(mysource, s_options.m_dHighlight, varmap, "highlight", ICAP_HIGHLIGHT);
-        test_characteristic(mysource, s_options.m_dThreshold, varmap, "threshold", ICAP_THRESHOLD);
-        test_characteristic(mysource, s_options.m_dGamma, varmap, "gamma", ICAP_GAMMA);
-        test_characteristic(mysource, s_options.m_strHalftone, varmap, "halftone", ICAP_HALFTONES);
-        test_characteristic(mysource, s_options.m_dResolution, varmap, "resolution", ICAP_XRESOLUTION);
         test_characteristic(mysource, s_options.m_dRotation, varmap, "rotation", ICAP_ROTATION);
-        test_characteristic(mysource, s_options.m_dShadow, varmap, "shadow", ICAP_SHADOW);
         test_characteristic(mysource, s_options.m_bOverscanMode, varmap, "overscan", ICAP_OVERSCAN);
         test_characteristic(mysource, s_options.m_bShowIndicator, varmap, "showindicator", CAP_INDICATORS);
-        test_characteristic(mysource, static_cast<long>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", ICAP_PIXELTYPE);
-        test_characteristic(mysource, static_cast<long>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", ICAP_UNITS);
-        test_characteristic(mysource, static_cast<long>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", ICAP_SUPPORTEDSIZES);
-        test_characteristic(mysource, static_cast<long>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", ICAP_ORIENTATION);
-        test_characteristic(mysource, s_options.m_strImprinter, varmap, "imprinterstring", CAP_PRINTER);
-        test_characteristic(mysource, static_cast<long>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", CAP_JOBCONTROL);
+        test_characteristic(mysource, s_options.m_bUseDuplex, varmap, "duplex", CAP_DUPLEX);
+        test_characteristic<std::string, GenericCharacteristicTester<std::string>>(mysource, s_options.m_strHalftone, varmap, "halftone", ICAP_HALFTONES);
+        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dHighlight, varmap, "highlight", ICAP_HIGHLIGHT);
+        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dThreshold, varmap, "threshold", ICAP_THRESHOLD);
+        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dResolution, varmap, "resolution", ICAP_XRESOLUTION);
+        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dGamma, varmap, "gamma", ICAP_GAMMA);
+        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_brightness, varmap, "brightness", ICAP_BRIGHTNESS);
+        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dContrast, varmap, "contrast", ICAP_CONTRAST);
+        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dShadow, varmap, "shadow", ICAP_SHADOW);
+        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", ICAP_PIXELTYPE);
+        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", ICAP_UNITS);
+        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", ICAP_SUPPORTEDSIZES);
+        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", ICAP_ORIENTATION);
+        test_characteristic(mysource, s_options.m_strImprinter.empty()?false:true, varmap, "imprinterstring", CAP_PRINTER);
+        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, s_options.m_nPrinter, varmap, "imprinter", CAP_PRINTER);
+        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", CAP_JOBCONTROL);
 
         s_options.m_nOverwriteWidth = NumDigits(s_options.m_nOverwriteMax);
 
