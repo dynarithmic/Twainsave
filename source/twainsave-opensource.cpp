@@ -106,6 +106,8 @@ struct scanner_options
     int m_nPrinter;
     bool m_bUseDuplex;
     bool m_bDeskew;
+    bool m_bShowDetails;
+    bool m_bShowHelp;
     bool m_bAutoRotateMode;
     std::string m_strHalftone;
     int m_Orientation;
@@ -130,12 +132,14 @@ struct scanner_options
     int m_nOverwriteMode;
     int m_nOverwriteMax;
     bool m_bOverscanMode;
+    bool m_bOptionCheck;
     int m_NumPages;
     std::string m_strPaperSize;
     std::string m_strDetailsFile;
     bool m_bNoUIWait;
     int m_NoUIWaitTime;
     bool m_bSaveOnCancel;
+    bool m_bShowVersion;
     bool m_bMultiPage;
     bool m_bMultiPage2;
     bool m_bUseDSM2;
@@ -155,6 +159,7 @@ struct scanner_options
     bool m_bUseTransparencyUnit;
     std::string m_strUnitOfMeasure;
     int m_nJobControl;
+    int m_nJpegQuality;
     int m_nOverwriteCount;
     int m_nOverwriteWidth;
     std::string m_strLanguage;
@@ -471,33 +476,34 @@ parse_return_type parse_options(int argc, char *argv[])
     try
     {
         desc2->add_options()
-            ("area", po::value< std::string >(&s_options.m_area), "set acquisition area of image to acquire")
+            ("area", po::value< std::string >(&s_options.m_area)->default_value(""), "set acquisition area of image to acquire")
             ("autobright", po::bool_switch(&s_options.m_bAutobrightMode)->default_value(false), "turn on autobright feature")
             ("autofeed", po::bool_switch(&s_options.m_bUseADF)->default_value(false), "turn on automatic document feeder")
             ("autofeedorflatbed", po::bool_switch(&s_options.m_bUseADFOrFlatbed)->default_value(false), "use feeder if not empty, else use flatbed")
             ("autorotate", po::bool_switch(&s_options.m_bAutoRotateMode)->default_value(false), "Detect if document should be rotated.  Device must support autorotate")
-            ("bitsperpixel", po::value< int >(&s_options.m_bitsPerPixel), "Image bits-per-pixel.  Default is current device setting")
+            ("bitsperpixel", po::value< int >(&s_options.m_bitsPerPixel)->default_value(0), "Image bits-per-pixel.  Default is current device setting")
             ("blankthreshold", po::value< double >(&s_options.m_dBlankThreshold)->default_value(98), "Percentage threshold to determine if page is blank")
-            ("brightness", po::value< double >(&s_options.m_brightness), "Brightness level (device must support brightness)")
+            ("brightness", po::value< double >(&s_options.m_brightness)->default_value(0), "Brightness level (device must support brightness)")
             ("color", po::value< int >(&s_options.m_color)->default_value(0), "Color. 0=B/W, 1=8-bit Grayscale, 2=24 bit RGB, 3=Palette, 4=CMY, 5=CMYK. Default is 0")
-            ("contrast", po::value< double >(&s_options.m_dContrast), "Contrast level (device must support contrast)")
+            ("contrast", po::value< double >(&s_options.m_dContrast)->default_value(0), "Contrast level (device must support contrast)")
             ("deskew", po::bool_switch(&s_options.m_bDeskew)->default_value(false), "Deskew image if skewed.  Device must support deskew")
-            ("details", "Detail information on all available TWAIN devices.")
+            ("details", po::bool_switch(&s_options.m_bShowDetails)->default_value(false), "Detail information on all available TWAIN devices.")
             ("diagnose", po::value< int >(&s_options.m_nDiagnose)->default_value(0), "Create diagnostic log.  Level values 1, 2, 3 or 4.")
-            ("diagnoselog", po::value< std::string >(&s_options.m_DiagnoseLog), "file name to store -diagnose messages")
+            ("diagnoselog", po::value< std::string >(&s_options.m_DiagnoseLog)->default_value("stddiag.log"), "file name to store -diagnose messages")
             ("dsmsearchorder", po::value< int >(&s_options.m_DSMSearchOrder)->default_value(0), "Directories TwainSave will search when locating TWAIN_32.DLL or TWAINDSM.DLL")
             ("duplex", po::bool_switch(&s_options.m_bUseDuplex)->default_value(false), "turn on duplex unit")
             ("filename", po::value< std::string >(&s_options.m_filename)->default_value(descript_name), "file name to save acquired image(s)")
             ("filetype", po::value< std::string >(&s_options.m_filetype)->default_value("bmp"), "Image file type")
-            ("gamma", po::value< double >(&s_options.m_dGamma), "Gamma level (device must support gamma levels)")
-            ("help", "Show help screen")
+            ("gamma", po::value< double >(&s_options.m_dGamma)->default_value(0), "Gamma level (device must support gamma levels)")
+            ("help", po::bool_switch(&s_options.m_bShowHelp)->default_value(false), "Show help screen")
             ("halftone", po::value< std::string >(&s_options.m_strHalftone)->default_value("none"), "Halftone effect to use when acquiring low resolution images")
-            ("highlight", po::value< double >(&s_options.m_dHighlight), "Highlight level (device must support highlight)")
+            ("highlight", po::value< double >(&s_options.m_dHighlight)->default_value(255), "Highlight level (device must support highlight)")
             ("imprinter", po::value< int >(&s_options.m_nPrinter)->default_value(-1), "Select imprinter to use (0-7)")
-            ("imprinterstring", po::value< std::string >(&s_options.m_strImprinter), "Set imprinter string")
+            ("imprinterstring", po::value< std::string >(&s_options.m_strImprinter)->default_value(""), "Set imprinter string")
             ("incvalue", po::value< int >(&s_options.m_FileIncrement)->default_value(1), "File name counter")
             ("jobcontrol", po::value< int >(&s_options.m_nJobControl)->default_value(0), "0=none, 1=include job page, 2=exclude job page")
-            ("language", po::value< std::string >(&s_options.m_strLanguage), "Set language in Twain dialog")
+            ("jquality", po::value< int >(&s_options.m_nJpegQuality)->default_value(75), "Quality Factor when acquiring JPEG images.  Default is 75")
+            ("language", po::value< std::string >(&s_options.m_strLanguage)->default_value("english"), "Set language in Twain dialog")
             ("multipage", po::bool_switch(&s_options.m_bMultiPage)->default_value(false), "Save to multipage file")
             ("multipage2", po::bool_switch(&s_options.m_bMultiPage2)->default_value(false), "Save to multipage file only after closing UI")
             ("negate", po::bool_switch(&s_options.m_bNegateImage)->default_value(false), "Negates (reverses polarity) of acquired images")
@@ -508,6 +514,7 @@ parse_return_type parse_options(int argc, char *argv[])
             ("nouiwait", po::bool_switch(&s_options.m_bNoUIWait)->default_value(false), "Do not display Source user interface and wait for feeder loaded before acquiring")
             ("nouiwaittime", po::value< int >(&s_options.m_NoUIWaitTime)->default_value(120), "Time to wait (in seconds) for feeder loaded.")
             ("numpages", po::value< int >(&s_options.m_NumPages)->default_value(0), "Number of pages to acquire.  Default is 0 (acquire all pages)")
+            ("optioncheck", po::bool_switch(&s_options.m_bOptionCheck)->default_value(false), "Check what options selected device supports")
             ("orientation", po::value< int >(&s_options.m_Orientation)->default_value(0), "Clockwise orientation in degrees (0, 90, 180, 270)")
             ("overscanmode", po::bool_switch(&s_options.m_bOverscanMode)->default_value(false), "Turn on overscan mode.  Device must support overscan")
             ("overwritemax", po::value< int >(&s_options.m_nOverwriteMax)->default_value(9999), "Sets the maximum number of files created per acquisition for \"--overwritemode 3\"")
@@ -516,43 +523,43 @@ parse_return_type parse_options(int argc, char *argv[])
             ("pdfascii", po::bool_switch(&pdf_commands.m_bAscii)->default_value(false), "create ASCII compressed (text-based) PDF files")
             ("pdf128", po::bool_switch(&pdf_commands.m_bStrong)->default_value(false), "use PDF 128-bit (strong) encryption")
             ("pdf40", po::bool_switch(&pdf_commands.m_bWeak)->default_value(true), "use PDF 40-bit encryption")
-            ("pdfauthor", po::value< std::string >(&pdf_commands.m_strAuthor), "Sets the PDF Author field")
-            ("pdfcreator", po::value< std::string >(&pdf_commands.m_strCreator), "Sets the PDF Creator field")
-            ("pdfkeywords", po::value< std::string >(&pdf_commands.m_strKeywords), "Sets the PDF Keywords field")
-            ("pdfproducer", po::value< std::string >(&pdf_commands.m_strProducer), "Sets the PDF Producer field")
-            ("pdfsubject", po::value< std::string >(&pdf_commands.m_strSubject), "Sets the PDF Subject field")
-            ("pdftitle", po::value< std::string >(&pdf_commands.m_strTitle), "Sets the PDF Title field")
+            ("pdfauthor", po::value< std::string >(&pdf_commands.m_strAuthor)->default_value(""), "Sets the PDF Author field")
+            ("pdfcreator", po::value< std::string >(&pdf_commands.m_strCreator)->default_value(""), "Sets the PDF Creator field")
+            ("pdfkeywords", po::value< std::string >(&pdf_commands.m_strKeywords)->default_value(""), "Sets the PDF Keywords field")
+            ("pdfproducer", po::value< std::string >(&pdf_commands.m_strProducer)->default_value(""), "Sets the PDF Producer field")
+            ("pdfsubject", po::value< std::string >(&pdf_commands.m_strSubject)->default_value(""), "Sets the PDF Subject field")
+            ("pdftitle", po::value< std::string >(&pdf_commands.m_strTitle)->default_value(""), "Sets the PDF Title field")
             ("pdfencrypt", po::bool_switch(&pdf_commands.m_bEncrypt)->default_value(false), "Turn on PDF encryption")
-            ("pdfownerpass", po::value< std::string >(&pdf_commands.m_strOwnerPass), "Sets the PDF owner password")
-            ("pdfuserpass", po::value< std::string >(&pdf_commands.m_strUserPass), "Sets the PDF user password")
+            ("pdfownerpass", po::value< std::string >(&pdf_commands.m_strOwnerPass)->default_value(""), "Sets the PDF owner password")
+            ("pdfuserpass", po::value< std::string >(&pdf_commands.m_strUserPass)->default_value(""), "Sets the PDF user password")
             ("pdfrandowner", po::bool_switch(&pdf_commands.m_bRandomOwner)->default_value(false), "Use random PDF owner password.  Cannot be used with --pdfownerpass")
             ("pdfranduser", po::bool_switch(&pdf_commands.m_bRandomUser)->default_value(false), "Use random PDF Userr password.  Cannot be used with --pdfuserpass")
-            ("pdfpermit", po::value< std::string >(&pdf_commands.m_strPermissions), "PDF permissions allowed for encrypted files")
+            ("pdfpermit", po::value< std::string >(&pdf_commands.m_strPermissions)->default_value(""), "PDF permissions allowed for encrypted files")
             ("pdfsize", po::value< std::string >(&pdf_commands.m_strPaperSize)->default_value("letter"), "PDF Paper size.  Default is \"letter\"")
             ("pdfquality", po::value< int >(&pdf_commands.m_quality)->default_value(60), "set the JPEG quality factor for PDF files")
             ("pdforient", po::value< std::string >(&pdf_commands.m_strOrient)->default_value("portrait"), "Sets orientation to portrait or landscape")
             ("pdfscale", po::value< std::string >(&pdf_commands.m_strScale)->default_value("noscale"), "PDF page scaling")
-            ("resolution", po::value< double >(&s_options.m_dResolution), "Image resolution in dots per unit (see --unit)")
-            ("rotation", po::value< double >(&s_options.m_dRotation), "Rotate page by the specified number of degrees (device must support rotation)")
+            ("resolution", po::value< double >(&s_options.m_dResolution)->default_value(0), "Image resolution in dots per unit (see --unit)")
+            ("rotation", po::value< double >(&s_options.m_dRotation)->default_value(0.0), "Rotate page by the specified number of degrees (device must support rotation)")
             ("saveoncancel", po::bool_switch(&s_options.m_bSaveOnCancel)->default_value(false), "Save image file even if acquisition canceled by user")
-            ("scale", po::value< std::string >(&s_options.m_scaling), "set x/y scaling options")
+            ("scale", po::value< std::string >(&s_options.m_scaling)->default_value(""), "set x/y scaling options")
             ("selectbydialog", po::bool_switch(&s_options.m_bSelectByDialog)->default_value(true), "When selecting device, show \"Select Source\" dialog (Default)")
-            ("selectbyname", po::value< std::string >(&s_options.m_strSelectName), "Select TWAIN device by specifying device product name")
+            ("selectbyname", po::value< std::string >(&s_options.m_strSelectName)->default_value(""), "Select TWAIN device by specifying device product name")
             ("selectdefault", po::bool_switch(&s_options.m_bSelectDefault)->default_value(false), "Select the default TWAIN device automatically")
-            ("shadow", po::value< double >(&s_options.m_dShadow), "Shadow level (device must support shadow levels)")
+            ("shadow", po::value< double >(&s_options.m_dShadow)->default_value(0), "Shadow level (device must support shadow levels)")
             ("showindicator", po::bool_switch(&s_options.m_bShowIndicator)->default_value(false), "Show progress indicator when no user-interface is chosen (-noui)")
-            ("tempdir", po::value< std::string >(&s_options.m_strTempDirectory), "Temporary file directory")
-            ("threshold", po::value< double >(&s_options.m_dThreshold), "Threshold level (device must support threshold)")
+            ("tempdir", po::value< std::string >(&s_options.m_strTempDirectory)->default_value(""), "Temporary file directory")
+            ("threshold", po::value< double >(&s_options.m_dThreshold)->default_value(0), "Threshold level (device must support threshold)")
             ("transfermode", po::value< int >(&s_options.m_nTransferMode)->default_value(0), "Transfer mode. 0=Native, 1=Buffered")
             ("transparency", po::bool_switch(&s_options.m_bUseTransparencyUnit)->default_value(false), "Use transparency unit")
             ("uionly", po::bool_switch(&s_options.m_bShowUIOnly)->default_value(false), "Allow user interface to be shown without acquiring images")
             ("uiperm", po::bool_switch(&s_options.m_bUIPerm)->default_value(false), "Leave UI open on successful acquisition")
             ("unitofmeasure", po::value< std::string >(&s_options.m_strUnitOfMeasure)->default_value("inch"), "Unit of measure")
-            ("usedsm2", po::bool_switch(&s_options.m_bShowUIOnly)->default_value(false), "Use TWAINDSM.DLL if found as the data source manager.")
+            ("usedsm2", po::bool_switch(&s_options.m_bUseDSM2)->default_value(false), "Use TWAINDSM.DLL if found as the data source manager.")
             ("useinc", po::bool_switch(&s_options.m_bUseFileInc)->default_value(false), "Use file name increment")
             ("verbose", po::bool_switch(&s_options.m_bUseVerbose)->default_value(false), "Turn on verbose mode")
-            ("version", "Display program version")
-            ("@", po::value< std::string >(&s_options.m_strConfigFile), "Configuration file");
+            ("version", po::bool_switch(&s_options.m_bShowVersion)->default_value(false), "Display program version")
+            ("@", po::value< std::string >(&s_options.m_strConfigFile)->default_value(""), "Configuration file");
         po::variables_map vm2;
         po::store(po::parse_command_line(argc, argv, *desc2, style), vm2);
         po::notify(vm2);
@@ -616,30 +623,38 @@ struct DummyCharacteristicTester
 };
 
 template <typename T, typename ValueTester = DummyCharacteristicTester<T>>
-void test_characteristic(twain_source& theSource, // TWAIN source
+std::pair<std::string, bool> test_characteristic(twain_source& theSource, // TWAIN source
                          const T& value, // value to test
                          const po::variables_map& varmap, 
                          const std::string& entry, 
+                         bool bSkipEntryCheck,
                          int capvalue = 0)
 {
+    bool issupported = false;
     auto iter = varmap.find(entry);
-    if (iter != varmap.end())
+    if (bSkipEntryCheck || iter != varmap.end())
     {
-        if (!iter->second.defaulted())
+        if (bSkipEntryCheck || !iter->second.defaulted())
         {
-            if (capvalue && !varmap["verbose"].defaulted())
+            if (capvalue)
             {
+                if ( !bSkipEntryCheck)
                 std::cout << "Checking if device supports " << entry << " ...\n";
                 // test if the source supports what we're supposed to be setting later
-                bool issupported = theSource.get_capability_interface().is_cap_supported(capvalue);
+                issupported = theSource.get_capability_interface().is_cap_supported(capvalue);
+                if (!bSkipEntryCheck)
+                {
                 std::cout << (issupported?"Success!  ":"Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
                     << "support the \"--" << entry << "\" capability\n";
                 if (issupported)
                     ValueTester::test(theSource, entry, value, capvalue);
             }
+            }
+            if ( !bSkipEntryCheck)
             std::cout << "\n";
         }
     }
+    return { entry, issupported };
 }
 
 std::string resolve_extension(std::string filetype)
@@ -694,7 +709,7 @@ void set_scale_options(twain_source& mysource, const po::variables_map& varmap)
     }
 }
 
-void set_areaofinterest_options(twain_source& mysource, const po::variables_map& varmap)
+bool set_areaofinterest_options(twain_source& mysource, const po::variables_map& varmap)
 {
     if (!varmap["area"].defaulted())
     {
@@ -714,7 +729,13 @@ void set_areaofinterest_options(twain_source& mysource, const po::variables_map&
             dynarithmic::twain::twain_frame<double> tf(area_values[0], area_values[1], area_values[2], area_values[3]);
             ac.get_pages_options().set_frame(tf);
         }
+        else
+        {
+            s_options.set_return_code(RETURN_BAD_COMMAND_LINE);
+            return false;
+        }
     }
+    return true;
 }
 
 void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
@@ -885,6 +906,8 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
             set_halftone(s_options.m_strHalftone).
             set_pixeltype(s_options.m_ColorTypeMap[s_options.m_color]).
             enable_negate(s_options.m_bNegateImage).
+            set_bitdepth(s_options.m_bitsPerPixel).
+            set_jpegquality(s_options.m_nJpegQuality).
             set_threshold(s_options.m_dThreshold);
 
         // brightness, contrast, rotation, etc.
@@ -931,29 +954,56 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
             set_option(s_options.m_JobControlMap[s_options.m_nJobControl]);
 
         // test the characteristics that have been set
-        test_characteristic(mysource, s_options.m_bAutobrightMode, varmap, "autobright", ICAP_AUTOBRIGHT);
-        test_characteristic(mysource, s_options.m_bDeskew, varmap, "deskew", ICAP_AUTOMATICDESKEW);
-        test_characteristic(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", ICAP_AUTOMATICROTATE);
-        test_characteristic(mysource, s_options.m_bUseTransparencyUnit?1:0, varmap, "transparency", ICAP_LIGHTPATH);
-        test_characteristic(mysource, s_options.m_dRotation, varmap, "rotation", ICAP_ROTATION);
-        test_characteristic(mysource, s_options.m_bOverscanMode, varmap, "overscan", ICAP_OVERSCAN);
-        test_characteristic(mysource, s_options.m_bShowIndicator, varmap, "showindicator", CAP_INDICATORS);
-        test_characteristic(mysource, s_options.m_bUseDuplex, varmap, "duplex", CAP_DUPLEX);
-        test_characteristic<std::string, GenericCharacteristicTester<std::string>>(mysource, s_options.m_strHalftone, varmap, "halftone", ICAP_HALFTONES);
-        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dHighlight, varmap, "highlight", ICAP_HIGHLIGHT);
-        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dThreshold, varmap, "threshold", ICAP_THRESHOLD);
-        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dResolution, varmap, "resolution", ICAP_XRESOLUTION);
-        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dGamma, varmap, "gamma", ICAP_GAMMA);
-        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_brightness, varmap, "brightness", ICAP_BRIGHTNESS);
-        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dContrast, varmap, "contrast", ICAP_CONTRAST);
-        test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dShadow, varmap, "shadow", ICAP_SHADOW);
-        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", ICAP_PIXELTYPE);
-        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", ICAP_UNITS);
-        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", ICAP_SUPPORTEDSIZES);
-        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", ICAP_ORIENTATION);
-        test_characteristic(mysource, s_options.m_strImprinter.empty()?false:true, varmap, "imprinterstring", CAP_PRINTER);
-        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, s_options.m_nPrinter, varmap, "imprinter", CAP_PRINTER);
-        test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", CAP_JOBCONTROL);
+        if (!varmap["verbose"].defaulted() || !varmap["optioncheck"].defaulted())
+        {
+            std::map<std::string, bool> mapOptions;
+
+            bool bSkipEntryCheck = !varmap["optioncheck"].defaulted();
+            mapOptions.insert( test_characteristic(mysource, s_options.m_bAutobrightMode, varmap, "autobright", bSkipEntryCheck, ICAP_AUTOBRIGHT));
+            mapOptions.insert( test_characteristic(mysource, s_options.m_bDeskew, varmap, "deskew", bSkipEntryCheck, ICAP_AUTOMATICDESKEW));
+            mapOptions.insert( test_characteristic(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", bSkipEntryCheck, ICAP_AUTOMATICROTATE));
+            mapOptions.insert( test_characteristic(mysource, s_options.m_bUseTransparencyUnit ? 1 : 0, varmap, "transparency", bSkipEntryCheck, ICAP_LIGHTPATH));
+            mapOptions.insert( test_characteristic(mysource, s_options.m_dRotation, varmap, "rotation", bSkipEntryCheck, ICAP_ROTATION));
+            mapOptions.insert( test_characteristic(mysource, s_options.m_bOverscanMode, varmap, "overscan", bSkipEntryCheck, ICAP_OVERSCAN));
+            mapOptions.insert( test_characteristic(mysource, s_options.m_bOverscanMode, varmap, "overscanmode", bSkipEntryCheck, ICAP_OVERSCAN));
+            mapOptions.insert( test_characteristic(mysource, s_options.m_bShowIndicator, varmap, "showindicator", bSkipEntryCheck, CAP_INDICATORS));
+            mapOptions.insert( test_characteristic(mysource, s_options.m_bUseDuplex, varmap, "duplex", bSkipEntryCheck, CAP_DUPLEX));
+            mapOptions.insert( test_characteristic<std::string, GenericCharacteristicTester<std::string>>(mysource, s_options.m_strHalftone, varmap, "halftone", bSkipEntryCheck, ICAP_HALFTONES));
+            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dHighlight, varmap, "highlight", bSkipEntryCheck, ICAP_HIGHLIGHT));
+            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dThreshold, varmap, "threshold", bSkipEntryCheck, ICAP_THRESHOLD));
+            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dResolution, varmap, "resolution", bSkipEntryCheck, ICAP_XRESOLUTION));
+            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dGamma, varmap, "gamma", bSkipEntryCheck, ICAP_GAMMA));
+            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_brightness, varmap, "brightness", bSkipEntryCheck, ICAP_BRIGHTNESS));
+            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dContrast, varmap, "contrast", bSkipEntryCheck, ICAP_CONTRAST));
+            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dShadow, varmap, "shadow", bSkipEntryCheck, ICAP_SHADOW));
+            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", bSkipEntryCheck, ICAP_PIXELTYPE));
+            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", bSkipEntryCheck, ICAP_UNITS));
+            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", bSkipEntryCheck, ICAP_SUPPORTEDSIZES));
+            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", bSkipEntryCheck, ICAP_ORIENTATION));
+            mapOptions.insert( test_characteristic(mysource, s_options.m_strImprinter.empty() ? false : true, varmap, "imprinterstring", bSkipEntryCheck, CAP_PRINTER));
+            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, s_options.m_nPrinter, varmap, "imprinter", bSkipEntryCheck, CAP_PRINTER));
+            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", bSkipEntryCheck, CAP_JOBCONTROL));
+
+            if (bSkipEntryCheck)
+            {
+                for (auto& pr : varmap)
+                    mapOptions.insert({ pr.first, true });
+
+                // Sort entries based on name
+                std::vector<std::pair<std::string, bool>> vOptionCheck;
+                for (auto& pr : mapOptions)
+                    vOptionCheck.push_back(pr);
+
+                auto iter = std::stable_partition(vOptionCheck.begin(), vOptionCheck.end(), [&](auto& pr) { return pr.second; });
+                std::cout << "For device: \"" << mysource.get_source_info().get_product_name() << "\", the following device-dependent option list was generated : \n\n";
+                std::cout << "Supported option(s):\n";
+                std::for_each(vOptionCheck.begin(), iter, [&](auto& pr) { std::cout << "--" << pr.first<< "\n"; });
+                std::cout << "\nUnsupported option(s):\n";
+                std::for_each(iter, vOptionCheck.end(), [&](auto& pr) { std::cout << "--" << pr.first << "\n"; });
+                s_options.set_return_code(RETURN_OK);
+                return false;
+            }
+        }
 
         s_options.m_nOverwriteWidth = NumDigits(s_options.m_nOverwriteMax);
 
@@ -966,7 +1016,9 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
         set_blank_page_options(mysource, varmap);
 
         // area of interest handling
-        set_areaofinterest_options(mysource, varmap);
+        bool areaOk = set_areaofinterest_options(mysource, varmap);
+        if (!areaOk)
+            return false;
 
         // set scale options
         set_scale_options(mysource, varmap);
@@ -1109,21 +1161,24 @@ int start_acquisitions(const po::variables_map& varmap)
 {
     if (s_options.m_bNoConsole)
         ShowWindow(GetConsoleWindow(), SW_HIDE);
-    if (varmap.count("version"))
+    auto defaultIter = varmap.find("version");
+    if (!defaultIter->second.defaulted())
     {
         std::cout << "twainsave-opensource " << TWAINSAVE_FULL_VERSION << "\n";
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
 
-    if (varmap.count("help"))
+    defaultIter = varmap.find("help");
+    if (!defaultIter->second.defaulted())
     {
         std::cout << *desc2;
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
     
-    if (varmap.count("details"))
+    defaultIter = varmap.find("details");
+    if (!defaultIter->second.defaulted())
     {
         auto s = generate_details();
         if (s_options.m_bNoConsole)
@@ -1175,6 +1230,15 @@ int start_acquisitions(const po::variables_map& varmap)
         }
     }
 
+    // See if the user wants to use TWAIN DSM2 (32-bit version)
+    if (s_options.m_bUseDSM2)
+        ts.set_dsm(dsm_type::version2_dsm);
+
+    // Set the application information for the session
+    twain_session::twain_app_info appInfo;
+    appInfo.set_product_name(TWAINSAVE_DEFAULT_TITLE).set_version_info(TWAINSAVE_FULL_VERSION);
+    ts.set_app_info(appInfo);
+        
     // Start the TWAIN session
     ts.start();
 
@@ -1275,6 +1339,12 @@ int start_acquisitions(const po::variables_map& varmap)
             else
                 s_options.set_return_code(RETURN_OK);
             g_source.reset();
+        }
+        else
+        {
+            g_source.reset();
+            // stop the twain session
+            ts.stop();
         }
     }
     return 0;

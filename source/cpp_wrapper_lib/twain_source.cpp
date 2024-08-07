@@ -294,6 +294,10 @@ namespace dynarithmic
             general_options& gOpts = ac.get_general_options();
             API_INSTANCE DTWAIN_SetMaxAcquisitions(m_theSource, gOpts.get_max_acquisitions());
 
+            // Set the JPEG quality in case we acquire to JPEG files
+            imagetype_options& iOpts = ac.get_imagetype_options();
+            API_INSTANCE DTWAIN_SetJpegValues(m_theSource, iOpts.get_jpegquality(), false);
+
             // If non-TWAIN scaling is enabled, enable it now
             auto& imageOptions = ac.get_imageparameter_options();
             if (imageOptions.is_force_scaling_enabled())
