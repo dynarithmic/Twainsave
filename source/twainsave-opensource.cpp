@@ -97,6 +97,7 @@ struct scanner_options
     std::string m_area;
     bool m_bUseADF;
     bool m_bUseADFOrFlatbed;
+    bool m_bCreateDir;
     bool m_bAutobrightMode;
     double m_brightness;
     double m_dContrast;
@@ -486,6 +487,7 @@ parse_return_type parse_options(int argc, char *argv[])
             ("brightness", po::value< double >(&s_options.m_brightness)->default_value(0), "Brightness level (device must support brightness)")
             ("color", po::value< int >(&s_options.m_color)->default_value(0), "Color. 0=B/W, 1=8-bit Grayscale, 2=24 bit RGB, 3=Palette, 4=CMY, 5=CMYK. Default is 0")
             ("contrast", po::value< double >(&s_options.m_dContrast)->default_value(0), "Contrast level (device must support contrast)")
+            ("createdir", po::bool_switch(&s_options.m_bCreateDir)->default_value(false), "Create the directory specified by --filename if directory does not exist")
             ("deskew", po::bool_switch(&s_options.m_bDeskew)->default_value(false), "Deskew image if skewed.  Device must support deskew")
             ("details", po::bool_switch(&s_options.m_bShowDetails)->default_value(false), "Detail information on all available TWAIN devices.")
             ("diagnose", po::value< int >(&s_options.m_nDiagnose)->default_value(0), "Create diagnostic log.  Level values 1, 2, 3 or 4.")
@@ -578,6 +580,41 @@ twain_source select_the_source(twain_session& tsession, SelectType s)
     return tsession.select_source(s);
 }
 
+template <typename T, bool isRange=false>
+static void options_writer(twain_source& theSource, std::string entry, const std::vector<T>& testArray, T value, bool valuefound)
+{
+
+    if constexpr (std::is_same<T, std::string>::value)
+        std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
+        << " support the value " << std::quoted(value) << " that you are using for --" << entry << "\n";
+    else
+        std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
+        << " support the value " << value << " that you are using for --" << entry << "\n";
+    if (!valuefound)
+    {
+        std::cout << "\nThe allowable values for --" << entry << " are as follows";
+        if constexpr (std::is_same<T, double>::value && isRange)
+        {
+            std::cout << " (as a range):\n";
+            dynarithmic::twain::twain_range<double> testRangeX(testArray);
+            std::cout << "Minimum Value: " << testRangeX.get_min() << "\n";
+            std::cout << "Maximum Value: " << testRangeX.get_max() << "\n";
+            std::cout << "Step Value: " << testRangeX.get_step() << "\n";
+        }
+        else
+        {
+            std::cout << ":\n";
+            for (auto& v : testArray)
+            {
+                if constexpr (std::is_same<T, std::string>::value)
+                    std::cout << std::quoted(v) << "\n";
+                else
+                    std::cout << v << "\n";
+            }
+        }
+    }
+}
+
 template <typename T>
 struct RangeCharacteristicTester
 {
@@ -585,6 +622,9 @@ struct RangeCharacteristicTester
     {
         // now test if the device can actually use the value set
         std::vector<T> testArray;
+        if constexpr (std::is_same<T, std::string>::value)
+            std::cout << "Testing if " << std::quoted(value) << " can be used...\n";
+        else
         std::cout << "Testing if " << value << " can be used...\n";
         testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
 
@@ -596,8 +636,10 @@ struct RangeCharacteristicTester
             valuefound = testRangeX.value_exists(value);
         else
             valuefound = std::find(testArray.begin(), testArray.end(), value) != testArray.end();
-        std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
-            << " support the value " << value << " that you are using for --" << entry << "\n";
+        if ( testRangeX.is_valid())
+            options_writer<T, true>(theSource, entry, testArray, value, valuefound);
+        else
+            options_writer(theSource, entry, testArray, value, valuefound);
     }
 };
 
@@ -611,8 +653,7 @@ struct GenericCharacteristicTester
         std::cout << "Testing if " << value << " can be used...\n";
         testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
         bool valuefound = std::find(testArray.begin(), testArray.end(), value) != testArray.end();
-        std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
-            << " support the value " << value << " that you are using for --" << entry << "\n";
+        options_writer(theSource, entry, testArray, value, valuefound);
     }
 };
 
@@ -623,7 +664,7 @@ struct DummyCharacteristicTester
 };
 
 template <typename T, typename ValueTester = DummyCharacteristicTester<T>>
-std::pair<std::string, bool> test_characteristic(twain_source& theSource, // TWAIN source
+std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // TWAIN source
                          const T& value, // value to test
                          const po::variables_map& varmap, 
                          const std::string& entry, 
@@ -639,7 +680,7 @@ std::pair<std::string, bool> test_characteristic(twain_source& theSource, // TWA
             if (capvalue)
             {
                 if ( !bSkipEntryCheck)
-                std::cout << "Checking if device supports " << entry << " ...\n";
+                    std::cout << "Checking if device supports --" << entry << " ...\n";
                 // test if the source supports what we're supposed to be setting later
                 issupported = theSource.get_capability_interface().is_cap_supported(capvalue);
                 if (!bSkipEntryCheck)
@@ -651,7 +692,7 @@ std::pair<std::string, bool> test_characteristic(twain_source& theSource, // TWA
             }
             }
             if ( !bSkipEntryCheck)
-            std::cout << "\n";
+                std::cout << std::string(120, '-') << "\n";
         }
     }
     return { entry, issupported };
@@ -839,8 +880,68 @@ void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
     }
 }
 
+bool check_device_options(twain_source& mysource, const po::variables_map& varmap, bool doOptionCheck = true)
+{
+    // test the characteristics that have been set
+    if (!varmap["verbose"].defaulted() || (!varmap["optioncheck"].defaulted() && doOptionCheck))
+    {
+        std::map<std::string, bool> mapOptions;
+        doOptionCheck = doOptionCheck && !varmap["optioncheck"].defaulted();
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bAutobrightMode, varmap, "autobright", doOptionCheck, ICAP_AUTOBRIGHT));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bDeskew, varmap, "deskew", doOptionCheck, ICAP_AUTOMATICDESKEW));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", doOptionCheck, ICAP_AUTOMATICROTATE));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bUseTransparencyUnit ? 1 : 0, varmap, "transparency", doOptionCheck, ICAP_LIGHTPATH));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_dRotation, varmap, "rotation", doOptionCheck, ICAP_ROTATION));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bOverscanMode, varmap, "overscan", doOptionCheck, ICAP_OVERSCAN));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bOverscanMode, varmap, "overscanmode", doOptionCheck, ICAP_OVERSCAN));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bShowIndicator, varmap, "showindicator", doOptionCheck, CAP_INDICATORS));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bUseDuplex, varmap, "duplex", doOptionCheck, CAP_DUPLEX));
+        mapOptions.insert(test_twainsave_option<std::string, GenericCharacteristicTester<std::string>>(mysource, s_options.m_strHalftone, varmap, "halftone", doOptionCheck, ICAP_HALFTONES));
+        mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dHighlight, varmap, "highlight", doOptionCheck, ICAP_HIGHLIGHT));
+        mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dThreshold, varmap, "threshold", doOptionCheck, ICAP_THRESHOLD));
+        mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dResolution, varmap, "resolution", doOptionCheck, ICAP_XRESOLUTION));
+        mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dGamma, varmap, "gamma", doOptionCheck, ICAP_GAMMA));
+        mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_brightness, varmap, "brightness", doOptionCheck, ICAP_BRIGHTNESS));
+        mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dContrast, varmap, "contrast", doOptionCheck, ICAP_CONTRAST));
+        mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dShadow, varmap, "shadow", doOptionCheck, ICAP_SHADOW));
+        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", doOptionCheck, ICAP_PIXELTYPE));
+        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", doOptionCheck, ICAP_UNITS));
+        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", doOptionCheck, ICAP_SUPPORTEDSIZES));
+        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", doOptionCheck, ICAP_ORIENTATION));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_strImprinter.empty() ? false : true, varmap, "imprinterstring", doOptionCheck, CAP_PRINTER));
+        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, s_options.m_nPrinter, varmap, "imprinter", doOptionCheck, CAP_PRINTER));
+        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", doOptionCheck, CAP_JOBCONTROL));
+
+        if (doOptionCheck)
+        {
+            for (auto& pr : varmap)
+                mapOptions.insert({ pr.first, true });
+
+            // Sort entries based on name
+            std::vector<std::pair<std::string, bool>> vOptionCheck;
+            for (auto& pr : mapOptions)
+                vOptionCheck.push_back(pr);
+
+            auto iter = std::stable_partition(vOptionCheck.begin(), vOptionCheck.end(), [&](auto& pr) { return pr.second; });
+            std::cout << "For device: \"" << mysource.get_source_info().get_product_name() << "\", the following device-dependent option list was generated : \n\n";
+            std::cout << "Supported option(s):\n";
+            std::for_each(vOptionCheck.begin(), iter, [&](auto& pr) { std::cout << "--" << pr.first << "\n"; });
+            std::cout << "\nUnsupported option(s):\n";
+            std::for_each(iter, vOptionCheck.end(), [&](auto& pr) { std::cout << "--" << pr.first << "\n"; });
+            s_options.set_return_code(RETURN_OK);
+            return false;
+        }
+    }
+    return true;
+}
+
 bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
 {
+    // Give a rundown of what is supported if --verbose or --optioncheck is specified
+    bool checkReturn = check_device_options(mysource, varmap, true);
+    if (!checkReturn)
+        return false; // get out if --optioncheck was done
+
     // get the general acquire characteristics and set them
     auto& ac = mysource.get_acquire_characteristics();
 
@@ -880,6 +981,7 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
 
         // set options, regardless if they appear on the command-line or not
         ac.get_file_transfer_options().
+            enable_autocreate_directory(s_options.m_bCreateDir).
             set_multi_page(s_options.m_bMultiPage).
             set_name(s_options.m_filename);
 
@@ -952,58 +1054,6 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
 
         ac.get_jobcontrol_options().
             set_option(s_options.m_JobControlMap[s_options.m_nJobControl]);
-
-        // test the characteristics that have been set
-        if (!varmap["verbose"].defaulted() || !varmap["optioncheck"].defaulted())
-        {
-            std::map<std::string, bool> mapOptions;
-
-            bool bSkipEntryCheck = !varmap["optioncheck"].defaulted();
-            mapOptions.insert( test_characteristic(mysource, s_options.m_bAutobrightMode, varmap, "autobright", bSkipEntryCheck, ICAP_AUTOBRIGHT));
-            mapOptions.insert( test_characteristic(mysource, s_options.m_bDeskew, varmap, "deskew", bSkipEntryCheck, ICAP_AUTOMATICDESKEW));
-            mapOptions.insert( test_characteristic(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", bSkipEntryCheck, ICAP_AUTOMATICROTATE));
-            mapOptions.insert( test_characteristic(mysource, s_options.m_bUseTransparencyUnit ? 1 : 0, varmap, "transparency", bSkipEntryCheck, ICAP_LIGHTPATH));
-            mapOptions.insert( test_characteristic(mysource, s_options.m_dRotation, varmap, "rotation", bSkipEntryCheck, ICAP_ROTATION));
-            mapOptions.insert( test_characteristic(mysource, s_options.m_bOverscanMode, varmap, "overscan", bSkipEntryCheck, ICAP_OVERSCAN));
-            mapOptions.insert( test_characteristic(mysource, s_options.m_bOverscanMode, varmap, "overscanmode", bSkipEntryCheck, ICAP_OVERSCAN));
-            mapOptions.insert( test_characteristic(mysource, s_options.m_bShowIndicator, varmap, "showindicator", bSkipEntryCheck, CAP_INDICATORS));
-            mapOptions.insert( test_characteristic(mysource, s_options.m_bUseDuplex, varmap, "duplex", bSkipEntryCheck, CAP_DUPLEX));
-            mapOptions.insert( test_characteristic<std::string, GenericCharacteristicTester<std::string>>(mysource, s_options.m_strHalftone, varmap, "halftone", bSkipEntryCheck, ICAP_HALFTONES));
-            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dHighlight, varmap, "highlight", bSkipEntryCheck, ICAP_HIGHLIGHT));
-            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dThreshold, varmap, "threshold", bSkipEntryCheck, ICAP_THRESHOLD));
-            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dResolution, varmap, "resolution", bSkipEntryCheck, ICAP_XRESOLUTION));
-            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dGamma, varmap, "gamma", bSkipEntryCheck, ICAP_GAMMA));
-            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_brightness, varmap, "brightness", bSkipEntryCheck, ICAP_BRIGHTNESS));
-            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dContrast, varmap, "contrast", bSkipEntryCheck, ICAP_CONTRAST));
-            mapOptions.insert( test_characteristic<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dShadow, varmap, "shadow", bSkipEntryCheck, ICAP_SHADOW));
-            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", bSkipEntryCheck, ICAP_PIXELTYPE));
-            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", bSkipEntryCheck, ICAP_UNITS));
-            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", bSkipEntryCheck, ICAP_SUPPORTEDSIZES));
-            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", bSkipEntryCheck, ICAP_ORIENTATION));
-            mapOptions.insert( test_characteristic(mysource, s_options.m_strImprinter.empty() ? false : true, varmap, "imprinterstring", bSkipEntryCheck, CAP_PRINTER));
-            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, s_options.m_nPrinter, varmap, "imprinter", bSkipEntryCheck, CAP_PRINTER));
-            mapOptions.insert( test_characteristic<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", bSkipEntryCheck, CAP_JOBCONTROL));
-
-            if (bSkipEntryCheck)
-            {
-                for (auto& pr : varmap)
-                    mapOptions.insert({ pr.first, true });
-
-                // Sort entries based on name
-                std::vector<std::pair<std::string, bool>> vOptionCheck;
-                for (auto& pr : mapOptions)
-                    vOptionCheck.push_back(pr);
-
-                auto iter = std::stable_partition(vOptionCheck.begin(), vOptionCheck.end(), [&](auto& pr) { return pr.second; });
-                std::cout << "For device: \"" << mysource.get_source_info().get_product_name() << "\", the following device-dependent option list was generated : \n\n";
-                std::cout << "Supported option(s):\n";
-                std::for_each(vOptionCheck.begin(), iter, [&](auto& pr) { std::cout << "--" << pr.first<< "\n"; });
-                std::cout << "\nUnsupported option(s):\n";
-                std::for_each(iter, vOptionCheck.end(), [&](auto& pr) { std::cout << "--" << pr.first << "\n"; });
-                s_options.set_return_code(RETURN_OK);
-                return false;
-            }
-        }
 
         s_options.m_nOverwriteWidth = NumDigits(s_options.m_nOverwriteMax);
 
@@ -1290,6 +1340,8 @@ int start_acquisitions(const po::variables_map& varmap)
         if (!g_source->is_selected())
         {
             s_options.set_return_code(RETURN_TWAIN_SOURCE_CANCEL);
+            g_source.reset();
+            ts.stop();
             return RETURN_TWAIN_SOURCE_CANCEL;
         }
         else
@@ -1297,6 +1349,8 @@ int start_acquisitions(const po::variables_map& varmap)
         if (!g_source->is_open())
         {
             s_options.set_return_code(RETURN_TWAIN_SOURCE_ERROR);
+            g_source.reset();
+            ts.stop();
             return RETURN_TWAIN_SOURCE_ERROR;
         }
     }
@@ -1334,10 +1388,15 @@ int start_acquisitions(const po::variables_map& varmap)
 
             // Start the acquisition
             auto acq_return = g_source->acquire();
+
+            // Get the return status of the acquisition
             if (acq_return.first == dynarithmic::twain::twain_source::acquire_timeout)
                 s_options.set_return_code(RETURN_TIMEOUT_REACHED);
             else
+            if (acq_return.first == dynarithmic::twain::twain_source::acquire_canceled || acq_return.first == dynarithmic::twain::twain_source::acquire_ok)
                 s_options.set_return_code(RETURN_OK);
+            else
+                s_options.set_return_code(RETURN_FILESAVE_ERROR);
             g_source.reset();
         }
         else
