@@ -24,5 +24,5 @@ add_executable(twainsave-opensource
     ${PROJECT_SOURCE_DIR}/stdafx.cpp
     ${PROJECT_SOURCE_DIR}/twainsave-opensource.cpp
 )
-set_property(TARGET twainsave-opensource PROPERTY CXX_STANDARD 14)
+set_property(TARGET twainsave-opensource PROPERTY CXX_STANDARD 17)
 target_sources(twainsave-opensource PRIVATE ${PROJECT_SOURCE_DIR}/twainsave-opensource.rc)
