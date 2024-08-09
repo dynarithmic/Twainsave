@@ -485,7 +485,7 @@ parse_return_type parse_options(int argc, char *argv[])
             ("bitsperpixel", po::value< int >(&s_options.m_bitsPerPixel)->default_value(0), "Image bits-per-pixel.  Default is current device setting")
             ("blankthreshold", po::value< double >(&s_options.m_dBlankThreshold)->default_value(98), "Percentage threshold to determine if page is blank")
             ("brightness", po::value< double >(&s_options.m_brightness)->default_value(0), "Brightness level (device must support brightness)")
-            ("color", po::value< int >(&s_options.m_color)->default_value(0), "Color. 0=B/W, 1=8-bit Grayscale, 2=24 bit RGB, 3=Palette, 4=CMY, 5=CMYK. Default is 0")
+            ("color", po::value< int >(&s_options.m_color)->default_value(0), "Color. 0=B/W, 1=Grayscale, 2=RGB, 3=Palette, 4=CMY, 5=CMYK. Default is 0")
             ("contrast", po::value< double >(&s_options.m_dContrast)->default_value(0), "Contrast level (device must support contrast)")
             ("createdir", po::bool_switch(&s_options.m_bCreateDir)->default_value(false), "Create the directory specified by --filename if directory does not exist")
             ("deskew", po::bool_switch(&s_options.m_bDeskew)->default_value(false), "Deskew image if skewed.  Device must support deskew")
@@ -580,20 +580,38 @@ twain_source select_the_source(twain_session& tsession, SelectType s)
     return tsession.select_source(s);
 }
 
+template <typename T>
+static bool constexpr is_rangeable()
+{
+    return std::is_same<T, double>::value || std::is_same<T, int>::value;
+}
+
+template <typename T>
+static bool constexpr is_stringtype()
+{
+    return std::is_same<T, std::string>::value;
+}
+
+template <typename T>
+static bool constexpr is_booltype()
+{
+    return std::is_same<T, bool>::value;
+}
+
 template <typename T, bool isRange=false>
 static void options_writer(twain_source& theSource, std::string entry, const std::vector<T>& testArray, T value, bool valuefound)
 {
 
-    if constexpr (std::is_same<T, std::string>::value)
-        std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
+    if constexpr (is_stringtype<T>())
+        std::cout << (valuefound ? "Success!  " : "Sorry : ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
         << " support the value " << std::quoted(value) << " that you are using for --" << entry << "\n";
     else
-        std::cout << (valuefound ? "Success!  " : "Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
-        << " support the value " << value << " that you are using for --" << entry << "\n";
+        std::cout << (valuefound ? "Success!  " : "Sorry : ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
+            << " support the value " << value << " that you are using for --" << entry << "\n";
     if (!valuefound)
     {
         std::cout << "\nThe allowable values for --" << entry << " are as follows";
-        if constexpr (std::is_same<T, double>::value && isRange)
+        if constexpr (isRange && is_rangeable<T>())
         {
             std::cout << " (as a range):\n";
             dynarithmic::twain::twain_range<double> testRangeX(testArray);
@@ -606,7 +624,7 @@ static void options_writer(twain_source& theSource, std::string entry, const std
             std::cout << ":\n";
             for (auto& v : testArray)
             {
-                if constexpr (std::is_same<T, std::string>::value)
+                if constexpr (is_stringtype<T>())
                     std::cout << std::quoted(v) << "\n";
                 else
                     std::cout << v << "\n";
@@ -622,24 +640,22 @@ struct RangeCharacteristicTester
     {
         // now test if the device can actually use the value set
         std::vector<T> testArray;
-        if constexpr (std::is_same<T, std::string>::value)
+        if constexpr (is_stringtype<T>())
             std::cout << "Testing if " << std::quoted(value) << " can be used...\n";
         else
-        std::cout << "Testing if " << value << " can be used...\n";
+            std::cout << "Testing if " << value << " can be used...\n";
+
+        // Get all the values supported
         testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
 
-        bool valuefound = false;
-
-        // This should be expanded if the returned array is a range
+        // Test if the returned array suggests that the values are in a range
         dynarithmic::twain::twain_range<T> testRangeX(testArray);
         if (testRangeX.is_valid())
-            valuefound = testRangeX.value_exists(value);
+            // Handle this as a range and test if value is in the range's domain
+            options_writer<T, true>(theSource, entry, testArray, value, testRangeX.value_exists(value));
         else
-            valuefound = std::find(testArray.begin(), testArray.end(), value) != testArray.end();
-        if ( testRangeX.is_valid())
-            options_writer<T, true>(theSource, entry, testArray, value, valuefound);
-        else
-            options_writer(theSource, entry, testArray, value, valuefound);
+            // Not a range, so the values in the array are discrete values that can be tested with value
+            options_writer(theSource, entry, testArray, value, std::find(testArray.begin(), testArray.end(), value) != testArray.end());
     }
 };
 
@@ -653,7 +669,19 @@ struct GenericCharacteristicTester
         std::cout << "Testing if " << value << " can be used...\n";
         testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
         bool valuefound = std::find(testArray.begin(), testArray.end(), value) != testArray.end();
-        options_writer(theSource, entry, testArray, value, valuefound);
+        std::cout << (valuefound ? "Success!  " : "Sorry : ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
+            << " support the value when requested for --" << entry << "\n";
+    }
+};
+
+struct BoolCharacteristicTester
+{
+    static bool test(twain_source& theSource, int capvalue)
+    {
+        // now test if the device can actually use the value set
+        std::vector<TW_BOOL> testArray;
+        testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
+        return find(testArray.begin(), testArray.end(), 1) != testArray.end();
     }
 };
 
@@ -669,7 +697,8 @@ std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // T
                          const po::variables_map& varmap, 
                          const std::string& entry, 
                          bool bSkipEntryCheck,
-                         int capvalue = 0)
+                         int capvalue,
+                         bool bTestForTrue = false)
 {
     bool issupported = false;
     auto iter = varmap.find(entry);
@@ -683,13 +712,23 @@ std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // T
                     std::cout << "Checking if device supports --" << entry << " ...\n";
                 // test if the source supports what we're supposed to be setting later
                 issupported = theSource.get_capability_interface().is_cap_supported(capvalue);
+
+                // do further testing 
+                if (bTestForTrue)
+                {
+                    issupported = BoolCharacteristicTester::test(theSource, capvalue);
+                    if ( !bSkipEntryCheck )
+                        std::cout << (issupported ? "Success!  " : "Sorry: ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
+                            << "support the \"--" << entry << "\" option\n";
+                }
+                else
                 if (!bSkipEntryCheck)
                 {
-                std::cout << (issupported?"Success!  ":"Sorry :( ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
-                    << "support the \"--" << entry << "\" capability\n";
-                if (issupported)
-                    ValueTester::test(theSource, entry, value, capvalue);
-            }
+                    std::cout << (issupported ? "Success!  " : "Sorry: ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
+                        << "support the \"--" << entry << "\" option\n";
+                    if (issupported)
+                        ValueTester::test(theSource, entry, value, capvalue);
+                }
             }
             if ( !bSkipEntryCheck)
                 std::cout << std::string(120, '-') << "\n";
@@ -896,6 +935,10 @@ bool check_device_options(twain_source& mysource, const po::variables_map& varma
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bOverscanMode, varmap, "overscanmode", doOptionCheck, ICAP_OVERSCAN));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bShowIndicator, varmap, "showindicator", doOptionCheck, CAP_INDICATORS));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bUseDuplex, varmap, "duplex", doOptionCheck, CAP_DUPLEX));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bNoUI, varmap, "noui", doOptionCheck, CAP_UICONTROLLABLE, true));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bNoUIWait, varmap, "nouiwait", doOptionCheck, CAP_PAPERDETECTABLE, true));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_NoUIWaitTime, varmap, "nouiwaittime", doOptionCheck, CAP_PAPERDETECTABLE, true));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bUseADF, varmap, "autofeedorflatbed", doOptionCheck, CAP_PAPERDETECTABLE, true));
         mapOptions.insert(test_twainsave_option<std::string, GenericCharacteristicTester<std::string>>(mysource, s_options.m_strHalftone, varmap, "halftone", doOptionCheck, ICAP_HALFTONES));
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dHighlight, varmap, "highlight", doOptionCheck, ICAP_HIGHLIGHT));
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dThreshold, varmap, "threshold", doOptionCheck, ICAP_THRESHOLD));
@@ -1384,7 +1427,7 @@ int start_acquisitions(const po::variables_map& varmap)
         // Set all of the options specified by the user
         if (set_device_options(*g_source, varmap))
         {
-            ts.register_callback(*g_source, STFCallback(&s_options)); 
+            ts.register_callback(*g_source, STFCallback(&s_options));
 
             // Start the acquisition
             auto acq_return = g_source->acquire();
