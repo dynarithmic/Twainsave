@@ -44,6 +44,27 @@ namespace dynarithmic
             attach(select_info);
         }
 
+        twain_source& twain_source::operator=(const source_select_info& select_info)
+        {
+            if (select_info.source_handle != m_theSource)
+            {
+                detach();
+                m_bIsSelected = false;
+                m_sourceInfo = {};
+                m_pSession = {};
+                m_bCloseable = {};
+                m_theSource = {};
+                m_bUIOnlyOn = {};
+                m_bWeakAttach = {};
+                m_pTwainSourceImpl = {};
+                m_theSource = select_info.source_handle;
+                m_pSession = select_info.session_handle;
+                create_interfaces();
+                attach(select_info);
+            }
+            return *this;
+        }
+
         twain_source::~twain_source() noexcept
         {
             try
@@ -158,7 +179,6 @@ namespace dynarithmic
 
         void twain_source::start_apply()
         {
-            auto& ci = get_capability_interface();
             auto& ac = get_acquire_characteristics();
             auto allAppliers = ac.get_appliers();
             if (allAppliers[acquire_characteristics::apply_languageoptions])
@@ -471,9 +491,9 @@ namespace dynarithmic
             /* Create the array of names.  This function is to be used
                since the user may have entered a file name that has
                embedded spaces */
-            auto AFileNames = DTWAIN_ArrayCreate(DTWAIN_ARRAYANSISTRING, 1);
+            auto AFileNames = API_INSTANCE DTWAIN_ArrayCreate(DTWAIN_ARRAYANSISTRING, 1);
             twain_array ta(AFileNames);
-            DTWAIN_ArraySetAtANSIString(AFileNames, 0, ftOptions.get_name().c_str());
+            API_INSTANCE DTWAIN_ArraySetAtANSIString(AFileNames, 0, ftOptions.get_name().c_str());
 
             auto retval = API_INSTANCE DTWAIN_AcquireFileEx(m_theSource, AFileNames,
                 file_type,
@@ -619,6 +639,13 @@ namespace dynarithmic
                                                         static_cast<LONG>(m_source_details.size()), info.indentFactor, FALSE);
             }
             return m_source_details;
+        }
+
+        HANDLE twain_source::get_current_image() 
+        { 
+            if ( m_theSource ) 
+                return API_INSTANCE DTWAIN_GetCurrentAcquiredImage(m_theSource);  
+            return nullptr;
         }
 
         image_information twain_source::get_current_image_information() const

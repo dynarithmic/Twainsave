@@ -926,6 +926,7 @@ bool check_device_options(twain_source& mysource, const po::variables_map& varma
     {
         std::map<std::string, bool> mapOptions;
         doOptionCheck = doOptionCheck && !varmap["optioncheck"].defaulted();
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bAutobrightMode, varmap, "autofeed", doOptionCheck, CAP_AUTOFEED));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bAutobrightMode, varmap, "autobright", doOptionCheck, ICAP_AUTOBRIGHT));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bDeskew, varmap, "deskew", doOptionCheck, ICAP_AUTOMATICDESKEW));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", doOptionCheck, ICAP_AUTOMATICROTATE));
@@ -1257,7 +1258,7 @@ int start_acquisitions(const po::variables_map& varmap)
     auto defaultIter = varmap.find("version");
     if (!defaultIter->second.defaulted())
     {
-        std::cout << "twainsave-opensource " << TWAINSAVE_FULL_VERSION << "\n";
+        std::cout << TWAINSAVE_VERINFO_ORIGINALFILENAME << " " << TWAINSAVE_FULL_VERSION << "\n";
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
@@ -1455,7 +1456,7 @@ int start_acquisitions(const po::variables_map& varmap)
 
 std::string GetTwainSaveExecutionPath()
 {
-    const auto symlocation = boost::dll::symbol_location("twainsave-opensource.exe");
+    const auto symlocation = boost::dll::symbol_location(TWAINSAVE_VERINFO_ORIGINALFILENAME);
     return symlocation.parent_path().string();
 }
 
@@ -1515,7 +1516,7 @@ class CommandLine
 CommandLine::CommandLine(std::istream& in)
 {
     std::string cmd;
-    argv_str.push_back("twainsave-opensource.exe");
+    argv_str.push_back(TWAINSAVE_VERINFO_ORIGINALFILENAME);
     while (std::getline(in, cmd))
     {
         std::string arg;

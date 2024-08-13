@@ -299,16 +299,22 @@ LONG        DLLENTRY_DEF DTWAIN_GetVersionCopyrightW(LPWSTR lpszApp, LONG nLengt
 #ifdef DTWAIN_ANSIDLL
     #define DTWAIN_CHARPTRTYPE LPSTR
     #define DTWAIN_CCHARPTRTYPE LPCSTR
-    #pragma message ("Using ANSI DTWAIN DLL")
+    #ifdef _MSC_VER
+        #pragma message ("Using ANSI DTWAIN DLL")
+    #endif
 #else
 #ifdef DTWAIN_UNICODEDLL
     #define DTWAIN_CHARPTRTYPE LPWSTR
     #define DTWAIN_CCHARPTRTYPE LPCWSTR
-    #pragma message ("Using Unicode DTWAIN DLL")
+    #ifdef _MSC_VER
+        #pragma message ("Using Unicode DTWAIN DLL")
+    #endif
 #else
     #define DTWAIN_CHARPTRTYPE LPTSTR
     #define DTWAIN_CCHARPTRTYPE LPCTSTR
-    #pragma message ("Using Platform-specific DTWAIN DLL")
+    #ifdef _MSC_VER
+        #pragma message ("Using Platform-specific DTWAIN DLL")
+    #endif
 #endif
 #endif
 

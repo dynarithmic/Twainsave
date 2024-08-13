@@ -77,7 +77,6 @@ namespace dynarithmic
             }
 
             const void* ptr = reinterpret_cast<const void*>(this);
-            uint64_t ui64 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(ptr));
 
             API_INSTANCE DTWAIN_SetErrorCallback64(error_callback_proc, PtrToInt64(this)); 
             API_INSTANCE DTWAIN_LoadCustomStringResourcesA(m_twain_characteristics.get_language().c_str());
@@ -313,6 +312,38 @@ namespace dynarithmic
         )
         {
             return API_INSTANCE DTWAIN_CallDSMProc(pSource, pDest, dg, dat, msg, pdata);
+        }
+
+
+        /// Selects a TWAIN source by using the passed-in traits object
+        /// 
+        /// @Returns a source_select_info describing the selection of the source 
+        source_select_info twain_session::select_source(select_source_traits& traits)
+        {
+            switch (traits.get_select_type())
+            {
+                case select_source_traits::use_legacy:
+                {
+                    return select_source();
+                }
+                break;
+                case select_source_traits::use_enhanced_dialog:
+                {
+                    return select_source(select_usedialog(traits.get_enhanced_dialog()));
+                }
+                break;
+                case select_source_traits::use_name:
+                {
+                    return select_source(select_byname(traits.get_source_name()));
+                }
+                break;
+                case select_source_traits::use_default:
+                {
+                    return select_source(select_default());
+                }
+                break;
+            }
+            return {};
         }
 
         /// Returns an error string that describes the error given by **error_number**

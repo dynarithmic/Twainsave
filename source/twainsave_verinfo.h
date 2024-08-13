@@ -26,12 +26,12 @@ OF THIRD PARTY RIGHTS.
 #define TWAINSAVE_PATCH_VERSION 11
 #define TWAINSAVE_FULL_VERSION "1.0.11"
 
-#define TWAINSAVE_VERINFO_COMMENTS          "TwainSave Open Source\0"
+#define TWAINSAVE_VERINFO_COMMENTS          "TwainSave\0"
 #define TWAINSAVE_VERINFO_COMPANYNAME       "Dynarithmic Software\0"
 #define TWAINSAVE_VERINFO_LEGALCOPYRIGHT	"Copyright   2020-2024\0"
-#define TWAINSAVE_VERINFO_PRODUCTNAME		"TwainSave Open Source\0"
-#define TWAINSAVE_VERINFO_INTERNALNAME      "TwainSave_opensource.exe\0"
-#define TWAINSAVE_VERINFO_ORIGINALFILENAME  "TwainSave_opensource.exe\0"
+#define TWAINSAVE_VERINFO_PRODUCTNAME		"TwainSave\0"
+#define TWAINSAVE_VERINFO_ORIGINALFILENAME  "twainsave-opensource.exe\0"
+#define TWAINSAVE_VERINFO_INTERNALNAME      "twainsave-opensource.exe\0"
 #define TWAINSAVE_VERINFO_LEGALTRADEMARKS   "Dynarithmic Software\0"
 #define TWAINSAVE_VERINFO_FILEDESCRIPTION    "\0"
 #define TWAINSAVE_VERINFO_SPECIALBUILD       "Open Source Version\0"
