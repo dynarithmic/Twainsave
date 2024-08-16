@@ -1,0 +1,15 @@
+20000 TwainSave ran successfully.
+20001 File name was not specified.  The TwainSave command-line is missing the --filename option.
+20002 Could not start TWAIN system.
+20003 Could not start TWAIN device.  If the --selectdefault command was used to open the TWAIN device, the default device (TWAIN driver or hardware) is faulty.
+20004 Could not save file successfully.
+20005 Bad or illegal command-line argument(s).
+20006 User cancelled TwainSave by not selecting a device.
+20007 Error in starting the acquisition process from the device.
+20008 Device does not support Black/White, Grayscale, RGB, Palette, CMY, or CMYK images.
+20009 Console not available.  Use -noconsole option.
+20010 TwainSave has timed out due to no paper being placed in feeder within specified time frame.  See --nouiwait and --nouiwaittime for more information.
+20011 TwainSave user interface could not be enabled.
+20012 TwainSave exited due to file already existing.  This return code will occur if --overwritemode 2 is specified.
+20013 Device does not support the mode 2 file type specified.  See --filetype for mode 2 file types.
+20014 Device does not support the --uionly mode.

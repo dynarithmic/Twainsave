@@ -1,23 +1,29 @@
-# Twainsave
-Twainsave is a free, open source version of Dynarithmic Software's [TwainSave](http://www.dynarithmic.com/onlinehelp5/twainsave_opensource/Introduction.html) command-line program to access TWAIN devices and convert scanned pages to image files (BMP, JPEG, TIFF, etc).  This version is licensed under the Apache 2.0 license.  
+# TwainSave
+TwainSave is a free, open source version of Dynarithmic Software's [TwainSave](http://www.dynarithmic.com/onlinehelp5/twainsave_opensource/Introduction.html) command-line program to access TWAIN devices and convert scanned pages to image files (BMP, JPEG, TIFF, etc).  This version is licensed under the Apache 2.0 license.  
 
-Note that this version of TwainSave currently lacks some features of the commercial version of TwainSave.  We are in the process of adding these features to the open source version periodically.  
+Close to all of the functionality that is in the commercial version of TwainSave is implemented in the open source version.  
 
-Currently, close to all of the functionality that is in the commercial version of TwainSave is implemented in the open source version.  
+Note that there are two copies of the TwainSave executable files for each architecture and TWAIN device  (32-bit and 64-bit).  To access 32-bit TWAIN devices, you must run the 32-bit version of TwainSave, and similarly, to access 64-bit TWAIN devices, you must run the 64-bit version of TwainSave.
 
-Note that there are two copies of the Twainsave executable files for each architecture (32-bit and 64-bit).  In the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/32-bit" target="_blank">32-bit version of Twainsave</a>, you will see **twainsave.exe**, and **twainsave-opensource.exe**, and for the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/64-bit" target="_blank">64-bit version of Twainsave</a>, the executable files are **twainsave-opensource.exe** and **twainsave64.exe**.  
+In the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/32-bit" target="_blank">32-bit version of TwainSave</a>, you will see **twainsave.exe**, and **twainsave-opensource.exe**, and for the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/64-bit" target="_blank">64-bit version of TwainSave</a>, the executable files are **twainsave-opensource.exe** and **twainsave64.exe**.  
 
 # Getting started
 There currently isn't an installation package, so the installation will be manual (but very simple).
 
-To get started, you can copy all the files from the TwainSave 32-bit folder to an empty folder on your computer.  Then you can either run Twainsave.exe directly from that folder, or set a PATH to the folder and run TwainSave.exe.
+To get started, 
 
-For 64-bit TwainSave, create another empty folder and copy all of the components in the 64-bit folder to the empty folder.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
+1) For 32-bit TwainSave, unpack the <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/32-bit" target="_blank">twainsave.zip</a> file to an empty folder on your computer.
+2) You can either run twainsave.exe directly from that folder, or set a PATH to the folder and run twainsave.exe.
+
+3) For <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/64-bit" target="_blank">64-bit TwainSave</a>, create another empty folder and follow steps 1) and 2) by opening the twainsave.zip file.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
+
+4) If when running TwainSave, you receive an error stating that **VCRUNTIME140.dll and MSVCP140.dll are missing**, you will need to install the <a href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170" target="_blank">Visual C++ Redistributables</a> for <a href="https://aka.ms/vs/17/release/vc_redist.x86.exe" target="_blank">X86</a> if you are running the 32-bit TwainSave, and 
+<a href="https://aka.ms/vs/17/release/vc_redist.x64.exe" target="_blank">X64</a> if you will be running the 64-bit version of TwainSave.
 
 The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
 ----
-The current open source Twainsave version is **1.0.10**.
+The current open source TwainSave version is **1.0.11**.
 
 ----
 
@@ -83,20 +89,10 @@ In addition, you must have the import libraries **dtwain32u.lib** and **dtwain64
 
 There is no need to rebuild DTWAIN first, however I would recommend you build DTWAIN first to ensure you have the correct requirements for building TwainSave.    
 
-<u>**Note:**</u>
-
-The default Visual Studio project that will be generated by CMake will create TwainSave executables that do not include the runtime libraries **MSVCP140.DLL** and **VCRUNTIME140.DLL**.  If you are rebuilding TwainSave, you should have these DLL's already installed by your Visual Studio installation.  
-
-If you do not have these runtime DLL's installed, TwainSave.exe will not start due to these missing DLL's.  This issue can be remedied by either
-
-1) downloading and installing the [Microsoft Visual C++ Redistributables](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170), or
-
-2) Adjusting the projects properties to use the runtime library **MultiThreaded (/MT)** instead of the **MultiThreaded DLL (/MD)** runtime library.  Then rebuild TwainSave using the updated runtime library option.
-
 
 ---------
 ## To-do list
 
-- Implement the **-verbose** and **-verboselog** option.
+- Implement the **--verboselog** option.
 
 

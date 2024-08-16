@@ -1,0 +1,18 @@
+TwainSave version changes
+
+1.0.11
+
+- Add --jquality to set the JPEG Quality Factor when acquiring JPEG images.
+
+- Add --optioncheck option to list all TwainSave options available for the selected device.
+
+- Add additional --color options:
+	--color 3  (Palette) 
+	--color 4  (CMY)
+	--color 5  (CMYK)
+
+- Add --imprinter option to select the imprinter to use when --imprinterstring is specified.
+
+- Adjust --verbose to test some of the options given on the Twainsave command line.
+
+- Add --autofeed (missing from the open source version).
