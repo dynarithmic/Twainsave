@@ -12,10 +12,10 @@ There currently isn't an installation package, so the installation will be manua
 
 To get started, 
 
-1) For 32-bit TwainSave, unpack the <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/32-bit" target="_blank">twainsave.zip</a> file to an empty folder on your computer.
+1) For 32-bit TwainSave, unpack the <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/32-bit" target="_blank">twainsave32.zip</a> file to an empty folder on your computer.
 2) You can either run twainsave.exe directly from that folder, or set a PATH to the folder and run twainsave.exe.
 
-3) For <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/64-bit" target="_blank">64-bit TwainSave</a>, create another empty folder and follow steps 1) and 2) by opening the twainsave.zip file.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
+3) For <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/64-bit" target="_blank">64-bit TwainSave</a>, create another empty folder and follow steps 1) and 2) by opening the twainsave64.zip file.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
 
 4) If when running TwainSave, you receive an error stating that **VCRUNTIME140.dll and MSVCP140.dll are missing**, you will need to install the <a href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170" target="_blank">Visual C++ Redistributables</a> for <a href="https://aka.ms/vs/17/release/vc_redist.x86.exe" target="_blank">X86</a> if you are running the 32-bit TwainSave, and 
 <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe" target="_blank">X64</a> if you will be running the 64-bit version of TwainSave.
