@@ -10,9 +10,12 @@ Note that there are two copies of the Twainsave executable files for each archit
 # Getting started
 There currently isn't an installation package, so the installation will be manual (but very simple).
 
-To get started, you can copy all the files from the TwainSave 32-bit folder to an empty folder on your computer.  Then you can either run Twainsave.exe directly from that folder, or set a PATH to the folder and run TwainSave.exe.
+To get started, 
 
-For 64-bit TwainSave, create another empty folder and copy all of the components in the 64-bit folder to the empty folder.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
+1) For 32-bit TwainSave, unpack the <a href="https://github.com/dynarithmic/Twainsave/tree/master/binaries/32-bit" target="_blank">twainsave.zip</a> file to an empty folder on your computer.
+2) You can either run Twainsave.exe directly from that folder, or set a PATH to the folder and run TwainSave.exe.
+
+3) For <a href="https://github.com/dynarithmic/Twainsave/tree/master/binaries/64-bit" target="_blank">64-bit TwainSave</a>, create another empty folder and follow steps 1) and 2) by opening the twainsave.zip file.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
 
 The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
@@ -97,6 +100,6 @@ If you do not have these runtime DLL's installed, TwainSave.exe will not start d
 ---------
 ## To-do list
 
-- Implement the **-verbose** and **-verboselog** option.
+- Implement the **--verboselog** option.
 
 

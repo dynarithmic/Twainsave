@@ -202,6 +202,8 @@ LONG DLLENTRY_DEF DTWAIN_GetDSMFullNameA(LONG DSMType, LPSTR szDLLName, LONG nMa
 LONG DLLENTRY_DEF DTWAIN_GetDSMFullNameW(LONG DSMType, LPWSTR szDLLName, LONG nMaxLen, LPLONG pWhichSearch);
 LONG DLLENTRY_DEF DTWAIN_GetErrorStringA(LONG lError, LPSTR lpszBuffer, LONG nLength);
 LONG DLLENTRY_DEF DTWAIN_GetErrorStringW(LONG lError, LPWSTR lpszBuffer, LONG nLength);
+LONG DLLENTRY_DEF DTWAIN_GetResourceStringA(LONG ResourceID, LPSTR lpszBuffer, LONG nMaxLen);
+LONG DLLENTRY_DEF DTWAIN_GetResourceStringW(LONG ResourceID, LPWSTR lpszBuffer, LONG nMaxLen);
 LONG DLLENTRY_DEF DTWAIN_GetExtCapFromNameA(LPCSTR szName);
 LONG DLLENTRY_DEF DTWAIN_GetExtCapFromNameW(LPCWSTR szName);
 LONG DLLENTRY_DEF DTWAIN_GetExtNameFromCapA(LONG nValue, LPSTR szValue, LONG nLength);
@@ -327,6 +329,7 @@ LONG           DLLENTRY_DEF      DTWAIN_GetLibraryPath(DTWAIN_CHARPTRTYPE lpszVe
 LONG           DLLENTRY_DEF      DTWAIN_GetShortVersionString(DTWAIN_CHARPTRTYPE lpszVer, LONG nLength);
 LONG           DLLENTRY_DEF      DTWAIN_GetVersionInfo(DTWAIN_CHARPTRTYPE lpszVer, LONG nLength);
 LONG           DLLENTRY_DEF      DTWAIN_GetErrorString(LONG lError, DTWAIN_CHARPTRTYPE lpszBuffer, LONG nMaxLen);
+LONG           DLLENTRY_DEF      DTWAIN_GetResourceString(LONG ResourceID, DTWAIN_CHARPTRTYPE lpszBuffer, LONG nMaxLen);
 LONG           DLLENTRY_DEF      DTWAIN_GetConditionCodeString(LONG lError, DTWAIN_CHARPTRTYPE lpszBuffer, LONG nMaxLen);
 LONG           DLLENTRY_DEF      DTWAIN_GetTwainStringName(LONG category, LONG TwainID, DTWAIN_CHARPTRTYPE lpszBuffer, LONG nMaxLen);
 LONG           DLLENTRY_DEF      DTWAIN_GetTwainIDFromName(DTWAIN_CCHARPTRTYPE lpszBuffer);

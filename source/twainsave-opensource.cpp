@@ -52,6 +52,7 @@ OF THIRD PARTY RIGHTS.
 #include "twainsave_verinfo.h"
 
 std::string generate_details();
+std::vector<std::string> vReturnStrings;
 
 template <typename E>
 constexpr auto to_underlying(E e) noexcept
@@ -84,6 +85,7 @@ constexpr auto to_underlying(E e) noexcept
 #define RETURN_UIONLY_SUPPORT_ERROR     14  
 #define RETURN_COMMANDFILE_NOT_FOUND    15
 #define RETURN_COMMANDFILE_OPEN_ERROR   16
+#define RETURN_CODE_LAST (RETURN_COMMANDFILE_OPEN_ERROR + 1)
 
 #define TWAINSAVE_DEFAULT_TITLE "TwainSave - OpenSource"
 #define TWAINSAVE_INI_FILE "twainsave.ini"
@@ -148,8 +150,8 @@ struct scanner_options
     int m_DSMSearchOrder;
     std::unordered_map<std::string, dynarithmic::twain::filetype_value::value_type> m_FileTypeMap;
     std::unordered_map<int, dynarithmic::twain::color_value::value_type> m_ColorTypeMap;
-    std::unordered_map<int, dynarithmic::twain::orientation_value::value_type> m_OrientationTypeMap;
-    std::unordered_map<std::string, dynarithmic::twain::supportedsizes_value::value_type> m_PageSizeMap;
+    std::map<int, dynarithmic::twain::orientation_value::value_type> m_OrientationTypeMap;
+    std::map<std::string, dynarithmic::twain::supportedsizes_value::value_type> m_PageSizeMap;
     std::array<long, 4> m_errorLevels;
     bool m_bUseFileInc;
     int m_FileIncrement;
@@ -164,8 +166,8 @@ struct scanner_options
     int m_nOverwriteCount;
     int m_nOverwriteWidth;
     std::string m_strLanguage;
-    std::unordered_map<std::string, dynarithmic::twain::units_value::value_type> m_MeasureUnitMap;
-    std::unordered_map<int, dynarithmic::twain::jobcontrol_value::value_type> m_JobControlMap;
+    std::map<std::string, dynarithmic::twain::units_value::value_type> m_MeasureUnitMap;
+    std::map<int, dynarithmic::twain::jobcontrol_value::value_type> m_JobControlMap;
     std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMap;
     std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMapOff;
     std::unordered_map<std::string, std::pair<dynarithmic::twain::filetype_value::value_type, dynarithmic::twain::compression_value::value_type>> m_MapMode2Map;
@@ -668,11 +670,51 @@ struct GenericCharacteristicTester
         std::vector<T> testArray;
         std::cout << "Testing if " << value << " can be used...\n";
         testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
-        bool valuefound = std::find(testArray.begin(), testArray.end(), value) != testArray.end();
-        std::cout << (valuefound ? "Success!  " : "Sorry : ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
-            << " support the value when requested for --" << entry << "\n";
+        options_writer(theSource, entry, testArray, value, std::find(testArray.begin(), testArray.end(), value) != testArray.end());
     }
 };
+
+template <typename K, typename V>
+bool MapCharacteristicTester(twain_source& theSource, std::string entry, std::map<K, V>& testMap, const K& value, int capvalue)
+{
+    std::vector<V> testArray;
+    if constexpr (is_stringtype<K>())
+        std::cout << "Testing if " << std::quoted(value) << " can be used...\n";
+    else
+        std::cout << "Testing if " << value << " can be used...\n";
+    auto iterForMapKey = testMap.find(value);
+    testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
+
+    // Test to make sure user entry is good
+    if (iterForMapKey != testMap.end())
+    {
+        //User entry passed the first test, now see if the mapped value is supported by the source
+        auto iterForMapValue = std::find(testArray.begin(), testArray.end(), iterForMapKey->second);
+        if (iterForMapValue != testArray.end())
+        {
+            options_writer(theSource, entry, std::vector<K>(), iterForMapKey->first, true);
+            return true;
+        }
+    }
+    else
+    {
+        // User entry failed
+        // Populate the array of keys with the supported device values
+        std::map<V, K> mirrormap;
+        for (auto& pr : testMap)
+            mirrormap[pr.second] = pr.first;
+        std::vector<K> keyArray;
+        for (auto& testVal : testArray)
+        {
+            auto it = mirrormap.find(testVal);
+            if (it != mirrormap.end())
+                keyArray.push_back(it->second);
+        }
+        // Write the supported items.
+        options_writer(theSource, entry, keyArray, value, false);
+    }
+    return false;
+}
 
 struct BoolCharacteristicTester
 {
@@ -691,14 +733,22 @@ struct DummyCharacteristicTester
     static void test(twain_source&, std::string, T value, int) {}
 };
 
+
+struct sAdditionalTest
+{
+    bool testOnlyTrueFalse = false;
+    bool testMapValue = false;
+    bool testCapOnly = false;
+};
+
 template <typename T, typename ValueTester = DummyCharacteristicTester<T>>
 std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // TWAIN source
-                         const T& value, // value to test
-                         const po::variables_map& varmap, 
-                         const std::string& entry, 
-                         bool bSkipEntryCheck,
-                         int capvalue,
-                         bool bTestForTrue = false)
+    const T& value, // value to test
+    const po::variables_map& varmap,
+    const std::string& entry,
+    bool bSkipEntryCheck,
+    int capvalue,
+    const sAdditionalTest& additionalTest = { false, false, false })
 {
     bool issupported = false;
     auto iter = varmap.find(entry);
@@ -708,21 +758,23 @@ std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // T
         {
             if (capvalue)
             {
-                if ( !bSkipEntryCheck)
+                if (!bSkipEntryCheck)
                     std::cout << "Checking if device supports --" << entry << " ...\n";
                 // test if the source supports what we're supposed to be setting later
                 issupported = theSource.get_capability_interface().is_cap_supported(capvalue);
 
                 // do further testing 
-                if (bTestForTrue)
+                if (additionalTest.testCapOnly || additionalTest.testOnlyTrueFalse)
                 {
-                    issupported = BoolCharacteristicTester::test(theSource, capvalue);
-                    if ( !bSkipEntryCheck )
+                    if (!additionalTest.testCapOnly)
+                        issupported = BoolCharacteristicTester::test(theSource, capvalue);
+                    if (!bSkipEntryCheck)
                         std::cout << (issupported ? "Success!  " : "Sorry: ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
-                            << "support the \"--" << entry << "\" option\n";
+                        << "support the \"--" << entry << "\" option\n";
                 }
                 else
-                if (!bSkipEntryCheck)
+                // Test for the value only if we are not doing map testing
+                if (!bSkipEntryCheck && !additionalTest.testMapValue)
                 {
                     std::cout << (issupported ? "Success!  " : "Sorry: ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
                         << "support the \"--" << entry << "\" option\n";
@@ -730,12 +782,13 @@ std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // T
                         ValueTester::test(theSource, entry, value, capvalue);
                 }
             }
-            if ( !bSkipEntryCheck)
+            if (!bSkipEntryCheck && !additionalTest.testMapValue)
                 std::cout << std::string(120, '-') << "\n";
         }
     }
     return { entry, issupported };
 }
+
 
 std::string resolve_extension(std::string filetype)
 {
@@ -919,6 +972,33 @@ void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
     }
 }
 
+template <typename K, typename V>
+void test_mapped_values(twain_source& mysource, const po::variables_map& varmap, bool doOptionCheck,
+                        std::map<std::string, bool>& mapOptions, std::map<K, V>& mapUserOptions,
+                        std::string entry, const K& value, int cap)
+{
+    // These need to be tested using a map, since the values entered by the user will be strings that are associated with
+    // a TWAIN value.
+    if (varmap[entry].defaulted())
+        return;
+    auto result = test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, {}, varmap, entry, doOptionCheck, cap, { true, true, true });
+    if (result.second)
+    {
+        if (!doOptionCheck)
+        {
+            auto result2 = MapCharacteristicTester(mysource, entry, mapUserOptions, value, cap);
+            mapOptions.insert({ entry, result2 });
+        }
+        else
+            mapOptions.insert({ entry, true });
+    }
+    else
+        mapOptions.insert({ entry, false });
+    if ( !doOptionCheck )
+        std::cout << std::string(120, '-') << "\n";
+}
+
+
 bool check_device_options(twain_source& mysource, const po::variables_map& varmap, bool doOptionCheck = true)
 {
     // test the characteristics that have been set
@@ -926,21 +1006,21 @@ bool check_device_options(twain_source& mysource, const po::variables_map& varma
     {
         std::map<std::string, bool> mapOptions;
         doOptionCheck = doOptionCheck && !varmap["optioncheck"].defaulted();
-        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bAutobrightMode, varmap, "autofeed", doOptionCheck, CAP_AUTOFEED));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bUseADF, varmap, "autofeed", doOptionCheck, CAP_AUTOFEED));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bAutobrightMode, varmap, "autobright", doOptionCheck, ICAP_AUTOBRIGHT));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bDeskew, varmap, "deskew", doOptionCheck, ICAP_AUTOMATICDESKEW));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bAutoRotateMode, varmap, "autorotate", doOptionCheck, ICAP_AUTOMATICROTATE));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bUseTransparencyUnit ? 1 : 0, varmap, "transparency", doOptionCheck, ICAP_LIGHTPATH));
-        mapOptions.insert(test_twainsave_option(mysource, s_options.m_dRotation, varmap, "rotation", doOptionCheck, ICAP_ROTATION));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bOverscanMode, varmap, "overscan", doOptionCheck, ICAP_OVERSCAN));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bOverscanMode, varmap, "overscanmode", doOptionCheck, ICAP_OVERSCAN));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bShowIndicator, varmap, "showindicator", doOptionCheck, CAP_INDICATORS));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_bUseDuplex, varmap, "duplex", doOptionCheck, CAP_DUPLEX));
-        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bNoUI, varmap, "noui", doOptionCheck, CAP_UICONTROLLABLE, true));
-        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bNoUIWait, varmap, "nouiwait", doOptionCheck, CAP_PAPERDETECTABLE, true));
-        mapOptions.insert(test_twainsave_option(mysource, s_options.m_NoUIWaitTime, varmap, "nouiwaittime", doOptionCheck, CAP_PAPERDETECTABLE, true));
-        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bUseADF, varmap, "autofeedorflatbed", doOptionCheck, CAP_PAPERDETECTABLE, true));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bNoUI, varmap, "noui", doOptionCheck, CAP_UICONTROLLABLE, { true,false }));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bNoUIWait, varmap, "nouiwait", doOptionCheck, CAP_PAPERDETECTABLE, { true, false }));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_NoUIWaitTime, varmap, "nouiwaittime", doOptionCheck, CAP_PAPERDETECTABLE, { true, false }));
+        mapOptions.insert(test_twainsave_option(mysource, s_options.m_bUseADF, varmap, "autofeedorflatbed", doOptionCheck, CAP_PAPERDETECTABLE, { true, false }));
         mapOptions.insert(test_twainsave_option<std::string, GenericCharacteristicTester<std::string>>(mysource, s_options.m_strHalftone, varmap, "halftone", doOptionCheck, ICAP_HALFTONES));
+        mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dRotation, varmap, "rotation", doOptionCheck, ICAP_ROTATION));
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dHighlight, varmap, "highlight", doOptionCheck, ICAP_HIGHLIGHT));
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dThreshold, varmap, "threshold", doOptionCheck, ICAP_THRESHOLD));
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dResolution, varmap, "resolution", doOptionCheck, ICAP_XRESOLUTION));
@@ -948,13 +1028,16 @@ bool check_device_options(twain_source& mysource, const po::variables_map& varma
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_brightness, varmap, "brightness", doOptionCheck, ICAP_BRIGHTNESS));
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dContrast, varmap, "contrast", doOptionCheck, ICAP_CONTRAST));
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(mysource, s_options.m_dShadow, varmap, "shadow", doOptionCheck, ICAP_SHADOW));
-        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_ColorTypeMap[s_options.m_color]), varmap, "color", doOptionCheck, ICAP_PIXELTYPE));
-        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]), varmap, "unitofmeasure", doOptionCheck, ICAP_UNITS));
-        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_PageSizeMap[s_options.m_strPaperSize]), varmap, "papersize", doOptionCheck, ICAP_SUPPORTEDSIZES));
-        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_OrientationTypeMap[s_options.m_Orientation]), varmap, "orientation", doOptionCheck, ICAP_ORIENTATION));
         mapOptions.insert(test_twainsave_option(mysource, s_options.m_strImprinter.empty() ? false : true, varmap, "imprinterstring", doOptionCheck, CAP_PRINTER));
         mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, s_options.m_nPrinter, varmap, "imprinter", doOptionCheck, CAP_PRINTER));
-        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, static_cast<TW_UINT16>(s_options.m_JobControlMap[s_options.m_nJobControl]), varmap, "jobcontrol", doOptionCheck, CAP_JOBCONTROL));
+        mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(mysource, s_options.m_color, varmap, "color", doOptionCheck, ICAP_PIXELTYPE));
+
+        // These need to be tested using a map, since the values entered by the user will be strings that are associated with
+        // a TWAIN value.
+        test_mapped_values(mysource, varmap, doOptionCheck, mapOptions, s_options.m_MeasureUnitMap, "unitofmeasure", s_options.m_strUnitOfMeasure, ICAP_UNITS);
+        test_mapped_values(mysource, varmap, doOptionCheck, mapOptions, s_options.m_PageSizeMap, "papersize", s_options.m_strPaperSize, ICAP_SUPPORTEDSIZES); 
+        test_mapped_values(mysource, varmap, doOptionCheck, mapOptions, s_options.m_OrientationTypeMap, "orientation", s_options.m_Orientation, ICAP_ORIENTATION);
+        test_mapped_values(mysource, varmap, doOptionCheck, mapOptions, s_options.m_JobControlMap, "jobcontrol", s_options.m_nJobControl, CAP_JOBCONTROL);
 
         if (doOptionCheck)
         {
@@ -1338,6 +1421,10 @@ int start_acquisitions(const po::variables_map& varmap)
 
     if (ts)
     {
+        // get the return code resources.
+        for (int i = RETURN_OK; i < RETURN_CODE_LAST; ++i)
+            vReturnStrings.push_back(ts.get_resource_string(DTWAIN_USERRES_START + i));
+
         // Load the language for the TWAIN dialog, diagnose logs, etc.
         if (!varmap["language"].defaulted())
         {
@@ -1556,15 +1643,23 @@ int main(int argc, char *argv[])
         if ( retval.first )
             start_acquisitions(retval.second);
     }
+    auto retcode = s_options.get_return_code();
     if (s_options.m_bNoConsole && !s_options.m_bNoPause)
     {
         // display a pause message
-        std::string s = "\nPress any key to continue...";
+        std::string s = "TwainSave returned code: " + std::to_string(retcode);
+        s += " (" + vReturnStrings[retcode] + ")\nPress any key to continue...";
         DWORD d;
         WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
         char buffer[10];
         ReadConsoleA(GetStdHandle(STD_INPUT_HANDLE), buffer, 1, &d, NULL);
     }
-    return s_options.get_return_code();
+    else
+    {
+        std::string s = "TwainSave returned code: " + std::to_string(retcode);
+        s += " (" + vReturnStrings[retcode] + ")";
+        std::cout << s;
+    }
+    return retcode;
 }
 

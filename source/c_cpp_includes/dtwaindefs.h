@@ -1535,10 +1535,16 @@ DTWAIN DLL are not displayed */
 #define DTWAIN_CONSTANT_TWPF2    44  
 #define DTWAIN_CONSTANT_TWCT     45  
 #define DTWAIN_CONSTANT_TWPS     46  
-#define DTWAIN_CONSTANT_TWSS     47  
+#define DTWAIN_CONSTANT_TWSS     47
 #define DTWAIN_CONSTANT_TWPH     48
 #define DTWAIN_CONSTANT_TWCI     49
 #define DTWAIN_CONSTANT_LAST     (DTWAIN_CONSTANT_TWCI + 1) 
+
+/* This ID is the start of user-defined custom resources */
+#define DTWAIN_USERRES_START     20000
+
+/* Maximum length for a resource string*/
+#define DTWAIN_USERRES_MAXSIZE   8192
 
 #endif
 

@@ -12,3 +12,7 @@ TwainSave version changes
 	--color 5  (CMYK)
 
 - Add --imprinter option to select the imprinter to use when --imprinterstring is specified.
+
+- Adjust --verbose to test some of the options given on the Twainsave command line.
+
+- Add --autofeed (missing from the open source version).

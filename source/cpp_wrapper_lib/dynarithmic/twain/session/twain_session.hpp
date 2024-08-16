@@ -446,6 +446,13 @@ namespace dynarithmic
                 /// @note The error string will be in the language specified by twain_characteristics::get_language()
                 static std::string get_error_string(int32_t error_number);
 
+                /// Returns a resource string 
+                /// 
+                /// @param[in] resource id.  For user-defined resources, this value should be >= DTWAIN_USERRES_START
+                /// @returns A resource string
+                /// @note The string will be in the language specified by twain_characteristics::get_language()
+                static std::string get_resource_string(int32_t resource_id);
+
                 /// Returns the last error encountered by the underlying DTWAIN library
                 /// 
                 /// @returns An error number that represents the last error
