@@ -12,7 +12,7 @@ There currently isn't an installation package, so the installation will be manua
 
 To get started, 
 
-1) For 32-bit TwainSave, unpack the <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/32-bit" target="_blank">twainsave.zip</a> file to an empty folder on your computer.
+1) For 32-bit TwainSave, unpack the <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/32-bit" target="_blank">twainsave32.zip</a> file to an empty folder on your computer.
 2) You can either run twainsave.exe directly from that folder, or set a PATH to the folder and run twainsave.exe.
 
 3) For <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/64-bit" target="_blank">64-bit TwainSave</a>, create another empty folder and follow steps 1) and 2) by opening the twainsave.zip file.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
