@@ -26,8 +26,6 @@ OF THIRD PARTY RIGHTS.
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/uuid/uuid.hpp>            
 #include <boost/uuid/uuid_generators.hpp> 
 #include <boost/uuid/uuid_io.hpp>         
 #include <boost/dll/runtime_symbol_info.hpp>
@@ -50,6 +48,7 @@ OF THIRD PARTY RIGHTS.
 #include <iostream>
 #include "..\simpleini\SimpleIni.h"
 #include "twainsave_verinfo.h"
+#include "twainsave.h"
 
 std::string generate_details();
 std::vector<std::string> vReturnStrings;
@@ -443,7 +442,7 @@ int NumDigits(int x)
                         10)))))))));
 }
 
-std::vector<std::string> SplitPath(const boost::filesystem::path &src) 
+std::vector<std::string> SplitPath(const filesys::path &src) 
 {
     std::vector<std::string> elements;
     for (const auto &p : src)
@@ -453,9 +452,9 @@ std::vector<std::string> SplitPath(const boost::filesystem::path &src)
 
 std::string GetNewFileName(const std::string& fullpath, int inc, int maxWidth)
 {
-    auto vString = SplitPath(boost::filesystem::path(fullpath));
+    auto vString = SplitPath(filesys::path(fullpath));
     auto newName = vString.back();
-    boost::filesystem::path theStem(newName);
+    filesys::path theStem(newName);
 
     // Get just the filename part
     std::string file_part = theStem.stem().string();
@@ -1246,7 +1245,7 @@ public:
     {
         if (m_pScannerOpts->m_nOverwriteMode == OVERWRITE_EXIT)
         {
-            if (boost::filesystem::exists(m_pScannerOpts->m_filename))
+            if (filesys::exists(m_pScannerOpts->m_filename))
             {
                 m_pScannerOpts->set_return_code(RETURN_FILESAVE_FILEEXISTS);
                 return 0;
@@ -1265,7 +1264,7 @@ public:
                 bool bFound = false;
                 while (m_pScannerOpts->m_nOverwriteCount < m_pScannerOpts->m_nOverwriteMax)
                 {
-                    if (boost::filesystem::exists(newName))
+                    if (filesys::exists(newName))
                     {
                         newName = ::GetNewFileName(m_pScannerOpts->m_filename,
                             m_pScannerOpts->m_nOverwriteCount,
@@ -1637,7 +1636,7 @@ CommandLine::CommandLine(std::istream& in)
 
 parse_return_type parse_config_options(const std::string& filename)
 {
-    if (!boost::filesystem::exists(filename))
+    if (!filesys::exists(filename))
     {
         s_options.set_return_code(RETURN_COMMANDFILE_NOT_FOUND);
         return{ false, {} };
