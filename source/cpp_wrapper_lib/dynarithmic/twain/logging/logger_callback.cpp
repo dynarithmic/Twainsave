@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2020 Dynarithmic Software.
+Copyright (c) 2002-2024 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,23 +18,28 @@ FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
 DYNARITHMIC SOFTWARE. DYNARITHMIC SOFTWARE DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
 OF THIRD PARTY RIGHTS.
 */
-#ifndef DTWAIN_TWAIN_ERROR_LOGGER_DETAILS_HPP
-#define DTWAIN_TWAIN_ERROR_LOGGER_DETAILS_HPP
 
-#include <cstddef>
+#include <dynarithmic/twain/twain_values.hpp>
+#include <dynarithmic/twain/session/twain_session.hpp>
+#include <dynarithmic/twain/logging/logger_callback.hpp>
 
 namespace dynarithmic
 {
     namespace twain
     {
-        class error_logger_details
+        LRESULT CALLBACK logger_callback_proc(const char* msg, DTWAIN_LONG64 UserData)
         {
-            size_t buffer_size = 50;
-
-        public:
-            error_logger_details& set_maxsize(size_t val) { buffer_size = val; return *this; }
-            size_t get_maxsize() const { return buffer_size; }
-        };
+            const auto thisObject = reinterpret_cast<twain_session*>(UserData);
+            if (thisObject)
+            {
+                twain_session::logger_type& sesObject = thisObject->get_logger_type();
+                if (sesObject.second && sesObject.second->is_enabled())
+                {
+                    const auto& fn = sesObject.second;
+                    fn->log(msg);
+                }
+            }
+            return 1;
+        }
     }
 }
-#endif

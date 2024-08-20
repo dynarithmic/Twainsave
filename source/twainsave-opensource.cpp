@@ -85,7 +85,8 @@ constexpr auto to_underlying(E e) noexcept
 #define RETURN_UIONLY_SUPPORT_ERROR     14  
 #define RETURN_COMMANDFILE_NOT_FOUND    15
 #define RETURN_COMMANDFILE_OPEN_ERROR   16
-#define RETURN_CODE_LAST (RETURN_COMMANDFILE_OPEN_ERROR + 1)
+#define RETURN_INVALID_FILETYPE         17
+#define RETURN_CODE_LAST (RETURN_INVALID_FILETYPE + 1)
 
 #define TWAINSAVE_DEFAULT_TITLE "TwainSave - OpenSource"
 #define TWAINSAVE_INI_FILE "twainsave.ini"
@@ -172,6 +173,7 @@ struct scanner_options
     std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMapOff;
     std::unordered_map<std::string, std::pair<dynarithmic::twain::filetype_value::value_type, dynarithmic::twain::compression_value::value_type>> m_MapMode2Map;
     std::unordered_map<std::string, TW_UINT16> m_OptionToCapMap;
+    std::map<int, std::string> m_ReturnCodesMap;
     int twainsave_return_value;
     std::string m_strConfigFile;
     struct TwainDialogConfig
@@ -214,6 +216,13 @@ struct scanner_options
                             INIT_TYPE(tif5, filetype_value, tiffjpeg),
                             INIT_TYPE(tif6, filetype_value, tiffdeflate),
                             INIT_TYPE(tif7, filetype_value, tifflzw),
+                            INIT_TYPE(btif1, filetype_value, bigtiffnocompress),
+                            INIT_TYPE(btif2, filetype_value, bigtiffpackbits),
+                            INIT_TYPE(btif3, filetype_value, bigtiffgroup3),
+                            INIT_TYPE(btif4, filetype_value, bigtiffgroup4),
+                            INIT_TYPE(btif5, filetype_value, bigtiffjpeg),
+                            INIT_TYPE(btif6, filetype_value, bigtiffdeflate),
+                            INIT_TYPE(btif7, filetype_value, bigtifflzw),
                             INIT_TYPE(ps1, filetype_value, postscript1),
                             INIT_TYPE(ps2, filetype_value, postscript2),
                             INIT_TYPE(webp, filetype_value, googlewebp) },
@@ -1075,6 +1084,11 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
     auto iter = s_options.m_FileTypeMap.find(s_options.m_filetype);
     auto iterMode2 = s_options.m_MapMode2Map.find(s_options.m_filetype);
 
+    if (iter == s_options.m_FileTypeMap.end() && iterMode2 == s_options.m_MapMode2Map.end())
+    {
+        s_options.set_return_code(RETURN_INVALID_FILETYPE);
+        return false;
+    }
     // set the file type, name
     bool type1 = false;
     bool type2 = false;
@@ -1580,6 +1594,14 @@ void LoadCustomResourcesFromIni()
 
     auto sLanguage = customProfile.GetValue("Twain Dialog", "language", "default");
     s_options.m_DialogConfig.m_language = sLanguage;
+
+    // Load the error strings
+    for (int curError = 0; curError < RETURN_CODE_LAST; ++curError)
+    {
+        std::string errorKey = "error" + std::to_string(curError);
+        auto errorValue = customProfile.GetValue("Error Messages", errorKey.c_str(), "");
+        s_options.m_ReturnCodesMap[curError] = errorValue;
+    }
 }
 
 
@@ -1648,7 +1670,7 @@ int main(int argc, char *argv[])
     {
         // display a pause message
         std::string s = "TwainSave returned code: " + std::to_string(retcode);
-        s += " (" + vReturnStrings[retcode] + ")\nPress any key to continue...";
+        s += " (" + s_options.m_ReturnCodesMap[retcode] + ")\nPress any key to continue...";
         DWORD d;
         WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
         char buffer[10];
@@ -1657,7 +1679,7 @@ int main(int argc, char *argv[])
     else
     {
         std::string s = "TwainSave returned code: " + std::to_string(retcode);
-        s += " (" + vReturnStrings[retcode] + ")";
+        s += " (" + s_options.m_ReturnCodesMap[retcode] + ")";
         std::cout << s;
     }
     return retcode;

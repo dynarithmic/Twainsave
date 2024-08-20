@@ -10,10 +10,10 @@ link_directories($ENV{DTWAIN_LIBRARY_DIR}
                  $ENV{BOOST_LIBRARY_DIR_V143_32})
 add_definitions(-DUNICODE -D_UNICODE)
 add_executable(twainsave-opensource
-    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/acquire_characteristics/acquire_characteristics.cpp
+    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/acquire_characteristics.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/buffered_transfer_info.cpp
-    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/logging/logger_callback.cpp
-    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/session/twain_characteristics.cpp
+    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/logger_callback.cpp
+    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_characteristics.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/options_base.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/paperhandling_info.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/pdf_text_element.cpp
@@ -26,3 +26,6 @@ add_executable(twainsave-opensource
 )
 set_property(TARGET twainsave-opensource PROPERTY CXX_STANDARD 17)
 target_sources(twainsave-opensource PRIVATE ${PROJECT_SOURCE_DIR}/twainsave-opensource.rc)
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
+endif()
