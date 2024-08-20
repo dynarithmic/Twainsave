@@ -72,19 +72,21 @@ If you want to build the source code, the requirements are the same as building 
     a) Visual Studio 2019 
     b) Visual Studio 2022
 
-2) The environment variable(s) used by the build process are as follows:
+2) You will need an installation of the Boost C++ library, version 1.70 or greater (see the link to building DTWAIN for more information).
+
+3) The environment variables used by the build process are as follows:
 
 ```plaintext
-DTWAIN_LIBRARY_DIR
+BOOST_INCLUDE_DIR
+BOOST_LIBRARY_DIR_V142_64
+BOOST_LIBRARY_DIR_V142_32
+BOOST_LIBRARY_DIR_V143_64
+BOOST_LIBRARY_DIR_V143_32
 ```
-The **DTWAIN_LIBRARY_DIR** is the directory where **dtwain32u.lib** and **dtwain64u.lib** import libraries are located, for example:
-```plaintext
-DTWAIN_LIBRARY_DIR=c:\dtwain_libs
-```
-You must have the import libraries **dtwain32u.lib** and **dtwain64u.lib** available.  These libraries can be found in the DTWAIN binary folders, in the **release_libraries.zip** archive in both the 
-[32-bit](https://github.com/dynarithmic/twain_library/tree/master/binaries/32bit) and [64-bit](https://github.com/dynarithmic/twain_library/tree/master/binaries/64bit) folders.
 
-3) Since TwainSave relies on the DTWAIN library to run successfully, you must ensure that **dtwain32u.dll** and **dtwain64u.dll** are available at run time.  Along with these files, the text resources should be made available.  
+See the [DTWAIN source main page](https://github.com/dynarithmic/twain_library_source) to see how to set these enviroment variables to point to the Boost headers and library directories.  
+
+4) Since TwainSave relies on the DTWAIN library to run successfully, you must ensure that **dtwain32u.dll** and **dtwain64u.dll** are available at run time.  Along with these files, the text resources should be made available.  
 
 You can get these runtime files directly from the [binaries](https://github.com/dynarithmic/Twainsave/tree/master/binaries/32-bit) folder and unzipping the packages you see there, and either placing the files directly in the path where the TwainSave executable is existing, or place those files in a directory specified by the PATH environment variable.
 
