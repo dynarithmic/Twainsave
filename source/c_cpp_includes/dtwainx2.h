@@ -612,6 +612,7 @@ typedef LONG (DLLENTRY_DEF * D_GETCURRENTFILENAMEAFUNC)                         
 typedef LONG (DLLENTRY_DEF * D_GETDSMFULLNAMEAFUNC)                             (LONG, LPSTR, LONG, LPLONG);
 typedef DTWAIN_BOOL (DLLENTRY_DEF * D_GETDEVICETIMEDATEAFUNC)                   (DTWAIN_SOURCE, LPSTR);
 typedef LONG (DLLENTRY_DEF * D_GETERRORSTRINGAFUNC)                             (LONG, LPSTR, LONG);
+typedef LONG (DLLENTRY_DEF * D_GETRESOURCESTRINGAFUNC)                          (LONG, LPSTR, LONG);
 typedef LONG (DLLENTRY_DEF * D_GETEXTCAPFROMNAMEAFUNC)                          (LPCSTR);
 typedef LONG (DLLENTRY_DEF * D_GETEXTNAMEFROMCAPAFUNC)                          (LONG, LPSTR, LONG);
 typedef DTWAIN_BOOL (DLLENTRY_DEF * D_GETHALFTONEAFUNC)                         (DTWAIN_SOURCE, LPSTR, LONG);
@@ -735,6 +736,7 @@ typedef LONG (DLLENTRY_DEF * D_GETCURRENTFILENAMEWFUNC)                         
 typedef LONG (DLLENTRY_DEF * D_GETDSMFULLNAMEWFUNC)                             (LONG, LPWSTR, LONG, LPLONG);
 typedef DTWAIN_BOOL (DLLENTRY_DEF * D_GETDEVICETIMEDATEWFUNC)                   (DTWAIN_SOURCE, LPWSTR);
 typedef LONG (DLLENTRY_DEF * D_GETERRORSTRINGWFUNC)                             (LONG, LPWSTR, LONG);
+typedef LONG (DLLENTRY_DEF * D_GETRESOURCESTRINGWFUNC)                          (LONG, LPWSTR, LONG);
 typedef LONG (DLLENTRY_DEF * D_GETEXTCAPFROMNAMEWFUNC)                          (LPCWSTR);
 typedef LONG (DLLENTRY_DEF * D_GETEXTNAMEFROMCAPWFUNC)                          (LONG, LPWSTR, LONG);
 typedef DTWAIN_BOOL (DLLENTRY_DEF * D_GETHALFTONEWFUNC)                         (DTWAIN_SOURCE, LPWSTR, LONG);
@@ -872,6 +874,7 @@ typedef LONG (DLLENTRY_DEF * D_GETCURRENTFILENAMEFUNC)                          
 typedef LONG (DLLENTRY_DEF * D_GETDSMFULLNAMEFUNC)                              (LONG, LPTSTR, LONG, LPLONG);
 typedef DTWAIN_BOOL (DLLENTRY_DEF * D_GETDEVICETIMEDATEFUNC)                    (DTWAIN_SOURCE, LPTSTR);
 typedef LONG (DLLENTRY_DEF * D_GETERRORSTRINGFUNC)                              (LONG, LPTSTR, LONG);
+typedef LONG (DLLENTRY_DEF * D_GETRESOURCESTRINGFUNC)                           (LONG, LPTSTR, LONG);
 typedef LONG (DLLENTRY_DEF * D_GETEXTCAPFROMNAMEFUNC)                           (LPCTSTR);
 typedef LONG (DLLENTRY_DEF * D_GETEXTNAMEFROMCAPFUNC)                           (LONG, LPTSTR, LONG);
 typedef DTWAIN_BOOL (DLLENTRY_DEF * D_GETHALFTONEFUNC)                          (DTWAIN_SOURCE, LPTSTR, LONG);
@@ -1380,6 +1383,9 @@ typedef DTWAIN_SOURCE (DLLENTRY_DEF* D_SELECTDEFAULTSOURCEWITHOPENFUNC)         
     STATIC D_GETERRORSTRINGAFUNC                            DTWAIN_GetErrorStringA;
     STATIC D_GETERRORSTRINGFUNC                             DTWAIN_GetErrorString;
     STATIC D_GETERRORSTRINGWFUNC                            DTWAIN_GetErrorStringW;
+    STATIC D_GETRESOURCESTRINGAFUNC                         DTWAIN_GetResourceStringA;
+    STATIC D_GETRESOURCESTRINGFUNC                          DTWAIN_GetResourceString;
+    STATIC D_GETRESOURCESTRINGWFUNC                         DTWAIN_GetResourceStringW;
     STATIC D_GETEXTCAPFROMNAMEAFUNC                         DTWAIN_GetExtCapFromNameA;
     STATIC D_GETEXTCAPFROMNAMEFUNC                          DTWAIN_GetExtCapFromName;
     STATIC D_GETEXTCAPFROMNAMEWFUNC                         DTWAIN_GetExtCapFromNameW;

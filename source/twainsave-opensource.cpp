@@ -1279,7 +1279,7 @@ public:
                     }
                 }
                 if (bFound)
-                    ::DTWAIN_SetSaveFileNameA(g_source->get_source(), newName.c_str());
+                    API_INSTANCE DTWAIN_SetSaveFileNameA(g_source->get_source(), newName.c_str());
             }
             break;
         }
