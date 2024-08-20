@@ -68,27 +68,25 @@ will write the details to the file **details.log**
 
 If you want to build the source code, the requirements are the same as building the source for the Dynarithmic TWAIN library found [here](https://github.com/dynarithmic/twain_library_source).  
 
-1) Note that the building of the source is initially set up using [CMake](https://cmake.org/).  You can use CMake or CMake-GUI to configure and generate the Visual Studio project files.  Note that you will need either Visual Studio 2019 or Visual Studio 2022 to build the source.
+1) Note that the building of the source is initially set up using [CMake](https://cmake.org/).  You can use CMake or CMake-GUI to configure and generate the Visual Studio project files.  Note that you will need either one of the following compilers to build Twainsave successfully:
+    a) Visual Studio 2019 
+    b) Visual Studio 2022
 
-2) You will need an installation of the Boost C++ library, version 1.70 or greater (see the link to building DTWAIN for more information).
-
-3) The environment variables used by the build process are as follows:
+2) The environment variable(s) used by the build process are as follows:
 
 ```plaintext
-BOOST_INCLUDE_DIR
-BOOST_LIBRARY_DIR_V142_64
-BOOST_LIBRARY_DIR_V142_32
-BOOST_LIBRARY_DIR_V143_64
-BOOST_LIBRARY_DIR_V143_32
 DTWAIN_LIBRARY_DIR
 ```
-The **DTWAIN_LIBRARY_DIR** is the directory where **dtwain32u.lib** and **dtwain64u.lib** are located.  
-
-In addition, you must have the import libraries **dtwain32u.lib** and **dtwain64u.lib** available.  These libraries can be found in the DTWAIN binary folders, in the **release_libraries.zip** archive in both the 
+The **DTWAIN_LIBRARY_DIR** is the directory where **dtwain32u.lib** and **dtwain64u.lib** import libraries are located, for example:
+```plaintext
+DTWAIN_LIBRARY_DIR=c:\dtwain_libs
+```
+You must have the import libraries **dtwain32u.lib** and **dtwain64u.lib** available.  These libraries can be found in the DTWAIN binary folders, in the **release_libraries.zip** archive in both the 
 [32-bit](https://github.com/dynarithmic/twain_library/tree/master/binaries/32bit) and [64-bit](https://github.com/dynarithmic/twain_library/tree/master/binaries/64bit) folders.
 
-There is no need to rebuild DTWAIN first, however I would recommend you build DTWAIN first to ensure you have the correct requirements for building TwainSave.    
+3) Since TwainSave relies on the DTWAIN library to run successfully, you must ensure that **dtwain32u.dll** and **dtwain64u.dll** are available at run time.  Along with these files, the text resources should be made available.  
 
+You can get these runtime files directly from the [binaries](https://github.com/dynarithmic/Twainsave/tree/master/binaries/32-bit) folder and unzipping the packages you see there, and either placing the files directly in the path where the TwainSave executable is existing, or place those files in a directory specified by the PATH environment variable.
 
 ---------
 ## To-do list
