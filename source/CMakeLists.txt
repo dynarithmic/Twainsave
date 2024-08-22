@@ -31,7 +31,6 @@ set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/twain_values.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/acquire_characteristics/acquire_characteristics.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/capability_interface/capability_interface.hpp
-        ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/capability_interface/generated_capfuncs.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/characteristics/twain_select_dialog.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/identity/twain_identity.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/imagehandler/image_handler.hpp
@@ -41,7 +40,6 @@ set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/info/file_transfer_info.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/info/imageinformation_info.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/info/imprinter_info.hpp
-        ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/info/info_base.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/info/paperhandling_info.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/logging/error_logger.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/logging/error_logger_details.hpp
@@ -94,6 +92,9 @@ set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/types/twain_types.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/types/underlying_type.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/utilities/string_utilities.hpp
+        ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/utilities/misc_utilities.hpp
+        ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/types/constexpr_utils.hpp
+        ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/types/eternal_map/include/mapbox/eternal.hpp
 )
  
 link_directories($ENV{BOOST_LIBRARY_DIR_V142_64}
@@ -104,11 +105,13 @@ add_definitions(-DUNICODE -D_UNICODE -DDTWAIN_NOIMPORTLIB)
 add_executable(twainsave-opensource
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/acquire_characteristics.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/buffered_transfer_info.cpp
+    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/imprinter_info.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/logger_callback.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_characteristics.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/options_base.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/paperhandling_info.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/pdf_text_element.cpp
+    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/string_utilities.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_callback.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_session.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_source.cpp

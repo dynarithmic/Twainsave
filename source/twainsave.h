@@ -25,6 +25,10 @@ OF THIRD PARTY RIGHTS.
 	#include <filesystem>
 	namespace filesys = std::filesystem;
 #else
+	#define USE_BOOST_FILESYSTEM
+#endif
+
+#ifdef USE_BOOST_FILESYSTEM
 	#pragma warning (push)
 	#pragma warning (disable : 4714)
 	#include <boost/filesystem.hpp>
