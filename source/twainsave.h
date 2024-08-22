@@ -23,9 +23,12 @@ OF THIRD PARTY RIGHTS.
 
 #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
 	#include <filesystem>
+	#include <string_view>
 	namespace filesys = std::filesystem;
+	using stringview = std::string_view;
 #else
 	#define USE_BOOST_FILESYSTEM
+	#define USE_BOOST_STRINGVIEW
 #endif
 
 #ifdef USE_BOOST_FILESYSTEM
@@ -35,4 +38,12 @@ OF THIRD PARTY RIGHTS.
 	namespace filesys = boost::filesystem;
 	#pragma warning (pop)
 #endif
+#ifdef USE_BOOST_STRINGVIEW
+	#pragma warning (push)
+	#pragma warning (disable : 4714)
+	#include <boost/utility/string_view.hpp>
+	using stringview = boost::string_view;
+	#pragma warning (pop)
 #endif
+#endif
+

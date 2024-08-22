@@ -23,7 +23,7 @@ OF THIRD PARTY RIGHTS.
 
 #include "stdafx.h"
 #include <boost/program_options/cmdline.hpp>
-#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/options_description.hpp> 
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/uuid/uuid_generators.hpp> 
@@ -34,6 +34,7 @@ OF THIRD PARTY RIGHTS.
 #include <dynarithmic/twain/twain_source.hpp>
 #include <dynarithmic/twain/options/pdf_options.hpp>
 #include <dynarithmic/twain/acquire_characteristics/acquire_characteristics.hpp>
+#include <dynarithmic/twain/types/eternal_map/include/mapbox/eternal.hpp>
 #include <string>
 #include <iostream>
 #include <utility>
@@ -85,19 +86,186 @@ constexpr auto to_underlying(E e) noexcept
 #define RETURN_COMMANDFILE_NOT_FOUND    15
 #define RETURN_COMMANDFILE_OPEN_ERROR   16
 #define RETURN_INVALID_FILETYPE         17
-#define RETURN_CODE_LAST (RETURN_INVALID_FILETYPE + 1)
+#define RETURN_INVALID_MEASUREUNIT      18
+#define RETURN_INVALID_PAPERSIZE        19
+#define RETURN_INVALID_COLOR            20
+#define RETURN_INVALID_ORIENTATION      21
+#define RETURN_INVALID_JOBCONTROL       22
+#define RETURN_CODE_LAST (RETURN_INVALID_JOBCONTROL + 1)
 
 #define TWAINSAVE_DEFAULT_TITLE "TwainSave - OpenSource"
 #define TWAINSAVE_INI_FILE "twainsave.ini"
 
 std::unique_ptr<dynarithmic::twain::twain_source> g_source;
 
+
+MAPBOX_ETERNAL_CONSTEXPR const auto g_FileTypeMap = mapbox::eternal::map<stringview, dynarithmic::twain::filetype_value::value_type>(
+    {
+    INIT_TYPE(bmp, filetype_value, bmp),
+    INIT_TYPE(bmprle, filetype_value, bmprle),
+    INIT_TYPE(gif, filetype_value,gif),
+    INIT_TYPE(pcx, filetype_value,pcx),
+    INIT_TYPE(dcx, filetype_value,dcx),
+    INIT_TYPE(pdf, filetype_value,pdf),
+    INIT_TYPE(ico, filetype_value,windowsicon),
+    INIT_TYPE(png, filetype_value,png),
+    INIT_TYPE(tga, filetype_value,targa),
+    INIT_TYPE(tgarle, filetype_value, targarle),
+    INIT_TYPE(psd, filetype_value,psd),
+    INIT_TYPE(emf, filetype_value,enhancedmetafile),
+    INIT_TYPE(wbmp, filetype_value,wirelessbmp),
+    INIT_TYPE(wmf, filetype_value,windowsmetafile),
+    INIT_TYPE(jpeg, filetype_value,jpeg),
+    INIT_TYPE(jp2, filetype_value,jpeg2k),
+    INIT_TYPE(tif1, filetype_value,tiffnocompress),
+    INIT_TYPE(tif2, filetype_value,tiffpackbits),
+    INIT_TYPE(tif3, filetype_value, tiffgroup3),
+    INIT_TYPE(tif4, filetype_value, tiffgroup4),
+    INIT_TYPE(tif5, filetype_value, tiffjpeg),
+    INIT_TYPE(tif6, filetype_value, tiffdeflate),
+    INIT_TYPE(tif7, filetype_value, tifflzw),
+    INIT_TYPE(btif1, filetype_value, bigtiffnocompress),
+    INIT_TYPE(btif2, filetype_value, bigtiffpackbits),
+    INIT_TYPE(btif3, filetype_value, bigtiffgroup3),
+    INIT_TYPE(btif4, filetype_value, bigtiffgroup4),
+    INIT_TYPE(btif5, filetype_value, bigtiffjpeg),
+    INIT_TYPE(btif6, filetype_value, bigtiffdeflate),
+    INIT_TYPE(btif7, filetype_value, bigtifflzw),
+    INIT_TYPE(ps1, filetype_value, postscript1),
+    INIT_TYPE(ps2, filetype_value, postscript2),
+    INIT_TYPE(webp, filetype_value, googlewebp)
+    });
+
+
+MAPBOX_ETERNAL_CONSTEXPR const auto g_PaperSizeMap = mapbox::eternal::map<stringview, dynarithmic::twain::papersize_value::value_type>(
+    {
+    INIT_TYPE(custom, papersize_value, CUSTOM),
+    INIT_TYPE(variable, papersize_value, VARIABLE),
+    INIT_TYPE(letter, papersize_value, USLETTER),
+    INIT_TYPE(none, papersize_value, NONE),
+    INIT_TYPE(legal, papersize_value, USLEGAL),
+    INIT_TYPE(ledger, papersize_value, USLEDGER),
+    INIT_TYPE(executive, papersize_value, USEXECUTIVE),
+    INIT_TYPE(statement, papersize_value, USSTATEMENT),
+    INIT_TYPE(businesscard, papersize_value, BUSINESSCARD),
+    INIT_TYPE(4A0, papersize_value, FOURA0),
+    INIT_TYPE(2A0, papersize_value, TWOA0),
+    INIT_TYPE(JISB0, papersize_value, JISB0),
+    INIT_TYPE(JISB1, papersize_value, JISB1),
+    INIT_TYPE(JISB2, papersize_value, JISB2),
+    INIT_TYPE(JISB3, papersize_value, JISB3),
+    INIT_TYPE(JISB4, papersize_value, JISB4),
+    INIT_TYPE(JISB5, papersize_value, JISB5),
+    INIT_TYPE(JISB6, papersize_value, JISB6),
+    INIT_TYPE(JISB7, papersize_value, JISB7),
+    INIT_TYPE(JISB8, papersize_value, JISB8),
+    INIT_TYPE(JISB9, papersize_value, JISB9),
+    INIT_TYPE(JISB10, papersize_value, JISB10),
+    INIT_TYPE(A0, papersize_value, A0),
+    INIT_TYPE(A1, papersize_value, A1),
+    INIT_TYPE(A2, papersize_value, A2),
+    INIT_TYPE(A3, papersize_value, A3),
+    INIT_TYPE(A4, papersize_value, A4),
+    INIT_TYPE(A5, papersize_value, A5),
+    INIT_TYPE(A6, papersize_value, A6),
+    INIT_TYPE(A7, papersize_value, A7),
+    INIT_TYPE(A8, papersize_value, A8),
+    INIT_TYPE(A9, papersize_value, A9),
+    INIT_TYPE(A10, papersize_value, A10),
+    INIT_TYPE(B0, papersize_value, ISOB0),
+    INIT_TYPE(B1, papersize_value, ISOB1),
+    INIT_TYPE(B2, papersize_value, ISOB2),
+    INIT_TYPE(B3, papersize_value, ISOB3),
+    INIT_TYPE(B4, papersize_value, ISOB4),
+    INIT_TYPE(B5, papersize_value, ISOB5),
+    INIT_TYPE(B6, papersize_value, ISOB6),
+    INIT_TYPE(B7, papersize_value, ISOB7),
+    INIT_TYPE(B8, papersize_value, ISOB8),
+    INIT_TYPE(B9, papersize_value, ISOB9),
+    INIT_TYPE(B10, papersize_value, ISOB10),
+    INIT_TYPE(C0, papersize_value, C0),
+    INIT_TYPE(C1, papersize_value, C1),
+    INIT_TYPE(C2, papersize_value, C2),
+    INIT_TYPE(C3, papersize_value, C3),
+    INIT_TYPE(C4, papersize_value, C4),
+    INIT_TYPE(C5, papersize_value, C5),
+    INIT_TYPE(C6, papersize_value, C6),
+    INIT_TYPE(C7, papersize_value, C7),
+    INIT_TYPE(C8, papersize_value, C8),
+    INIT_TYPE(C9, papersize_value, C9),
+    INIT_TYPE(C10, papersize_value, C10),
+    });
+
+MAPBOX_ETERNAL_CONSTEXPR const auto g_ColorTypeMap = mapbox::eternal::map<int, dynarithmic::twain::color_value::value_type>(
+    {
+    INIT_TYPE_2(0, color_value, bw),
+    INIT_TYPE_2(1, color_value, gray),
+    INIT_TYPE_2(2, color_value, rgb),
+    INIT_TYPE_2(3, color_value, palette),
+    INIT_TYPE_2(4, color_value, cmy),
+    INIT_TYPE_2(5, color_value, cmyk) 
+    });
+
+MAPBOX_ETERNAL_CONSTEXPR const auto g_MeasureUnitMap = mapbox::eternal::map<stringview, dynarithmic::twain::units_value::value_type>(
+    {
+    INIT_TYPE(inch, units_value, inches),
+    INIT_TYPE(cm, units_value, centimeters),
+    INIT_TYPE(pica, units_value, picas),
+    INIT_TYPE(point, units_value, points),
+    INIT_TYPE(twip, units_value, twips),
+    INIT_TYPE(pixel, units_value, pixels),
+    INIT_TYPE(mm, units_value, millimeters)
+    });
+
+MAPBOX_ETERNAL_CONSTEXPR const auto g_OrientationTypeMap = mapbox::eternal::map<int, dynarithmic::twain::orientation_value::value_type>(
+    {
+    INIT_TYPE_2(0, orientation_value, orient_0),
+    INIT_TYPE_2(90, orientation_value, orient_90),
+    INIT_TYPE_2(180, orientation_value, orient_180),
+    INIT_TYPE_2(270, orientation_value, orient_270)
+    });
+
+MAPBOX_ETERNAL_CONSTEXPR const auto g_JobControlMap = mapbox::eternal::map<int, dynarithmic::twain::jobcontrol_value::value_type>(
+    {
+    INIT_TYPE_2(0, jobcontrol_value, none),
+    INIT_TYPE_2(1, jobcontrol_value, include_separator),
+    INIT_TYPE_2(2, jobcontrol_value, exclude_separator)
+    });
+
+MAPBOX_ETERNAL_CONSTEXPR const auto g_PDFEncryptMap = mapbox::eternal::map<stringview, dynarithmic::twain::pdf_options::pdf_permission>(
+    {
+    INIT_TYPE(modify, pdf_options::pdf_permission, modify),
+    INIT_TYPE(copy, pdf_options::pdf_permission, copy),
+    INIT_TYPE(modannot, pdf_options::pdf_permission, modifyannotations),
+    INIT_TYPE(fillin, pdf_options::pdf_permission, fillin),
+    INIT_TYPE(extract, pdf_options::pdf_permission, extract),
+    INIT_TYPE(assembly, pdf_options::pdf_permission, assembly),
+    INIT_TYPE(degradeprint, pdf_options::pdf_permission, degradedprint),
+    INIT_TYPE(print, pdf_options::pdf_permission, print),
+    INIT_TYPE(all, pdf_options::pdf_permission, all)
+    });
+
+MAPBOX_ETERNAL_CONSTEXPR const auto g_PDFEncryptMapOff = mapbox::eternal::map<stringview, dynarithmic::twain::pdf_options::pdf_permission>(
+    {
+    INIT_TYPE(nomodify, pdf_options::pdf_permission, modify),
+    INIT_TYPE(nocopy, pdf_options::pdf_permission, copy),
+    INIT_TYPE(nomodannot, pdf_options::pdf_permission, modifyannotations),
+    INIT_TYPE(nofillin, pdf_options::pdf_permission, fillin),
+    INIT_TYPE(noextract, pdf_options::pdf_permission, extract),
+    INIT_TYPE(noassembly, pdf_options::pdf_permission, assembly),
+    INIT_TYPE(nodegradeprint, pdf_options::pdf_permission, degradedprint),
+    INIT_TYPE(noprint, pdf_options::pdf_permission, print),
+    INIT_TYPE(none, pdf_options::pdf_permission, all)
+    });
+
+std::unordered_map<std::string, std::pair<dynarithmic::twain::filetype_value::value_type, dynarithmic::twain::compression_value::value_type>> m_MapMode2Map;
+
 struct scanner_options
 {
     std::string m_filetype;
     std::string m_filename;
     std::string m_area;
-    bool m_bUseADF;
+    bool m_bUseADF{};
     bool m_bUseADFOrFlatbed;
     bool m_bCreateDir;
     bool m_bAutobrightMode;
@@ -148,10 +316,6 @@ struct scanner_options
     bool m_bUseDSM2;
     std::string m_strTempDirectory;
     int m_DSMSearchOrder;
-    std::unordered_map<std::string, dynarithmic::twain::filetype_value::value_type> m_FileTypeMap;
-    std::unordered_map<int, dynarithmic::twain::color_value::value_type> m_ColorTypeMap;
-    std::map<int, dynarithmic::twain::orientation_value::value_type> m_OrientationTypeMap;
-    std::map<std::string, dynarithmic::twain::supportedsizes_value::value_type> m_PageSizeMap;
     std::array<long, 4> m_errorLevels;
     bool m_bUseFileInc;
     int m_FileIncrement;
@@ -166,12 +330,7 @@ struct scanner_options
     int m_nOverwriteCount;
     int m_nOverwriteWidth;
     std::string m_strLanguage;
-    std::map<std::string, dynarithmic::twain::units_value::value_type> m_MeasureUnitMap;
-    std::map<int, dynarithmic::twain::jobcontrol_value::value_type> m_JobControlMap;
-    std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMap;
-    std::unordered_map<std::string, dynarithmic::twain::pdf_options::pdf_permission> m_PDFEncryptMapOff;
-    std::unordered_map<std::string, std::pair<dynarithmic::twain::filetype_value::value_type, dynarithmic::twain::compression_value::value_type>> m_MapMode2Map;
-    std::unordered_map<std::string, TW_UINT16> m_OptionToCapMap;
+    std::unordered_map<stringview, std::pair<dynarithmic::twain::filetype_value::value_type, dynarithmic::twain::compression_value::value_type>> m_MapMode2Map;
     std::map<int, std::string> m_ReturnCodesMap;
     int twainsave_return_value;
     std::string m_strConfigFile;
@@ -191,149 +350,6 @@ struct scanner_options
     scanner_options() : twainsave_return_value(RETURN_OK),
                             m_nOverwriteCount(1),
                             m_nOverwriteWidth(1),
-                            m_FileTypeMap{ 
-                            INIT_TYPE(bmp, filetype_value, bmp),
-                            INIT_TYPE(bmprle, filetype_value, bmprle),
-                            INIT_TYPE(gif, filetype_value,gif),
-                            INIT_TYPE(pcx, filetype_value,pcx),
-                            INIT_TYPE(dcx, filetype_value,dcx),
-                            INIT_TYPE(pdf, filetype_value,pdf),
-                            INIT_TYPE(ico, filetype_value,windowsicon),
-                            INIT_TYPE(png, filetype_value,png),
-                            INIT_TYPE(tga, filetype_value,targa),
-                            INIT_TYPE(tgarle, filetype_value, targarle),
-                            INIT_TYPE(psd, filetype_value,psd),
-                            INIT_TYPE(emf, filetype_value,enhancedmetafile),
-                            INIT_TYPE(wbmp, filetype_value,wirelessbmp),
-                            INIT_TYPE(wmf, filetype_value,windowsmetafile),
-                            INIT_TYPE(jpeg, filetype_value,jpeg),
-                            INIT_TYPE(jp2, filetype_value,jpeg2k),
-                            INIT_TYPE(tif1, filetype_value,tiffnocompress),
-                            INIT_TYPE(tif2, filetype_value,tiffpackbits),
-                            INIT_TYPE(tif3, filetype_value, tiffgroup3),
-                            INIT_TYPE(tif4, filetype_value, tiffgroup4),
-                            INIT_TYPE(tif5, filetype_value, tiffjpeg),
-                            INIT_TYPE(tif6, filetype_value, tiffdeflate),
-                            INIT_TYPE(tif7, filetype_value, tifflzw),
-                            INIT_TYPE(btif1, filetype_value, bigtiffnocompress),
-                            INIT_TYPE(btif2, filetype_value, bigtiffpackbits),
-                            INIT_TYPE(btif3, filetype_value, bigtiffgroup3),
-                            INIT_TYPE(btif4, filetype_value, bigtiffgroup4),
-                            INIT_TYPE(btif5, filetype_value, bigtiffjpeg),
-                            INIT_TYPE(btif6, filetype_value, bigtiffdeflate),
-                            INIT_TYPE(btif7, filetype_value, bigtifflzw),
-                            INIT_TYPE(ps1, filetype_value, postscript1),
-                            INIT_TYPE(ps2, filetype_value, postscript2),
-                            INIT_TYPE(webp, filetype_value, googlewebp) },
-
-                        m_ColorTypeMap{
-                            INIT_TYPE_2(0, color_value, bw),
-                            INIT_TYPE_2(1, color_value, gray),
-                            INIT_TYPE_2(2, color_value, rgb),
-                            INIT_TYPE_2(3, color_value, palette),
-                            INIT_TYPE_2(4, color_value, cmy),
-                            INIT_TYPE_2(5, color_value, cmyk) },
-
-                            m_PageSizeMap{
-                            INIT_TYPE(custom, papersize_value, CUSTOM),
-                            INIT_TYPE(variable, papersize_value, VARIABLE),
-                            INIT_TYPE(letter, papersize_value, USLETTER),
-                            INIT_TYPE(none, papersize_value, NONE),
-                            INIT_TYPE(legal, papersize_value, USLEGAL),
-                            INIT_TYPE(ledger, papersize_value, USLEDGER),
-                            INIT_TYPE(executive, papersize_value, USEXECUTIVE),
-                            INIT_TYPE(statement, papersize_value, USSTATEMENT),
-                            INIT_TYPE(businesscard, papersize_value, BUSINESSCARD),
-                            INIT_TYPE(4A0, papersize_value, FOURA0),
-                            INIT_TYPE(2A0, papersize_value, TWOA0),
-                            INIT_TYPE(JISB0, papersize_value, JISB0),
-                            INIT_TYPE(JISB1, papersize_value, JISB1),
-                            INIT_TYPE(JISB2, papersize_value, JISB2),
-                            INIT_TYPE(JISB3, papersize_value, JISB3),
-                            INIT_TYPE(JISB4, papersize_value, JISB4),
-                            INIT_TYPE(JISB5, papersize_value, JISB5),
-                            INIT_TYPE(JISB6, papersize_value, JISB6),
-                            INIT_TYPE(JISB7, papersize_value, JISB7),
-                            INIT_TYPE(JISB8, papersize_value, JISB8),
-                            INIT_TYPE(JISB9, papersize_value, JISB9),
-                            INIT_TYPE(JISB10, papersize_value, JISB10),
-                            INIT_TYPE(A0, papersize_value, A0),
-                            INIT_TYPE(A1, papersize_value, A1),
-                            INIT_TYPE(A2, papersize_value, A2),
-                            INIT_TYPE(A3, papersize_value, A3),
-                            INIT_TYPE(A4, papersize_value, A4),
-                            INIT_TYPE(A5, papersize_value, A5),
-                            INIT_TYPE(A6, papersize_value, A6),
-                            INIT_TYPE(A7, papersize_value, A7),
-                            INIT_TYPE(A8, papersize_value, A8),
-                            INIT_TYPE(A9, papersize_value, A9),
-                            INIT_TYPE(A10, papersize_value, A10),
-                            INIT_TYPE(B0, papersize_value, ISOB0),
-                            INIT_TYPE(B1, papersize_value, ISOB1),
-                            INIT_TYPE(B2, papersize_value, ISOB2),
-                            INIT_TYPE(B3, papersize_value, ISOB3),
-                            INIT_TYPE(B4, papersize_value, ISOB4),
-                            INIT_TYPE(B5, papersize_value, ISOB5),
-                            INIT_TYPE(B6, papersize_value, ISOB6),
-                            INIT_TYPE(B7, papersize_value, ISOB7),
-                            INIT_TYPE(B8, papersize_value, ISOB8),
-                            INIT_TYPE(B9, papersize_value, ISOB9),
-                            INIT_TYPE(B10, papersize_value, ISOB10),
-                            INIT_TYPE(C0, papersize_value, C0),
-                            INIT_TYPE(C1, papersize_value, C1),
-                            INIT_TYPE(C2, papersize_value, C2),
-                            INIT_TYPE(C3, papersize_value, C3),
-                            INIT_TYPE(C4, papersize_value, C4),
-                            INIT_TYPE(C5, papersize_value, C5),
-                            INIT_TYPE(C6, papersize_value, C6),
-                            INIT_TYPE(C7, papersize_value, C7),
-                            INIT_TYPE(C8, papersize_value, C8),
-                            INIT_TYPE(C9, papersize_value, C9),
-                            INIT_TYPE(C10, papersize_value, C10) },
-
-                        m_MeasureUnitMap{
-                            INIT_TYPE(inch, units_value, inches),
-                            INIT_TYPE(cm, units_value, centimeters),
-                            INIT_TYPE(pica, units_value, picas),
-                            INIT_TYPE(point, units_value, points),
-                            INIT_TYPE(twip, units_value, twips),
-                            INIT_TYPE(pixel, units_value, pixels),
-                            INIT_TYPE(mm, units_value, millimeters) },
-
-                        m_OrientationTypeMap{
-                            INIT_TYPE_2(0, orientation_value, orient_0),
-                            INIT_TYPE_2(90, orientation_value, orient_90),
-                            INIT_TYPE_2(180, orientation_value, orient_180),
-                            INIT_TYPE_2(270, orientation_value, orient_270) },
-
-                        m_JobControlMap{
-                            INIT_TYPE_2(0, jobcontrol_value, none),
-                            INIT_TYPE_2(1, jobcontrol_value, include_separator),
-                            INIT_TYPE_2(2, jobcontrol_value, exclude_separator) },
-
-                        m_PDFEncryptMap{
-                            INIT_TYPE(modify, pdf_options::pdf_permission, modify),
-                            INIT_TYPE(copy, pdf_options::pdf_permission, copy),
-                            INIT_TYPE(modannot, pdf_options::pdf_permission, modifyannotations),
-                            INIT_TYPE(fillin, pdf_options::pdf_permission, fillin),
-                            INIT_TYPE(extract, pdf_options::pdf_permission, extract),
-                            INIT_TYPE(assembly, pdf_options::pdf_permission, assembly),
-                            INIT_TYPE(degradeprint, pdf_options::pdf_permission, degradedprint),
-                            INIT_TYPE(print, pdf_options::pdf_permission, print),
-                            INIT_TYPE(all, pdf_options::pdf_permission, all)
-                        },
-
-                        m_PDFEncryptMapOff{
-                            INIT_TYPE(nomodify, pdf_options::pdf_permission, modify),
-                            INIT_TYPE(nocopy, pdf_options::pdf_permission, copy),
-                            INIT_TYPE(nomodannot, pdf_options::pdf_permission, modifyannotations),
-                            INIT_TYPE(nofillin, pdf_options::pdf_permission, fillin),
-                            INIT_TYPE(noextract, pdf_options::pdf_permission, extract),
-                            INIT_TYPE(noassembly, pdf_options::pdf_permission, assembly),
-                            INIT_TYPE(nodegradeprint, pdf_options::pdf_permission, degradedprint),
-                            INIT_TYPE(noprint, pdf_options::pdf_permission, print),
-                            INIT_TYPE(none, pdf_options::pdf_permission, all)
-                        },
 
         m_MapMode2Map{ {"bmp1_mode2",{dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::none}},
                    {"bmp2_mode2",{ dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::rle4}},
@@ -362,31 +378,7 @@ struct scanner_options
                    { "tiff7_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::lzw } },
                    { "tiff8_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::jbig } },
                    { "tiff9_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::zip } },
-                   { "xbm_mode2",{ dynarithmic::twain::filetype_value::xbm_source_mode, dynarithmic::twain::compression_value::none} } },
-
-        m_OptionToCapMap{ {"autobright", ICAP_AUTOBRIGHT},
-                         {"deskew", ICAP_AUTOMATICDESKEW},
-                         {"autorotate", ICAP_AUTOMATICROTATE},
-                         {"brightness", ICAP_BRIGHTNESS},
-                         {"transparency", ICAP_LIGHTPATH},
-                         {"contrast", ICAP_CONTRAST},
-                         {"highlight", ICAP_HIGHLIGHT},
-                         {"threshold", ICAP_THRESHOLD},
-                         {"gamma", ICAP_GAMMA},
-                         {"halftone", ICAP_HALFTONES},
-                         {"resolution", ICAP_XRESOLUTION},
-                         {"rotation", ICAP_ROTATION},
-                         {"shadow", ICAP_SHADOW},
-                         {"overscan", ICAP_OVERSCAN},
-                         {"showindicator", CAP_INDICATORS},
-                         {"color", ICAP_PIXELTYPE},
-                         {"unitofmeasure", ICAP_UNITS},
-                         {"papersize", ICAP_SUPPORTEDSIZES},
-                         {"orientation", ICAP_ORIENTATION},
-                         {"imprinterstring", CAP_PRINTER},
-                         {"jobcontrol", CAP_JOBCONTROL},
-                         {"nouiwait",CAP_PAPERDETECTABLE},
-                         {"nouiwaittime",0} }
+                   { "xbm_mode2",{ dynarithmic::twain::filetype_value::xbm_source_mode, dynarithmic::twain::compression_value::none} } }
     {
         m_errorLevels[0] = DTWAIN_LOG_USEFILE | DTWAIN_LOG_CALLSTACK;
         m_errorLevels[1] = m_errorLevels[0] | DTWAIN_LOG_DECODE_DEST | DTWAIN_LOG_DECODE_SOURCE;
@@ -599,7 +591,7 @@ static bool constexpr is_rangeable()
 template <typename T>
 static bool constexpr is_stringtype()
 {
-    return std::is_same<T, std::string>::value;
+    return std::is_same<T, std::string>::value || std::is_same<T, stringview>::value;
 }
 
 template <typename T>
@@ -682,8 +674,8 @@ struct GenericCharacteristicTester
     }
 };
 
-template <typename K, typename V>
-bool MapCharacteristicTester(twain_source& theSource, std::string entry, std::map<K, V>& testMap, const K& value, int capvalue)
+template <typename K, typename V, typename mapType = std::map<K,V>>
+bool MapCharacteristicTester(twain_source& theSource, std::string entry, mapType& testMap, const K& value, int capvalue)
 {
     std::vector<V> testArray;
     if constexpr (is_stringtype<K>())
@@ -906,10 +898,10 @@ void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
             pagesizeopts.set_custom_size(width, height).set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::custom);
         }
         else
-            if (word == "variable")
-                pagesizeopts.set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::variable);
-            else
-                pagesizeopts.set_page_size(s_options.m_PageSizeMap[pdf_commands.m_strPaperSize]);
+        if (word == "variable")
+            pagesizeopts.set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::variable);
+        else
+            pagesizeopts.set_page_size(g_PaperSizeMap.at(pdf_commands.m_strPaperSize));
 
         // get PDF scale options
         {
@@ -969,10 +961,10 @@ void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
             {
                 if (sAllPermissions[i] == "none")
                     permissionContainer.clear();
-                if (s_options.m_PDFEncryptMap.find(sAllPermissions[i]) != s_options.m_PDFEncryptMap.end())
-                    permissionContainer.insert(s_options.m_PDFEncryptMap[sAllPermissions[i]]);
-                if (s_options.m_PDFEncryptMapOff.find(sAllPermissions[i]) != s_options.m_PDFEncryptMapOff.end())
-                    permissionContainer.erase(s_options.m_PDFEncryptMapOff[sAllPermissions[i]]);
+                if (g_PDFEncryptMap.find(sAllPermissions[i]) != g_PDFEncryptMap.end())
+                    permissionContainer.insert(g_PDFEncryptMap.at(sAllPermissions[i]));
+                if (g_PDFEncryptMapOff.find(sAllPermissions[i]) != g_PDFEncryptMapOff.end())
+                    permissionContainer.erase(g_PDFEncryptMapOff.at(sAllPermissions[i]));
             }
 
             encrypt_opts.set_permissions(permissionContainer);
@@ -980,9 +972,10 @@ void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
     }
 }
 
-template <typename K, typename V>
+
+template <typename K, typename V, typename mapType = std::map<K,V>>
 void test_mapped_values(twain_source& mysource, const po::variables_map& varmap, bool doOptionCheck,
-                        std::map<std::string, bool>& mapOptions, std::map<K, V>& mapUserOptions,
+                        std::map<std::string, bool>& mapOptions, mapType& mapUserOptions,
                         std::string entry, const K& value, int cap)
 {
     // These need to be tested using a map, since the values entered by the user will be strings that are associated with
@@ -994,7 +987,7 @@ void test_mapped_values(twain_source& mysource, const po::variables_map& varmap,
     {
         if (!doOptionCheck)
         {
-            auto result2 = MapCharacteristicTester(mysource, entry, mapUserOptions, value, cap);
+            auto result2 = MapCharacteristicTester<K, V, mapType>(mysource, entry, mapUserOptions, value, cap);
             mapOptions.insert({ entry, result2 });
         }
         else
@@ -1042,10 +1035,17 @@ bool check_device_options(twain_source& mysource, const po::variables_map& varma
 
         // These need to be tested using a map, since the values entered by the user will be strings that are associated with
         // a TWAIN value.
-        test_mapped_values(mysource, varmap, doOptionCheck, mapOptions, s_options.m_MeasureUnitMap, "unitofmeasure", s_options.m_strUnitOfMeasure, ICAP_UNITS);
-        test_mapped_values(mysource, varmap, doOptionCheck, mapOptions, s_options.m_PageSizeMap, "papersize", s_options.m_strPaperSize, ICAP_SUPPORTEDSIZES); 
-        test_mapped_values(mysource, varmap, doOptionCheck, mapOptions, s_options.m_OrientationTypeMap, "orientation", s_options.m_Orientation, ICAP_ORIENTATION);
-        test_mapped_values(mysource, varmap, doOptionCheck, mapOptions, s_options.m_JobControlMap, "jobcontrol", s_options.m_nJobControl, CAP_JOBCONTROL);
+        test_mapped_values<stringview, dynarithmic::twain::units_value::value_type, decltype(g_MeasureUnitMap)>(mysource, varmap, doOptionCheck, mapOptions,
+                        g_MeasureUnitMap, "unitofmeasure", s_options.m_strUnitOfMeasure, ICAP_UNITS);
+
+        test_mapped_values<stringview, dynarithmic::twain::papersize_value::value_type, decltype(g_PaperSizeMap)>
+            (mysource, varmap, doOptionCheck, mapOptions, g_PaperSizeMap, "papersize", s_options.m_strPaperSize, ICAP_SUPPORTEDSIZES);
+
+        test_mapped_values<int, dynarithmic::twain::orientation_value::value_type, decltype(g_OrientationTypeMap)>(mysource, varmap, doOptionCheck, mapOptions,
+                        g_OrientationTypeMap, "orientation", s_options.m_Orientation, ICAP_ORIENTATION);
+
+        test_mapped_values<int, dynarithmic::twain::jobcontrol_value::value_type, decltype(g_JobControlMap)>(mysource, varmap, doOptionCheck, mapOptions,
+                        g_JobControlMap, "jobcontrol", s_options.m_nJobControl, CAP_JOBCONTROL);
 
         if (doOptionCheck)
         {
@@ -1070,6 +1070,19 @@ bool check_device_options(twain_source& mysource, const po::variables_map& varma
     return true;
 }
 
+template <typename mapType, typename ValueType>
+bool check_option_value(mapType& m, ValueType& v, int retValue)
+{
+	auto iter = m.find(v);
+
+	if (iter == m.end())
+	{
+		s_options.set_return_code(retValue);
+		return false;
+	}
+    return true;
+}
+
 bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
 {
     // Give a rundown of what is supported if --verbose or --optioncheck is specified
@@ -1079,19 +1092,39 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
 
     // get the general acquire characteristics and set them
     auto& ac = mysource.get_acquire_characteristics();
+    if ( !check_option_value(g_MeasureUnitMap, s_options.m_strUnitOfMeasure, RETURN_INVALID_MEASUREUNIT))
+		return false;
 
-    auto iter = s_options.m_FileTypeMap.find(s_options.m_filetype);
+	// Check the paper size
+	if (!check_option_value(g_PaperSizeMap, s_options.m_strPaperSize, RETURN_INVALID_PAPERSIZE))
+		return false;
+
+    // Check the color value
+	if (!check_option_value(g_ColorTypeMap, s_options.m_color, RETURN_INVALID_COLOR))
+		return false;
+
+    // Check the orientation value
+	if (!check_option_value(g_OrientationTypeMap, s_options.m_Orientation, RETURN_INVALID_ORIENTATION))
+		return false;
+
+	// Check the job control value
+	if (!check_option_value(g_JobControlMap, s_options.m_nJobControl, RETURN_INVALID_JOBCONTROL))
+		return false;
+
+    // Check the file type
+    auto iterFileType = g_FileTypeMap.find(s_options.m_filetype);
     auto iterMode2 = s_options.m_MapMode2Map.find(s_options.m_filetype);
 
-    if (iter == s_options.m_FileTypeMap.end() && iterMode2 == s_options.m_MapMode2Map.end())
+    if (iterFileType == g_FileTypeMap.end() && iterMode2 == s_options.m_MapMode2Map.end())
     {
         s_options.set_return_code(RETURN_INVALID_FILETYPE);
         return false;
     }
+
     // set the file type, name
     bool type1 = false;
     bool type2 = false;
-    if ((type1 = (iter != s_options.m_FileTypeMap.end())) || 
+    if ((type1 = (iterFileType != g_FileTypeMap.end())) || 
         (type2 = (iterMode2 != s_options.m_MapMode2Map.end())))
     {
         if (varmap["filename"].defaulted())
@@ -1101,10 +1134,8 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
         auto& fOptions = ac.get_file_transfer_options();
         if (type1)
         {
-            auto multipage_type = file_type_info::get_multipage_type(iter->second);
-            if (s_options.m_bMultiPage)
-                iter->second = multipage_type;
-            fOptions.set_type(iter->second);
+            auto multipage_type = file_type_info::get_multipage_type(iterFileType->second);
+            fOptions.set_type(iterFileType->second);
             ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
         }
         else
@@ -1146,7 +1177,7 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
         // turn on/off halftoning, negation, threshold, pixel type
         ac.get_imagetype_options().
             set_halftone(s_options.m_strHalftone).
-            set_pixeltype(s_options.m_ColorTypeMap[s_options.m_color]).
+            set_pixeltype(g_ColorTypeMap.at(s_options.m_color)).
             enable_negate(s_options.m_bNegateImage).
             set_bitdepth(s_options.m_bitsPerPixel).
             set_jpegquality(s_options.m_nJpegQuality).
@@ -1157,7 +1188,7 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
             enable_autobright(s_options.m_bAutobrightMode).
             set_brightness(s_options.m_brightness).
             set_contrast(s_options.m_dContrast).
-            set_orientation(s_options.m_OrientationTypeMap[s_options.m_Orientation]).
+            set_orientation(g_OrientationTypeMap.at(s_options.m_Orientation)).
             set_rotation(s_options.m_dRotation).
             set_shadow(s_options.m_dShadow).
             set_highlight(s_options.m_dHighlight);
@@ -1171,7 +1202,7 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
         ac.get_deviceparams_options().
             set_overscan(s_options.m_bOverscanMode).
             set_lightpath(s_options.m_bUseTransparencyUnit ? lightpath_value::transmissive : lightpath_value::reflective).
-            set_units(s_options.m_MeasureUnitMap[s_options.m_strUnitOfMeasure]);
+            set_units(g_MeasureUnitMap.at(s_options.m_strUnitOfMeasure));
 
         ac.get_color_options().
             set_gamma(s_options.m_dGamma);
@@ -1180,7 +1211,7 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
             set_resolution(s_options.m_dResolution, s_options.m_dResolution);
 
         ac.get_pages_options().
-            set_supportedsize(s_options.m_PageSizeMap[s_options.m_strPaperSize]);
+            set_supportedsize(g_PaperSizeMap.at(s_options.m_strPaperSize));
 
         // Imprinter options
         auto& imprinter_options = ac.get_imprinter_options();
@@ -1193,7 +1224,7 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
         }
 
         ac.get_jobcontrol_options().
-            set_option(s_options.m_JobControlMap[s_options.m_nJobControl]);
+            set_option(g_JobControlMap.at(s_options.m_nJobControl));
 
         s_options.m_nOverwriteWidth = NumDigits(s_options.m_nOverwriteMax);
 
