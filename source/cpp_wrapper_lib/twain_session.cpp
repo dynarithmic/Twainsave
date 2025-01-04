@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,8 +22,23 @@ OF THIRD PARTY RIGHTS.
 #include <dynarithmic/twain/session/twain_session.hpp>
 #include <dynarithmic/twain/logging/logger_callback.hpp>
 #include <dynarithmic/twain/twain_source.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/join.hpp>
+#include <dynarithmic/twain/utilities/string_utilities.hpp>
+#include <chrono>
+#include <thread>
+
+#if __cplusplus >= 201703L
+    #include <numeric>
+    #include <algorithm>
+    #define USE_CPPSTRING_FUNCS 
+    #define join_strings_ dynarithmic::twain::join
+    #define trim_copy_string_ dynarithmic::twain::trim_copy
+#else
+    #include <boost/algorithm/string.hpp>
+    #include <boost/algorithm/string/join.hpp>
+    #define join_strings_ boost::algorithm::join
+    #define trim_copy_string_ boost::algorithm::trim_copy
+#endif
+
 namespace dynarithmic
 {
     namespace twain
@@ -37,7 +52,7 @@ namespace dynarithmic
 
         bool twain_session::start(bool bCleanStart)
         {
-#ifdef DTWAIN_NOIMPORTLIB
+#ifdef DTWAIN_CPP_NOIMPORTLIB
             if (bCleanStart && !get_dllhandle())
             {
 #ifndef DTWAIN_USELOADEDLIB
@@ -68,15 +83,23 @@ namespace dynarithmic
             if (!API_INSTANCE DTWAIN_IsInitialized())
             {
                 if (bCleanStart)
+                {
+                    m_bOCRStarted = false;
                     m_Handle = API_INSTANCE DTWAIN_SysInitialize();
+                    if (m_Handle)
+                    {
+                        if (!API_INSTANCE DTWAIN_InitOCRInterface())
+                            m_error_logger.add_error(API_INSTANCE DTWAIN_GetLastError());
+                        else
+                            m_bOCRStarted = true;
+                    }
+                }
                 if (!m_Handle)
                 {
                     m_error_logger.add_error(DTWAIN_ERR_NOT_INITIALIZED);
                     return false;
                 }
             }
-
-            const void* ptr = reinterpret_cast<const void*>(this);
 
             API_INSTANCE DTWAIN_SetErrorCallback64(error_callback_proc, PtrToInt64(this)); 
             API_INSTANCE DTWAIN_LoadCustomStringResourcesA(m_twain_characteristics.get_language().c_str());
@@ -99,7 +122,7 @@ namespace dynarithmic
             API_INSTANCE DTWAIN_GetVersionCopyrightA(retBuf.data(), static_cast<int32_t>(retBuf.size()));
             m_version_copyright = retBuf.data();
 
-            if (m_logger.second && m_logger.second->is_enabled())
+            if (m_logger.second/* && m_logger.second->is_enabled()*/)
                 setup_logging();
 #ifdef _WIN64
             m_twain_characteristics.set_dsm(dsm_type::version2_dsm);
@@ -168,12 +191,19 @@ namespace dynarithmic
             if (m_logger.second)
             {
                 auto& details = *(m_logger.second.get());
-                int32_t log_destination = 0; // static_cast<int32_t>(details.get_destination());
-                const int32_t log_verbosity = static_cast<int32_t>(details.get_verbosity_aslong());
-                log_destination |= DTWAIN_LOG_USECALLBACK;
-                API_INSTANCE DTWAIN_SetLoggerCallbackA(dynarithmic::twain::logger_callback_proc, PtrToInt64(this));
-                API_INSTANCE DTWAIN_SetTwainLogA(log_destination | log_verbosity, "");
+                if (details.is_enabled())
+                {
+                    auto log_destination = details.get_destination_aslong();
+                    auto log_verbosity = details.get_verbosity_aslong();
+                    log_destination |= DTWAIN_LOG_USECALLBACK;
+                    API_INSTANCE DTWAIN_SetLoggerCallbackA(dynarithmic::twain::logger_callback_proc, PtrToInt64(this));
+                    API_INSTANCE DTWAIN_SetTwainLogA(log_destination | log_verbosity, details.get_filename().c_str());
+                }
+                else
+                    // Turn off logging
+					API_INSTANCE DTWAIN_SetTwainLogA(0, "");
             }
+
         }
 
         void twain_session::mover(twain_session&& rhs) noexcept
@@ -204,7 +234,7 @@ namespace dynarithmic
         twain_session::~twain_session()
         {
             try {
-#ifdef DTWAIN_NOIMPORTLIB
+#ifdef DTWAIN_CPP_NOIMPORTLIB
                 cache_dll_handle(false);
 #endif
                 stop();
@@ -249,7 +279,7 @@ namespace dynarithmic
         bool twain_session::stop()
         {
             using namespace std::chrono_literals;
-#ifdef DTWAIN_NOIMPORTLIB
+#ifdef DTWAIN_CPP_NOIMPORTLIB
             struct HandleCloser
             {
                 HMODULE h_;
@@ -279,11 +309,16 @@ namespace dynarithmic
                     m_Handle = nullptr;
                     m_logger = { nullptr, nullptr };
                     m_source_cache.clear();
+                    while (!m_selected_sources.empty())
+                    {
+                        auto iter = m_selected_sources.begin();
+                        (*iter)->close();
+                    }
                     m_bStarted = false;
                     return true;
                 }
             }
-#ifdef DTWAIN_NOIMPORTLIB
+#ifdef DTWAIN_CPP_NOIMPORTLIB
             hCloser.detach();
 #endif
             return false;
@@ -352,7 +387,7 @@ namespace dynarithmic
         /// @returns An error string that describes the error
         /// @see get_last_error() twain_characteristics.get_language()
         /// @note The error string will be in the language specified by twain_characteristics::get_language()
-         std::string twain_session::get_error_string(int32_t error_number)
+        std::string twain_session::get_error_string(int32_t error_number)
         {
             char sz[DTWAIN_USERRES_MAXSIZE + 1] = {};
             API_INSTANCE DTWAIN_GetErrorStringA(error_number, sz, DTWAIN_USERRES_MAXSIZE);
@@ -491,6 +526,7 @@ namespace dynarithmic
         /// @see set_dsm_search_order() get_dsm_search_order() twain_session::get_dsm_path() twain_session::start()
         twain_session& twain_session::set_dsm(dsm_type dsm) noexcept { m_twain_characteristics.set_dsm(dsm); return *this; }
 
+        twain_session& twain_session::set_resource_directory(std::string resDir) noexcept { m_twain_characteristics.set_resource_directory(resDir); return *this; }
 
         twain_session& twain_session::set_dsm_search_order(std::string search_order, std::string user_directory) noexcept
         {
@@ -546,7 +582,7 @@ namespace dynarithmic
         {
             auto container = container_in;
             std::transform(std::begin(container_in), std::end(container_in), std::begin(container),
-                [](const std::string& s) { return boost::algorithm::trim_copy(s); });
+                [](const std::string& s) { return trim_copy_string_(s); });
             std::string sAllDetails;
 #ifdef DTWAIN_USELOADEDLIB
             sAllDetails = json_generator().generate_details(*this, container,true);
@@ -567,7 +603,7 @@ namespace dynarithmic
             auto allSources = get_all_source_info();
             for (auto& sourceName : container)
             {
-                std::string sKeyToUse = boost::algorithm::trim_copy(sourceName);
+                std::string sKeyToUse = trim_copy_string_(sourceName);
                 if (std::find_if(allSources.begin(), allSources.end(),
                     [&](const source_basic_info& info) { return info.get_product_name() == sKeyToUse; }) ==
                     allSources.end())
@@ -576,7 +612,7 @@ namespace dynarithmic
             }
             if (aValidSources.empty())
                 return {};
-            std::string sources = boost::algorithm::join(aValidSources, "|");
+            std::string sources = join_strings_(aValidSources, "|");
             LONG nChars = API_INSTANCE DTWAIN_GetSessionDetailsA(nullptr, 0, info.indentFactor, TRUE);
             if (nChars > 0)
             {
@@ -586,6 +622,36 @@ namespace dynarithmic
             m_source_detail_map.insert({ sMapKey, sAllDetails });
             return sAllDetails;
 #endif
+        }
+
+        struct HandleDestroyer
+        {
+            HANDLE h;
+            HandleDestroyer(HANDLE h_) : h(h_) {}
+            ~HandleDestroyer() { if (h) { GlobalUnlock(h); GlobalFree(h); } }
+        };
+
+        std::string twain_session::to_api_string(const std::string& str)
+        {
+            HANDLE h = API_INSTANCE DTWAIN_ConvertToAPIStringA(str.c_str());
+            if (h)
+            {
+                HandleDestroyer hRAII(h);
+                LPCSTR pData = (LPCSTR)GlobalLock(h);
+                if ( pData )
+                    return std::string(pData, GlobalSize(h));
+            }
+            return {};
+        }
+
+        void twain_session::add_source(twain_source* pSource)
+        {
+            m_selected_sources.insert(pSource);
+        }
+
+        void twain_session::remove_source(twain_source* pSource)
+        {
+            m_selected_sources.erase(pSource);
         }
 
         LRESULT CALLBACK twain_session::error_callback_proc(LONG error, LONG64 UserData)

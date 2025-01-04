@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2020 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,12 +32,12 @@ namespace dynarithmic
         struct acquired_strip_data
         {
             LONG Compression;
-            LONG BytesPerRow;
-            LONG Columns;
-            LONG Rows;
-            LONG XOffset;
-            LONG YOffset;
-            LONG BytesWritten;
+            DWORD BytesPerRow;
+            DWORD Columns;
+            DWORD Rows;
+            DWORD XOffset;
+            DWORD YOffset;
+            DWORD BytesWritten;
             acquired_strip_data() : Compression(0), BytesPerRow(0), Columns(0), 
                                     Rows(0), XOffset(0), YOffset(0), BytesWritten() {}
         };
@@ -47,24 +47,28 @@ namespace dynarithmic
             private:
                 acquired_strip_data m_stripData;
                 HANDLE m_hStrip;
-                LONG m_nStripSize;
-                LONG m_nCurrentStripSize;
-                LONG m_nMinSize, m_nMaxSize, m_nPrefSize;
+                DWORD m_nStripSize;
+                DWORD m_nCurrentStripSize;
+                DWORD m_nMinSize, m_nMaxSize, m_nPrefSize;
                 std::unordered_set<compression_value::value_type> all_compression_types;
                 DTWAIN_SOURCE m_twain_source;
             
             public:
-                buffered_transfer_info() : m_hStrip(nullptr), m_nStripSize(0),
-                                            m_nMinSize(0), m_nMaxSize(0), m_nPrefSize(0), 
-                                            m_twain_source(nullptr), m_nCurrentStripSize(0)
+                buffered_transfer_info() : m_hStrip(nullptr),
+                                            m_nStripSize(0),
+                                            m_nCurrentStripSize(0),
+                                            m_nMinSize(0),
+                                            m_nMaxSize(0),
+                                            m_nPrefSize(0),
+                                            m_twain_source(nullptr)
                 {}
 
                 ~buffered_transfer_info();
 
-                LONG stripsize() const { return m_nStripSize; }
-                LONG minstripsize() const { return m_nMinSize; }
-                LONG maxstripsize() const { return m_nMaxSize; }
-                LONG preferredsize() const { return m_nPrefSize; }
+                DWORD stripsize() const { return m_nStripSize; }
+                DWORD minstripsize() const { return m_nMinSize; }
+                DWORD maxstripsize() const { return m_nMaxSize; }
+                DWORD preferredsize() const { return m_nPrefSize; }
                 HANDLE getstrip() const { return m_hStrip; }
 
                 acquired_strip_data& get_strip_data();

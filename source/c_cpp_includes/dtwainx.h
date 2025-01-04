@@ -1,6 +1,6 @@
 /*
     This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-    Copyright (c) 2002-2024 Dynarithmic Software.
+    Copyright (c) 2002-2025 Dynarithmic Software.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsTwainAvailable(VOID_PROTOTYPE);
 DTWAIN_HANDLE  DLLENTRY_DEF      DTWAIN_SysInitialize(VOID_PROTOTYPE);
 
 /* Initialize DTWAIN without having the "Resources not found" error box blocking the client */
-DTWAIN_HANDLE  DLLENTRY_DEF      DTWAIN_SysInitializeNoBlocking(VOID_PROTOTYPE);
+DTWAIN_HANDLE  DLLENTRY_DEF      DTWAIN_SysInitializeNoBlocking();
 
 /* Uninitialize DTWAIN (closes all open sources, shuts down the link to the TWAIN DSM) */
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SysDestroy(VOID_PROTOTYPE);
@@ -102,6 +102,7 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SetDefaultSource( DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsSourceAcquiring( DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsSourceAcquiringEx(DTWAIN_SOURCE Source, BOOL bUIOnly);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsSourceOpen( DTWAIN_SOURCE Source);
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsSourceInUIOnlyMode(DTWAIN_SOURCE Source);
 DTWAIN_SOURCE  DLLENTRY_DEF      DTWAIN_SelectSourceWithOpen(DTWAIN_BOOL bOpen);
 DTWAIN_SOURCE  DLLENTRY_DEF      DTWAIN_SelectDefaultSourceWithOpen(DTWAIN_BOOL bOpen);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsAcquiring(VOID_PROTOTYPE);
@@ -123,6 +124,7 @@ DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_EnumSupportedCapsEx2(DTWAIN_SOURCE Sourc
 DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_EnumExtendedCapsEx2(DTWAIN_SOURCE Source);
 DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_EnumCustomCapsEx2(DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsCapSupported(DTWAIN_SOURCE Source,LONG lCapability );
+DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_TestGetCap(DTWAIN_SOURCE Source, LONG lCapability);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_GetCapOperations(DTWAIN_SOURCE Source,LONG lCapability,LPLONG  lpOps);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SetAllCapsToDefault(DTWAIN_SOURCE Source);
 LONG           DLLENTRY_DEF      DTWAIN_GetCapArrayType(DTWAIN_SOURCE Source, LONG nCap);
@@ -160,6 +162,7 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_ArrayGetAtLong(DTWAIN_ARRAY pArray, LONG
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_ArrayGetAtLong64(DTWAIN_ARRAY pArray, LONG nWhere, LPLONG64 pVal);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_ArrayGetAtFloat(DTWAIN_ARRAY pArray, LONG nWhere, LPDTWAIN_FLOAT pVal);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_ArrayGetSourceAt(DTWAIN_ARRAY pArray, LONG nWhere, DTWAIN_SOURCE* ppSource);
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_ArrayGetAtSource(DTWAIN_ARRAY pArray, LONG nWhere, DTWAIN_SOURCE* ppSource);
 
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_ArrayInsertAt(DTWAIN_ARRAY pArray, LONG nWhere, LPVOID pVariant);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_ArrayInsertAtLong(DTWAIN_ARRAY pArray, LONG nWhere, LONG pVal);
@@ -227,7 +230,15 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_FrameIsValid(DTWAIN_FRAME Frame);
 DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_AcquireNative(DTWAIN_SOURCE Source,LONG PixelType,LONG nMaxPages,DTWAIN_BOOL bShowUI,DTWAIN_BOOL bCloseSource,LPLONG pStatus);
 DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_AcquireBuffered(DTWAIN_SOURCE Source,LONG PixelType,LONG nMaxPages,DTWAIN_BOOL bShowUI,DTWAIN_BOOL bCloseSource,LPLONG pStatus);
 DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_AcquireToClipboard(DTWAIN_SOURCE Source,LONG PixelType,LONG nMaxPages,LONG nTransferMode,DTWAIN_BOOL bDiscardDibs,DTWAIN_BOOL bShowUI,DTWAIN_BOOL bCloseSource,LPLONG pStatus);
-DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_AcquireFileEx(DTWAIN_SOURCE Source,DTWAIN_ARRAY aFileNames,LONG     lFileType,LONG     lFileFlags,LONG     PixelType,LONG     lMaxPages,DTWAIN_BOOL bShowUI,DTWAIN_BOOL bCloseSource,LPLONG pStatus);
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_AcquireFileEx(DTWAIN_SOURCE Source,DTWAIN_ARRAY aFileNames,LONG lFileType,LONG lFileFlags,LONG PixelType,LONG lMaxPages,DTWAIN_BOOL bShowUI,DTWAIN_BOOL bCloseSource,LPLONG pStatus);
+
+/* Set whether a buffered transfer will use tile mode */
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SetBufferedTileMode(DTWAIN_SOURCE Source, DTWAIN_BOOL bTileMode);
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsBufferedTileModeOn(DTWAIN_SOURCE Source);
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsBufferedTileModeSupported(DTWAIN_SOURCE Source);
+
+/* Use when a buffered transfer has sent a tile or strip */
+HANDLE         DLLENTRY_DEF      DTWAIN_GetBufferedTransferInfo(DTWAIN_SOURCE Source, LPDWORD Compression, LPDWORD BytesPerRow, LPDWORD Columns, LPDWORD Rows, LPDWORD XOffset, LPDWORD YOffset, LPDWORD Flags, LPDWORD BytesWritten, LPDWORD MemoryLength);
 
 /* Getting acquired images after successful acquisition */
 LONG           DLLENTRY_DEF      DTWAIN_GetNumAcquisitions( DTWAIN_ARRAY aAcq);
@@ -386,7 +397,6 @@ DTWAIN_BOOL    DLLENTRY_DEF       DTWAIN_IsAutoFeedEnabled(DTWAIN_SOURCE Source)
 DTWAIN_BOOL    DLLENTRY_DEF       DTWAIN_IsAutoFeedSupported(DTWAIN_SOURCE Source);
 LONG           DLLENTRY_DEF       DTWAIN_GetFeederFuncs(DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF       DTWAIN_IsPaperDetectable(DTWAIN_SOURCE Source);
-DTWAIN_BOOL    DLLENTRY_DEF       DTWAIN_EnableAutoFeedNotify(LONG Latency, DTWAIN_BOOL bEnable);
 
 /* Duplex Scanner support */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetDuplexType(DTWAIN_SOURCE Source, LPLONG lpDupType);
@@ -421,8 +431,8 @@ DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumBitDepthsEx2(DTWAIN_SOURCE Source, LONG Pix
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumFileTypeBitsPerPixel(LONG FileType, LPDTWAIN_ARRAY Array);
 
 /* Support for CAP_CUSTOMDSDATA */
-HANDLE DLLENTRY_DEF DTWAIN_GetCustomDSData(DTWAIN_SOURCE Source, LPBYTE Data, LONG dSize, LPLONG pActualSize,LONG nFlags);
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetCustomDSData(DTWAIN_SOURCE Source, HANDLE hData, LPCBYTE Data, LONG dSize, LONG nFlags);
+HANDLE DLLENTRY_DEF DTWAIN_GetCustomDSData(DTWAIN_SOURCE Source, LPBYTE Data, DWORD dSize, LPDWORD pActualSize,LONG nFlags);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetCustomDSData(DTWAIN_SOURCE Source, HANDLE hData, LPCBYTE Data, DWORD dSize, LONG nFlags);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsCustomDSDataSupported(DTWAIN_SOURCE Source);
 
 /* Only to be used by static libraries.  This is mapped to DTWAIN_SysInitializexxx() for DLL */
@@ -523,11 +533,11 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetAcquireArea2(DTWAIN_SOURCE Source, LPDTWAIN_F
 /*******************************************************************/
 
 /* Functions to control the strip size of buffered transfer. */
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetAcquireStripSizes(DTWAIN_SOURCE Source, LPLONG lpMin, LPLONG lpMax,LPLONG lpPreferred);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetAcquireStripSizes(DTWAIN_SOURCE Source, LPDWORD lpMin, LPDWORD lpMax, LPDWORD lpPreferred);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetAcquireStripBuffer(DTWAIN_SOURCE Source, HANDLE hMem);
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetAcquireStripSize(DTWAIN_SOURCE Source, LONG StripSize);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetAcquireStripSize(DTWAIN_SOURCE Source, DWORD StripSize);
 HANDLE      DLLENTRY_DEF DTWAIN_GetAcquireStripBuffer(DTWAIN_SOURCE Source);
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetAcquireStripData(DTWAIN_SOURCE Source, LPLONG lpCompression, LPLONG lpBytesPerRow,LPLONG lpColumns, LPLONG lpRows, LPLONG XOffset,LPLONG YOffset, LPLONG lpBytesWritten);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetAcquireStripData(DTWAIN_SOURCE Source, LPLONG lpCompression, LPDWORD lpBytesPerRow, LPDWORD lpColumns, LPDWORD lpRows, LPDWORD XOffset,LPDWORD YOffset, LPDWORD lpBytesWritten);
 
 /* Extended image information functions. This function can be called at any time*/
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsExtImageInfoSupported(DTWAIN_SOURCE Source);
@@ -601,6 +611,8 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsFileSystemSupported( DTWAIN_SOURCE Source );
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumTopCameras(DTWAIN_SOURCE Source,    LPDTWAIN_ARRAY Cameras);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumBottomCameras(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY Cameras);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumCameras(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY Cameras);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumCamerasEx(DTWAIN_SOURCE Source, LONG nWhichCamera, LPDTWAIN_ARRAY Cameras);
+
 
 /* Blank page detection functions */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetBlankPageDetection(DTWAIN_SOURCE Source, DTWAIN_FLOAT threshold,
@@ -797,6 +809,7 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_DisableAppWindow(HWND hWnd, DTWAIN_BOOL bDisable
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_OpenSourcesOnSelect(DTWAIN_BOOL bSet);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsOpenSourcesOnSelect(VOID_PROTOTYPE);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetVersionEx(LPLONG lMajor, LPLONG lMinor,LPLONG lVersionType, LPLONG lPatchLevel);
+LONG        DLLENTRY_DEF DTWAIN_GetSavedFilesCount(DTWAIN_SOURCE Source);
 
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetEOJDetectValue(DTWAIN_SOURCE Source, LONG nValue);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetQueryCapSupport(DTWAIN_BOOL bSet);
@@ -812,6 +825,10 @@ LONG DLLENTRY_DEF DTWAIN_GetTwainTimeout(VOID_PROTOTYPE);
 
 /* User-defined callback to change DIB */
 DTWAIN_DIBUPDATE_PROC DLLENTRY_DEF DTWAIN_SetUpdateDibProc(DTWAIN_DIBUPDATE_PROC DibProc);
+
+/* Use PeekMessage() or GetMessage() TWAIN loop */
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnablePeekMessageLoop(DTWAIN_SOURCE Source, BOOL bSet);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsPeekMessageLoopEnabled(DTWAIN_SOURCE Source);
 
 /* Error buffer access */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetErrorBuffer(LPDTWAIN_ARRAY ArrayBuffer);
@@ -830,6 +847,8 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetOCRCapValues(DTWAIN_OCRENGINE Engine,LONG OCR
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetOCRCapValues(DTWAIN_OCRENGINE Engine,LONG OCRCapValue,LONG SetType,DTWAIN_ARRAY CapValues);
 DTWAIN_OCRENGINE DLLENTRY_DEF DTWAIN_SelectOCREngine(VOID_PROTOTYPE);
 DTWAIN_OCRENGINE DLLENTRY_DEF DTWAIN_SelectDefaultOCREngine(VOID_PROTOTYPE);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetOCRMajorMinorVersion(DTWAIN_OCRENGINE Engine, LPLONG lpMajor, LPLONG lpMinor);
+
 
 DTWAIN_OCRTEXTINFOHANDLE DLLENTRY_DEF DTWAIN_GetOCRTextInfoHandle(DTWAIN_OCRENGINE Engine, LONG nPageNo);
 

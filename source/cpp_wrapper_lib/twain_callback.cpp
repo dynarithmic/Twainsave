@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,10 +22,8 @@ OF THIRD PARTY RIGHTS.
 // processing on acquisition startup, UI opening and closing, etc.  See the DTWAIN help manual for a list of
 // the various events.
 
-#include <unordered_map>
-#include <functional>
-#ifndef DTWAIN_NOIMPORTLIB 
-#include <dtwain.h>
+#ifndef DTWAIN_CPP_NOIMPORTLIB
+    #include <dtwain.h>
 #else
     #include <dtwainx2.h>
 #endif

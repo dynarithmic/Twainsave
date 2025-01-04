@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ OF THIRD PARTY RIGHTS.
 #include <limits>
 #include <cstdint>
 #include <dynarithmic/twain/twain_values.hpp>
+#include <dynarithmic/twain/types/twain_types.hpp>
 
 namespace dynarithmic
 {
@@ -45,9 +46,9 @@ namespace dynarithmic
 
             public:
                 general_options() : 
+                            m_transfer_type(transfer_type::file_using_native),
                             m_nMaxPageCount(DTWAIN_MAXACQUIRE),
                             m_nMaxAcquisitions(default_int),
-                            m_transfer_type(transfer_type::file_using_native),
                             m_SourceAction(sourceaction_type::openafteracquire),
                             m_pixelType(color_value::default_color)
                             {}

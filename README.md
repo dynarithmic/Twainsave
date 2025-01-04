@@ -12,10 +12,10 @@ There currently isn't an installation package, so the installation will be manua
 
 To get started, 
 
-1) For 32-bit TwainSave, unpack the <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/32-bit" target="_blank">twainsave32.zip</a> file to an empty folder on your computer.
-2) You can either run twainsave.exe directly from that folder, or set a PATH to the folder and run twainsave.exe.
+1) For 32-bit TwainSave, copy the files from <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/32-bit" target="_blank">this folder</a> to an empty folder on your computer.
+2) You can either run **twainsave.exe** directly from that folder, or set a PATH to the folder and run **twainsave.exe**.
 
-3) For <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/64-bit" target="_blank">64-bit TwainSave</a>, create another empty folder and follow steps 1) and 2) by opening the twainsave64.zip file.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
+3) For <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/64-bit" target="_blank">64-bit TwainSave</a>, create another empty folder and follow steps 1) and 2).  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
 
 4) If when running TwainSave, you receive an error stating that **VCRUNTIME140.dll and MSVCP140.dll are missing**, you will need to install the <a href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170" target="_blank">Visual C++ Redistributables</a> for <a href="https://aka.ms/vs/17/release/vc_redist.x86.exe" target="_blank">X86</a> if you are running the 32-bit TwainSave, and 
 <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe" target="_blank">X64</a> if you will be running the 64-bit version of TwainSave.
@@ -23,7 +23,7 @@ To get started,
 The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
 ----
-The current open source TwainSave version is **1.0.11**.
+The current open source TwainSave version is **1.1.0**.
 
 ----
 
@@ -68,7 +68,9 @@ will write the details to the file **details.log**
 
 If you want to build the source code, the requirements are the same as building the source for the Dynarithmic TWAIN library found [here](https://github.com/dynarithmic/twain_library_source).  
 
-1) Note that the building of the source is initially set up using [CMake](https://cmake.org/).  You can use CMake or CMake-GUI to configure and generate the Visual Studio project files.  Note that you will need either Visual Studio 2019 or Visual Studio 2022 to build the source.
+1) Note that the building of the source is initially set up using [CMake](https://cmake.org/).  You can use CMake or CMake-GUI to configure and generate the Visual Studio project files.  Note that you will need either one of the following compilers to build Twainsave successfully:
+    a) Visual Studio 2019 
+    b) Visual Studio 2022
 
 2) You will need an installation of the Boost C++ library, version 1.70 or greater (see the link to building DTWAIN for more information).
 
@@ -80,15 +82,13 @@ BOOST_LIBRARY_DIR_V142_64
 BOOST_LIBRARY_DIR_V142_32
 BOOST_LIBRARY_DIR_V143_64
 BOOST_LIBRARY_DIR_V143_32
-DTWAIN_LIBRARY_DIR
 ```
-The **DTWAIN_LIBRARY_DIR** is the directory where **dtwain32u.lib** and **dtwain64u.lib** are located.  
 
-In addition, you must have the import libraries **dtwain32u.lib** and **dtwain64u.lib** available.  These libraries can be found in the DTWAIN binary folders, in the **release_libraries.zip** archive in both the 
-[32-bit](https://github.com/dynarithmic/twain_library/tree/master/binaries/32bit) and [64-bit](https://github.com/dynarithmic/twain_library/tree/master/binaries/64bit) folders.
+See the [DTWAIN source main page](https://github.com/dynarithmic/twain_library_source) to see how to set these enviroment variables to point to the Boost headers and library directories.  
 
-There is no need to rebuild DTWAIN first, however I would recommend you build DTWAIN first to ensure you have the correct requirements for building TwainSave.    
+4) Since TwainSave relies on the DTWAIN library to run successfully, you must ensure that **dtwain32u.dll** and **dtwain64u.dll** are available at run time.  Along with these files, the text resources should be made available.  
 
+You can get these runtime files directly from the [binaries](https://github.com/dynarithmic/Twainsave/tree/master/binaries/32-bit) folder and unzipping the packages you see there, and either placing the files directly in the path where the TwainSave executable is existing, or place those files in a directory specified by the PATH environment variable.
 
 ---------
 ## To-do list

@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ OF THIRD PARTY RIGHTS.
 
 #include <string>
 #include <unordered_set>
-#include <algorithm>
 #include <dynarithmic/twain/twain_values.hpp>
 
 // Class that controls the naming of image files when generated
@@ -63,10 +62,12 @@ namespace dynarithmic
             multipage_save_options m_multipage_save_options;
 
             public:
-                file_transfer_options() : m_file_type(filetype_value::bmp),
-                                    m_filename("temp.bmp"), m_bMultiPage(false),
-                                    m_bAutoCreateDirectory(true),
-                                    m_transferFlags(file_transfer_flags::use_name)
+                file_transfer_options() :
+                                    m_filename("temp.bmp"),
+                                    m_file_type(filetype_value::bmp),
+                                    m_transferFlags(file_transfer_flags::use_name),
+                                    m_bMultiPage(false),
+                                    m_bAutoCreateDirectory(true)
                 {}
 
                 file_transfer_options& set_type(filetype_value::value_type ft)

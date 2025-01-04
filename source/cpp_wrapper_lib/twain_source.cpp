@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,10 @@ OF THIRD PARTY RIGHTS.
 #include <dynarithmic/twain/info/paperhandling_info.hpp>
 #include <dynarithmic/twain/types/twain_timer.hpp>
 #include <dynarithmic/twain/source/twain_source_pimpl.hpp>
+#include <chrono>
+#include <thread>
 
+namespace tb_namespace = dynarithmic::twain::tribool;
 namespace dynarithmic
 {
 	namespace twain
@@ -37,6 +40,7 @@ namespace dynarithmic
             m_bCloseable{},
             m_theSource{},
             m_bUIOnlyOn{},
+            m_bUIOnlySupported{tb_namespace::make_tribool(0)},
             m_bWeakAttach{},
             m_pTwainSourceImpl{}
         {
@@ -55,12 +59,34 @@ namespace dynarithmic
                 m_bCloseable = {};
                 m_theSource = {};
                 m_bUIOnlyOn = {};
+                m_bUIOnlySupported = {tb_namespace::tribool::indeterminate};
                 m_bWeakAttach = {};
                 m_pTwainSourceImpl = {};
                 m_theSource = select_info.source_handle;
                 m_pSession = select_info.session_handle;
+                m_pSession->add_source(this);
                 create_interfaces();
                 attach(select_info);
+            }
+            return *this;
+        }
+
+        twain_source& twain_source::operator=(twain_source&& rhs) noexcept
+        {
+            if (rhs.m_theSource != m_theSource)
+            {
+                detach();
+                m_bIsSelected = rhs.m_bIsSelected;
+                m_bCloseable = rhs.m_bCloseable;
+                m_bUIOnlyOn = rhs.m_bUIOnlyOn;
+                m_bUIOnlySupported = rhs.m_bUIOnlySupported;
+                m_bWeakAttach = rhs.m_bWeakAttach;
+                m_pTwainSourceImpl = rhs.m_pTwainSourceImpl;
+                m_theSource = rhs.m_theSource;
+                m_pSession = rhs.m_pSession;
+                m_sourceInfo = rhs.m_sourceInfo;
+                rhs.m_theSource = nullptr;
+                rhs.m_pSession = nullptr;
             }
             return *this;
         }
@@ -87,6 +113,7 @@ namespace dynarithmic
             std::swap(left.m_source_details, right.m_source_details);
             std::swap(left.m_theSource, right.m_theSource);
             std::swap(left.m_bUIOnlyOn, right.m_bUIOnlyOn);
+			std::swap(left.m_bUIOnlySupported, right.m_bUIOnlySupported);
             std::swap(left.m_pTwainSourceImpl, right.m_pTwainSourceImpl);
         }
 
@@ -106,6 +133,13 @@ namespace dynarithmic
             m_sourceInfo = *p_id;
         }
 
+        const TW_IDENTITY* twain_source::get_twain_id(bool bRefresh/* = true*/)
+        {
+            if (bRefresh)
+                get_source_info_internal();
+            return &m_sourceInfo.get_identity();
+        }
+
         void twain_source::attach(twain_session& twSession, DTWAIN_SOURCE source)
         {
             m_pSession = &twSession;
@@ -123,6 +157,15 @@ namespace dynarithmic
                 m_bIsSelected = true;
                 m_source_details.clear();
                 m_pSession->update_source_status(*this);
+                if (m_pSession->get_source_status(*this) == twain_session::source_status::opened)
+                {
+                    auto uiOnlySupported = API_INSTANCE DTWAIN_IsUIOnlySupported(m_theSource);
+                    m_bUIOnlySupported = uiOnlySupported ? tribool::make_tribool(1) : tribool::make_tribool(-1);
+                    auto vXferMechs = get_capability_interface().get_image_xfermech();
+                    m_vAllXferMechs.clear();
+                    for (auto value : vXferMechs)
+                        m_vAllXferMechs.push_back(static_cast<xfermech_value::value_type>(value));
+                }
             }
             else
                 m_bIsSelected = false;
@@ -166,12 +209,16 @@ namespace dynarithmic
 
         bool twain_source::close()
         {
-            if (m_theSource)
+            bool retVal = true;
+            if (m_theSource && m_pSession)
             {
-                bool retVal = API_INSTANCE DTWAIN_CloseSource(m_theSource) ? true : false;
+                if (API_INSTANCE DTWAIN_IsSourceValid( m_theSource ))
+                    retVal = API_INSTANCE DTWAIN_CloseSource(m_theSource) ? true : false;
+                m_pSession->remove_source(this);
                 m_bIsSelected = false;
                 m_pSession->update_source_status(*this);
                 m_theSource = nullptr;
+                m_pSession = nullptr;
                 return retVal;
             }
             return false;
@@ -447,14 +494,26 @@ namespace dynarithmic
             LONG dtwain_transfer_type = DTWAIN_USENATIVE;
             if (transtype == transfer_type::file_using_buffered)
                 dtwain_transfer_type = DTWAIN_USEBUFFERED;
+            else
+            if (transtype == transfer_type::file_using_source)
+                dtwain_transfer_type = DTWAIN_USESOURCEMODE;
             dtwain_transfer_type |= static_cast<LONG>(ftOptions.get_transfer_flags());
 
-            const auto ft = ftOptions.get_type();
-            if (!file_type_info::is_universal_support(ft))
+            const auto file_type = ftOptions.get_type();
+            if (!file_type_info::is_universal_support(file_type))
             {
-                dtwain_transfer_type |= DTWAIN_USESOURCEMODE;
-                // Set the compression type
-                API_INSTANCE DTWAIN_SetCompressionType(m_theSource, static_cast<LONG>(ft), 1);
+                // Test for file transfer support
+                if (dtwain_transfer_type & DTWAIN_USESOURCEMODE)
+                {
+                    if (!API_INSTANCE DTWAIN_IsFileXferSupported(m_theSource, file_type))
+                        return { API_INSTANCE DTWAIN_GetLastError(), {} };
+                }
+
+                // Check and set the compression type
+                auto compress_option = ac.get_compression_options().get_compression();
+                auto compressOk = API_INSTANCE DTWAIN_SetCompressionType(m_theSource, compress_option, 1);
+                if ( !compressOk )
+                    return { API_INSTANCE DTWAIN_GetLastError(), {} };
             }
 
             if (ftOptions.is_autocreate_directory())
@@ -466,7 +525,12 @@ namespace dynarithmic
             API_INSTANCE DTWAIN_SetFileAutoIncrement(m_theSource, inc.get_increment(), inc.is_reset_count_used() ? TRUE : FALSE,
                 inc.is_enabled() ? TRUE : FALSE);
             API_INSTANCE DTWAIN_EnableMsgNotify(1);
-            auto file_type = ftOptions.get_type();
+
+            if (dtwain_transfer_type & DTWAIN_USESOURCEMODE)
+            {
+                if ( !API_INSTANCE DTWAIN_IsFileXferSupported(m_theSource, file_type) )
+                    return { API_INSTANCE DTWAIN_GetLastError(), {} };
+            }
             if (file_type_info::is_multipage_type(file_type))
             {
                 auto& paper_options = ac.get_paperhandling_options();
@@ -514,6 +578,7 @@ namespace dynarithmic
             }
             return { API_INSTANCE DTWAIN_GetLastError(), {} };
         }
+
         twain_source::acquire_return_type twain_source::acquire_to_image_handles(transfer_type transtype)
         {
             acquire_characteristics& ac = *(m_pTwainSourceImpl->m_acquire_characteristics);
@@ -579,14 +644,6 @@ namespace dynarithmic
             if (vEnabled.empty() || !vEnabled.front())
             {
                 // feeder not enabled
-                status = true;
-                return;
-            }
-
-            bool ispaperdetectable = m_pTwainSourceImpl->m_capability_info->is_cap_supported(CAP_PAPERDETECTABLE);
-            if (!ispaperdetectable)
-            {
-                // Cannot detect if paper is in feeder
                 status = true;
                 return;
             }
@@ -705,7 +762,7 @@ namespace dynarithmic
                 for (size_t j = 0; j < image_count; ++j)
                     ih.push_back_image(handleBuffer[j]);
             }
-            return std::move(ih);
+            return ih;
         }
 
         std::vector<twain_source::custom_data_type> twain_source::get_custom_data() const
@@ -713,7 +770,7 @@ namespace dynarithmic
             const capability_interface& ci = get_capability_interface();
             if (!ci.is_customdsdata_supported())
                 return {};
-            long actualSize = 0;
+            DWORD actualSize = 0;
             if (!API_INSTANCE DTWAIN_GetCustomDSData(m_theSource, nullptr, 0, &actualSize, DTWAINGCD_COPYDATA))
                 return {};
             if (actualSize > 0)
@@ -746,5 +803,65 @@ namespace dynarithmic
                     { *(m_pTwainSourceImpl->m_acquire_characteristics) = ac; return *this; }
         bool twain_source::set_tiff_compress_type(tiffcompress_value::value_type compress_type) 
              { return API_INSTANCE DTWAIN_SetTIFFCompressType(m_theSource, static_cast<LONG>(compress_type)); }
+
+        bool twain_source::is_acquiring() const
+        {
+            if (m_theSource)
+                return API_INSTANCE DTWAIN_IsSourceAcquiring(m_theSource);
+            return false;
+        }
+
+        bool twain_source::is_uienabled() const
+        {
+            if (m_theSource)
+                return API_INSTANCE DTWAIN_IsUIEnabled(m_theSource);
+            return false;
+        }
+
+		bool twain_source::is_uionlysupported() const
+		{
+			if (m_theSource)
+                return tribool::true_(m_bUIOnlySupported) ? true : false;
+            return false;
+        }
+
+        bool twain_source::feederwait_supported() const
+        {
+            if (m_theSource)
+            {
+                const capability_interface& ci = get_capability_interface();
+
+                // First check if ICAP_FEEDERENABLED is supported, and if so, get the
+                // current value.
+                auto vect = ci.get_feederenabled();
+                if (!vect.empty())
+                {
+                    // Supported, so see if we can actually use the feeder    
+                    if (vect[0] == false)
+                    {
+                        // Feeder turned off, so
+                        // temporarily enable the feeder
+                        ci.set_feederenabled({ true });
+
+                        // See if we enabled it successfully
+                        bool feederenabled = false;
+                        vect = ci.get_feederenabled();
+                        feederenabled = !vect.empty() && vect[0] == true;
+
+                        if (feederenabled)
+                        {
+                            // reset to original value
+                            ci.set_feederenabled({ false });
+                        }
+                        else
+                            return false; // couldn't enable the feeder, so can't really
+                                          // test the feederloaded capability.
+                    }
+                    // check to see if ICAP_FEEDERLOADED capability is supported.
+                    return ci.is_feederloaded_supported();
+                }
+            }
+			return false;
+		}
 	}
 }

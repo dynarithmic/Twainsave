@@ -2,8 +2,6 @@
 #include <dynarithmic/twain/twain_source.hpp>
 #include <dynarithmic/twain/types/twain_callback.hpp>
 #include <dynarithmic/twain/info/paperhandling_info.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/range/adaptor/transformed.hpp>
 #include <sstream>
 #include <string>
 #include <vector>

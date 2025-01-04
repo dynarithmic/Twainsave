@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,11 @@ OF THIRD PARTY RIGHTS.
 #ifndef DTWAIN_TWAIN_VALUES_HPP
 #define DTWAIN_TWAIN_VALUES_HPP
 
-#include <dtwain.h>
+#ifdef DTWAIN_CPP_NOIMPORTLIB
+    #include <dtwainx2.h>
+#else
+    #include <dtwain.h>
+#endif
 #include <cstdint>
 #include <map>
 #include <unordered_set>
@@ -29,9 +33,10 @@ OF THIRD PARTY RIGHTS.
 #include <array>
 #include <vector>
 #include <string>
-#include <algorithm>
 #include <limits>
 #include <dynarithmic/twain/tostring/tostring.hpp>
+#include <dynarithmic/twain/types/constexpr_utils.hpp>
+#include <dynarithmic/twain/types/eternal_map/include/mapbox/eternal.hpp>
 
 #define DTWAIN_DEFINE_STRING_MAP()  static const std::map<value_type, std::pair<const char *, const char*>>& get_names() \
         { \
@@ -511,6 +516,20 @@ namespace dynarithmic
             static constexpr value_type  tiffnocompressmulti = DTWAIN_TIFFNONEMULTI;
             static constexpr value_type  tiffpackbitsmulti = DTWAIN_TIFFPACKBITSMULTI;
             static constexpr value_type  textmulti = DTWAIN_TEXTMULTI;
+            static constexpr value_type  bigtifflzw = DTWAIN_BIGTIFFLZW;
+            static constexpr value_type  bigtifflzwmulti = DTWAIN_BIGTIFFLZWMULTI;
+            static constexpr value_type  bigtiffnocompress = DTWAIN_BIGTIFFNONE;
+            static constexpr value_type  bigtiffnocompressmulti = DTWAIN_BIGTIFFNONEMULTI;
+            static constexpr value_type  bigtiffpackbits = DTWAIN_BIGTIFFPACKBITS;
+            static constexpr value_type  bigtiffpackbitsmulti = DTWAIN_BIGTIFFPACKBITSMULTI;
+            static constexpr value_type  bigtiffdeflate = DTWAIN_BIGTIFFDEFLATE;
+            static constexpr value_type  bigtiffdeflatemulti = DTWAIN_BIGTIFFDEFLATEMULTI;
+            static constexpr value_type  bigtiffgroup3 = DTWAIN_BIGTIFFG3;
+            static constexpr value_type  bigtiffgroup3multi = DTWAIN_BIGTIFFG3MULTI;
+            static constexpr value_type  bigtiffgroup4 = DTWAIN_BIGTIFFG4;
+            static constexpr value_type  bigtiffgroup4multi = DTWAIN_BIGTIFFG4MULTI;
+            static constexpr value_type  bigtiffjpeg = DTWAIN_BIGTIFFJPEG;
+            static constexpr value_type  bigtiffjpegmulti = DTWAIN_BIGTIFFJPEGMULTI;
             static constexpr value_type  bmp_source_mode = DTWAIN_FF_BMP;
             static constexpr value_type  tiff_source_mode = DTWAIN_FF_TIFF;
             static constexpr value_type  pict_source_mode = DTWAIN_FF_PICT;
@@ -1692,7 +1711,14 @@ namespace dynarithmic
                 filetype_value::windowsiconresized,
                 filetype_value::windowsmetafile,
                 filetype_value::wirelessbmp,
-                filetype_value::wirelessbmpresized
+                filetype_value::wirelessbmpresized,
+                filetype_value::bigtifflzw,
+                filetype_value::bigtiffnocompress,
+                filetype_value::bigtiffpackbits,
+                filetype_value::bigtiffdeflate,
+                filetype_value::bigtiffgroup3,
+                filetype_value::bigtiffgroup4,
+                filetype_value::bigtiffjpeg
             };
 
             static constexpr filetype_value::value_type aMulti [] = 
@@ -1708,22 +1734,37 @@ namespace dynarithmic
                 filetype_value::tiffnocompressmulti,
                 filetype_value::tiffpackbitsmulti,
                 filetype_value::pdfmulti,
-                filetype_value::dcxmulti
+                filetype_value::dcxmulti,
+                filetype_value::bigtifflzwmulti,
+                filetype_value::bigtiffnocompressmulti,
+                filetype_value::bigtiffpackbitsmulti,
+                filetype_value::bigtiffdeflatemulti,
+                filetype_value::bigtiffgroup3multi,
+                filetype_value::bigtiffgroup4multi,
+                filetype_value::bigtiffjpegmulti
             };
 
-            static bool is_multipage_type(filetype_value::value_type ft)
+            static constexpr bool is_multipage_type(filetype_value::value_type ft)
             {
+                #if __cplusplus >= 202002L
                 return std::find(std::begin(aMulti), std::end(aMulti), ft) != std::end(aMulti);
+                #else
+                return dynarithmic::twain::array_finder(aMulti, ft, std::size(aMulti)).first;
+                #endif
             }
 
-            static bool is_singlepage_type(filetype_value::value_type ft)
+            static constexpr bool is_singlepage_type(filetype_value::value_type ft)
             {
+                #if __cplusplus >= 202002L
                 return std::find(std::begin(aSingle), std::end(aSingle), ft) != std::end(aSingle);
+                #else
+				return dynarithmic::twain::array_finder(aSingle, ft, std::size(aSingle)).first;
+                #endif
             }
 
-            static int32_t get_multipage_type(filetype_value::value_type ft)
+            static constexpr int32_t get_multipage_type(filetype_value::value_type ft)
             {
-                static std::unordered_map<filetype_value::value_type, int32_t> multipage_map =
+                MAPBOX_ETERNAL_CONSTEXPR const auto multipage_map = mapbox::eternal::map<filetype_value::value_type, int32_t>(
                 {
                     {filetype_value::dcx, DTWAIN_DCX},
                     {filetype_value::pdf, DTWAIN_PDFMULTI},
@@ -1749,7 +1790,14 @@ namespace dynarithmic
                     {filetype_value::tifflzwmulti, DTWAIN_TIFFLZWMULTI},
                     {filetype_value::tiffnocompressmulti, DTWAIN_TIFFNONEMULTI},
                     {filetype_value::tiffpackbitsmulti, DTWAIN_TIFFPACKBITSMULTI},
-                };
+                    {filetype_value::bigtifflzwmulti, DTWAIN_BIGTIFFLZWMULTI},
+                    {filetype_value::bigtiffnocompressmulti,  DTWAIN_BIGTIFFNONEMULTI},
+                    {filetype_value::bigtiffpackbitsmulti,  DTWAIN_BIGTIFFPACKBITSMULTI},
+                    {filetype_value::bigtiffdeflatemulti,  DTWAIN_BIGTIFFDEFLATEMULTI},
+                    {filetype_value::bigtiffgroup3multi, DTWAIN_BIGTIFFG3MULTI},
+                    {filetype_value::bigtiffgroup4multi, DTWAIN_BIGTIFFG4MULTI},
+                    {filetype_value::bigtiffjpegmulti, DTWAIN_BIGTIFFJPEGMULTI}
+                    });
 
                 auto iter = multipage_map.find(ft);
                 if (iter != multipage_map.end())
@@ -1757,10 +1805,40 @@ namespace dynarithmic
                 return static_cast<int32_t>(ft);
             }
 
-            // returns true if the image type is supported by all TWAIN devices
-            static bool is_universal_support(filetype_value::value_type ft)
+            static constexpr filetype_value::value_type get_bigtiff_type(filetype_value::value_type ft)
             {
-                static std::unordered_set<filetype_value::value_type> supported_set =
+                MAPBOX_ETERNAL_CONSTEXPR const auto bigtiff_map = mapbox::eternal::map<filetype_value::value_type, filetype_value::value_type>(
+                {
+                    {filetype_value::tifflzw,               filetype_value::bigtifflzw},
+                    {filetype_value::tiffnocompress,        filetype_value::bigtiffnocompress}, 
+                    {filetype_value::tiffpackbits,          filetype_value::bigtiffpackbits},   
+                    {filetype_value::tiffdeflate,           filetype_value::bigtiffdeflate},    
+                    {filetype_value::tiffgroup3,            filetype_value::bigtiffgroup3},     
+                    {filetype_value::tiffgroup4,            filetype_value::bigtiffgroup4},     
+                    {filetype_value::tiffjpeg,              filetype_value::bigtiffjpeg},       
+                    {filetype_value::tifflzwmulti,          filetype_value::bigtifflzwmulti},
+                    {filetype_value::tiffnocompressmulti,   filetype_value::bigtiffnocompressmulti}, 
+                    {filetype_value::tiffpackbitsmulti,     filetype_value::bigtiffpackbitsmulti},   
+                    {filetype_value::tiffdeflatemulti,      filetype_value::bigtiffdeflatemulti},    
+                    {filetype_value::tiffgroup3multi,       filetype_value::bigtiffgroup3multi},     
+                    {filetype_value::tiffgroup4multi,       filetype_value::bigtiffgroup4multi},     
+                    {filetype_value::tiffjpegmulti,         filetype_value::bigtiffjpegmulti},       
+                });
+
+                auto iter = bigtiff_map.find(ft);
+                if (iter != bigtiff_map.end())
+                    return iter->second;
+                return static_cast<int32_t>(ft);
+            }
+
+            // returns true if the image type is supported by all TWAIN devices
+            static constexpr bool is_universal_support(filetype_value::value_type ft)
+            {
+                #if __cplusplus >= 202002L
+                constexpr std::array<filetype_value::value_type, 58> supported_types =
+                #else    
+                constexpr filetype_value::value_type supported_types [] = 
+                #endif
                 {
                     filetype_value::bmp,
                     filetype_value::bmprle,
@@ -1805,9 +1883,27 @@ namespace dynarithmic
                     filetype_value::tiffjpegmulti,
                     filetype_value::tifflzwmulti,
                     filetype_value::tiffnocompressmulti,
-                    filetype_value::tiffpackbitsmulti
+                    filetype_value::tiffpackbitsmulti,
+                    filetype_value::bigtifflzw,
+                    filetype_value::bigtifflzwmulti,
+                    filetype_value::bigtiffnocompress,
+                    filetype_value::bigtiffnocompressmulti,
+                    filetype_value::bigtiffpackbits,
+                    filetype_value::bigtiffpackbitsmulti,
+                    filetype_value::bigtiffdeflate,
+                    filetype_value::bigtiffdeflatemulti,
+                    filetype_value::bigtiffgroup3,
+                    filetype_value::bigtiffgroup3multi,
+                    filetype_value::bigtiffgroup4,
+                    filetype_value::bigtiffgroup4multi,
+                    filetype_value::bigtiffjpeg,
+                    filetype_value::bigtiffjpegmulti
                 };
-                return supported_set.find(ft) != supported_set.end();
+                #if __cplusplus >= 202002L
+                return std::find(supported_types.begin(), supported_types.end(), ft) != supported_types.end();
+                #else
+				return dynarithmic::twain::array_finder(supported_types, ft, std::size(supported_types)).first;
+                #endif
             }
         };
 
@@ -1874,12 +1970,15 @@ namespace dynarithmic
             TWCT,
             TWPS,
             TWSS,
+            TWPH,
+            TWCI
         };
         class twain_session;
         struct source_select_info
         {
-            DTWAIN_SOURCE source_handle = nullptr;      /**< [out] Low-level source_handle */
-            twain_session* session_handle = nullptr;    /**< [out] twain_session that opened the source */
+            DTWAIN_SOURCE source_handle = nullptr;      /**< [out] Low-level source handle */
+            DTWAIN_OCRENGINE ocrengine_handle = nullptr; /**< [out] Low-level ocr engine handle */
+            twain_session* session_handle = nullptr;    /**< [out] twain_session that opened the source or ocr engine */
             bool is_canceled = false;                   /**< [out] status indicator */
             bool canceled() const { return is_canceled; }
         };

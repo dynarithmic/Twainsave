@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -48,11 +48,16 @@ namespace dynarithmic
 
             public:
                 doublefeed_options& set_responses(doublefeedresponse_value::value_type v)
-                { return set_responses({v}); }
+                { 
+                    std::vector<doublefeedresponse_value::value_type> vtemp {v};
+                    return set_responses(vtemp); 
+                }
 
-                doublefeed_options() : m_detection(doublefeeddetection_value::default_val),
-                                                           m_sensitivity(doublefeedsensitivity_value::default_val),
-                                                           m_length((std::numeric_limits<double>::min)()), m_bEnable(false) {}
+                doublefeed_options() : m_bEnable(false),
+                                       m_detection(doublefeeddetection_value::default_val),
+                                       m_length((std::numeric_limits<double>::min)()),
+                                       m_sensitivity(doublefeedsensitivity_value::default_val)
+                {}
 
                 doublefeed_options& enable(bool bEnable = true) { m_bEnable = bEnable; return *this; }
                 bool is_enabled() const { return m_bEnable; }

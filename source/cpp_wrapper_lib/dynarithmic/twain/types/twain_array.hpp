@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,7 +29,11 @@ OF THIRD PARTY RIGHTS.
 #include <algorithm>
 #include <string>
 #include <stdexcept>
-#include <dtwain.h>
+#ifdef DTWAIN_CPP_NOIMPORTLIB
+    #include <dtwainx2.h>
+#else
+    #include <dtwain.h>
+#endif
 #include <dynarithmic/twain/types/twain_frame.hpp>
 #include <dynarithmic/twain/dtwain_twain.hpp>
 #include <dynarithmic/twain/types/underlying_type.hpp>
@@ -227,7 +231,7 @@ namespace dynarithmic
                         if (API_INSTANCE DTWAIN_RangeExpand(m_theArray, &temp))
                         {
                             twain_array temp_arr(temp);
-                            int32_t sz = DTWAIN_ArrayGetCount(m_theArray);
+                            int32_t sz = API_INSTANCE DTWAIN_ArrayGetCount(m_theArray);
                             auto pBuffer = temp_arr.get_buffer<typename dtwain_underlying_type<typename Container::value_type>::value_type>();
                             std::transform(pBuffer, pBuffer + sz, std::inserter(ct, std::end(ct)), []
                                 (typename dtwain_underlying_type<typename Container::value_type>::value_type val)

@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2022 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,57 +18,46 @@ FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
 DYNARITHMIC SOFTWARE. DYNARITHMIC SOFTWARE DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
 OF THIRD PARTY RIGHTS.
 */
-#ifndef STRING_UTILITIES_H
-#define STRING_UTILITIES_H
+#ifndef STRING_UTILITIES_HPP
+#define STRING_UTILITIES_HPP
 
 #include <string>
-#include <algorithm>
-#include <cctype>
+#include <sstream>
+#include <numeric>
 
-#pragma warning( push )  // Stores the current warning state for every warning.
-#pragma warning( disable:4996)
+#ifdef _MSC_VER
+    #pragma warning( push )  // Stores the current warning state for every warning.
+    #pragma warning( disable:4996)
+#endif
 
 namespace dynarithmic
 {
     namespace twain
     {
-        std::string& ltrim(std::string& str)
-        {
-            auto it2 = std::find_if(str.begin(), str.end(), [](unsigned char ch) 
-                                    { return !isspace(ch); });
-            str.erase(str.begin(), it2);
-            return str;
-        }
+        std::string& ltrim(std::string& str);
+        std::string& rtrim(std::string& str);
+        std::string ltrim_copy(std::string str);
+        std::string rtrim_copy(std::string str);
+        std::string trim_copy(std::string str);
+        std::string& trim(std::string& str);
 
-        std::string& rtrim(std::string& str)
+        template <typename Container>
+        std::string join(const Container& ct, std::string separator)
         {
-            auto it1 = std::find_if(str.rbegin(), str.rend(), [](unsigned char ch)
-                                    { return !isspace(ch); });
-            str.erase(it1.base(), str.end());
-            return str;
-        }
-
-        std::string ltrim_copy(std::string str)
-        {
-            return ltrim(str);
-        }
-
-        std::string rtrim_copy(std::string str)
-        {
-            return rtrim(str);
-        }
-
-        std::string trim_copy(const std::string& str)
-        {
-            auto s = str;
-            return ltrim(rtrim(s));
-        }
-
-        std::string& trim(std::string& str)
-        {
-            return ltrim(rtrim(str));
+            return std::accumulate(ct.begin(), ct.end(), std::string(),
+                [&](const auto& str, typename Container::value_type val)
+                {
+                    std::ostringstream strm;
+                    if (!str.empty())
+                        strm << str << separator << val;
+                    else
+                        strm << val;
+                    return strm.str();
+                });
         }
     }
 }
-#pragma warning(pop)
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
 #endif

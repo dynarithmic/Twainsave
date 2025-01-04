@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -91,15 +91,22 @@ namespace dynarithmic
         }
 
         template <typename T=long>
-        struct twainrange_iterator : public std::iterator<std::bidirectional_iterator_tag, T, const T>
+        struct twainrange_iterator 
         {
+            // iterator traits
+            using difference_type = T;
+            using value_type = T;
+            using pointer = const T*;
+            using reference = const T&;
+            using iterator_category = std::bidirectional_iterator_tag;
+
             std::array<T,5> m_CurrentValue;
             T m_CurrentDerefValue;
     
             explicit twainrange_iterator() : m_CurrentDerefValue{} {}
             explicit twainrange_iterator(const std::array<T,5>& start ) : m_CurrentValue(start), m_CurrentDerefValue(start[0]) {}
     
-            T operator*() { return m_CurrentDerefValue; }
+            T& operator*() { return m_CurrentDerefValue; }
 
             twainrange_iterator& operator++()
             {

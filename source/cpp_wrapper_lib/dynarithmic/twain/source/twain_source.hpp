@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,18 +22,16 @@ OF THIRD PARTY RIGHTS.
 #define DTWAIN_TWAIN_SOURCE_HPP
 
 #include <utility>
-#include <unordered_map>
-#include <functional>
 #include <algorithm>
-#include <chrono>
-#include <thread>
-#include <tuple>
 #include <numeric>
 #include <string>
 #include <vector>
 #include <memory>
-
-#include <dtwain.h>
+#ifdef DTWAIN_CPP_NOIMPORTLIB
+    #include <dtwainx2.h>
+#else
+    #include <dtwain.h>
+#endif
 #include <dynarithmic/twain/identity/twain_identity.hpp>
 #include <dynarithmic/twain/types/twain_array.hpp>
 #include <dynarithmic/twain/twain_values.hpp>
@@ -42,6 +40,7 @@ OF THIRD PARTY RIGHTS.
 #include <dynarithmic/twain/info/file_transfer_info.hpp>
 #include <dynarithmic/twain/info/buffered_transfer_info.hpp>
 #include <dynarithmic/twain/twain_details.hpp>
+#include <dynarithmic/twain/utilities/misc_utilities.hpp>
 
 namespace dynarithmic
 {
@@ -75,9 +74,10 @@ namespace dynarithmic
 
                 twain_source(const twain_source&) = delete;
                 twain_source& operator=(const twain_source&) = delete;
-                twain_source(twain_source&& rhs) noexcept : m_bUIOnlyOn(rhs.m_bUIOnlyOn), 
-                                                            m_theSource(rhs.m_theSource), 
-                                                            m_bWeakAttach(rhs.m_bWeakAttach)
+                twain_source(twain_source&& rhs) noexcept :  m_theSource(rhs.m_theSource),
+                                                             m_bUIOnlyOn(rhs.m_bUIOnlyOn),
+                                                             m_bUIOnlySupported(rhs.m_bUIOnlySupported),
+                                                             m_bWeakAttach(rhs.m_bWeakAttach)
                 {
                     swap(*this, rhs);
                     rhs.m_theSource = nullptr;
@@ -101,8 +101,10 @@ namespace dynarithmic
                 std::string m_source_details;
                 DTWAIN_SOURCE m_theSource;
                 bool m_bUIOnlyOn;
+                tribool::tribool m_bUIOnlySupported;
                 bool m_bWeakAttach;
                 std::shared_ptr<twain_source_pimpl> m_pTwainSourceImpl;
+                std::vector<xfermech_value::value_type> m_vAllXferMechs;
 
                 void create_interfaces();
                 void get_source_info_internal();
@@ -134,7 +136,7 @@ namespace dynarithmic
                 const capability_interface& get_capability_interface() const noexcept;
                 acquire_return_type acquire();
                 bool showui_only();
-                TW_IDENTITY* get_twain_id();
+                const TW_IDENTITY* get_twain_id(bool bRefresh = true);
                 static image_handler get_images(const twain_array& images);
                 bool open();
                 bool close();
@@ -144,6 +146,7 @@ namespace dynarithmic
                 bool is_acquiring() const;
                 bool is_uienabled() const;
                 bool is_uionlysupported() const;
+                bool feederwait_supported() const;
                 image_information get_current_image_information() const;
                 bool set_current_camera(const cameraside_value::value_type& camera);
                 DTWAIN_SOURCE get_source() const noexcept { return m_theSource; }
@@ -160,6 +163,11 @@ namespace dynarithmic
                 const twain_session* get_session() const;
                 std::string& get_details(details_info info = {true, 2});
                 bool set_tiff_compress_type(tiffcompress_value::value_type compress_type);
+                std::vector<xfermech_value::value_type>& get_xfermechs() { return m_vAllXferMechs; }
+                bool is_xfermech_supported(xfermech_value::value_type xfermech) const
+                {
+                    return std::find(m_vAllXferMechs.begin(), m_vAllXferMechs.end(), xfermech) != m_vAllXferMechs.end();
+                }
         };
 
         inline std::ostream& operator <<(std::ostream& os, const image_information& ii)

@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2020 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ OF THIRD PARTY RIGHTS.
 #define DTWAIN_TWAIN_ERROR_DETAILS_HPP
 
 #include <deque>
+#include <cstdint>
 
 namespace dynarithmic
 {

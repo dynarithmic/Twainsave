@@ -1,3 +1,4 @@
+0 Geen fout
 1 NULL Raam Hanteert
 2 Herinnering Allocation Mislukking
 3 Kwalijken DLL Hanteert
@@ -53,22 +54,40 @@
 1038 Bron or middel niet gesteund querying of document laden in document feeder
 1039 Herinnering uitzondering vergissing while belt Twain DSM.   DSM stel in inconsistenten staat
 1040 Invalid TWAIN state transition
-1041 Unsupported extended image info type
-1042 DLL Resource file not found
-1043 DTWAIN Not initialized
-1044 No TWAIN Sources found
-1045 TWAIN is not installed
-1046 Incorrect thread of execution
-1047 Bad capability data type
-1048 Capability has unknown data type
+1041 Niet-ondersteund type van uitgebreide afbeeldingsinformatie
+1042 DLL-bronbestand niet gevonden  
+1043 DTWAIN Niet geïnitialiseerd  
+1044 Geen TWAIN-bronnen gevonden  
+1045 TWAIN is niet geïnstalleerd  
+1046 Onjuiste uitvoeringsdraad  
+1047 Slechte capaciteitsgegevens type  
+1048 Capaciteit heeft onbekend gegevenstype  
 1049 Demo Version of DTWAIN does not support this file type
 1050 Selectie Geannuleerd
 1051 DTWAIN Resources not found
 1052 String komt niet overeen met arraytype
 1053 DTWAIN ARRAY not the same type
-1054 Source not installed
-1055 Source does not support memory file transfers
+1054 Bron niet geïnstalleerd  
+1055 Bron ondersteunt geen geheugenbestandoverdrachten
 1056 Area array is te klein. Array moet ten minste 4 items bevatten
+1057 Kan logbestand niet maken.
+1058 Bron ondersteunt het TWAIN-bestandssysteem niet.
+1059 Tegelmodus wordt niet ondersteund voor deze TWAIN-bron.
+1060 DTWAIN32.INI niet gevonden  
+1061 DTWAIN64.INI niet gevonden  
+1062 CRC-controle mislukt. Controleer op een beschadigd twaininfo.txt-bestand  
+1063 De versie van het twaininfo.txt-bestand is ongeldig voor deze versie van DTWAIN  
+1064 Windows API-fout  
+1065 Geen TWAIN-ID komt overeen met de string  
+1066 Dubbele resource-ID gevonden  
+1067 Beschikbare uitgebreide afbeeldingsinformatie waarde
+1068 Ongeldig bitmap teruggegeven door TWAIN-bron (TWAINDSM 2.x)
+1069 Geen afbeeldingen verkregen.
+1070 Afbeeldingsfout  
+1071 Onbekende TWAIN Terugkeer Code  
+1072 Onbekende TWAIN Voorwaarde Code 
+1073 Hulpbron gegevensfout: Uitzondering opgetreden
+1074 Audiotransfers worden niet ondersteund 
 1100 TWAIN Gesteldheid niet Code: niet voleindigde operaties.   Ontoerijkende Herinnering
 1101 TWAIN Gesteldheid Code: Vergissing
 1102 TWAIN Gesteldheid Code: Unknown oorzaak of mislukking
@@ -185,83 +204,50 @@
 2088 Invalid color space.  Only RGB, Grayscale, and Black/White color spaces are supported
 2089 PDF not supported.
 2090 Missing or corrupt DTWTS.DLL.  TwainSave not available
-2100 Ongeldige OCR pagina
+2101 Ongeldig OCR-pagina opgegeven  
+2102 Ongeldig OCR  
+2103 OCR niet actief  
+2104 Ongeldig OCR-bestandstype  
+2105 Ongeldig OCR-pixeltype  
+2106 Ongeldige OCR-bitdiepte  
+2107 OCR-herkenningsfout  
 2500 Niet open TWAIN bron
 2501 Niet afsluiten TWAIN bron
+2502 Ongeldige afbeeldingsinformatie
+2503 Fout bij het schrijven van gegevens naar bestand
+2504 Operatie niet ondersteund  
 3000 Selecteer bron
 3001 &Selecteer
 3002 &Annuleer
 3003 Bronen:
-3005 Entering
-3006 Exiting
-3007 returning value of
+3004 Selecteer OCR
+3005 Binnenkomen
+3006 Afsluiten
+3007 terugkerende waarde van
 3008 Exception Error
 3009 Module
 3010 No parameter info
 3011 Error in getting information for function
-3012 Input
-3013 Output: return code from DSM
+3012 Invoer
+3013 Uitvoer: retourcode van DSM
 3014 No information for 
 3015 returned error code
-5000 Courier
-5001 Courier-Bold
-5002 Courier-BoldOblique
-5003 Courier-Oblique
-5004 Helvetica
-5005 Helvetica-Bold
-5006 Helvetica-BoldOblique
-5007 Helvetica-Oblique
-5008 Times-Bold
-5009 Times-BoldItalic
-5010 Times-Roman
-5011 Times-Italic
-5012 Symbol
-5013 ZapfDingbats
-9500 TWCC_SUCCESS
-9501 TWCC_BUMMER
-9502 TWCC_LOWMEMORY
-9503 TWCC_NODS
-9504 TWCC_MAXCONNECTIONS
-9505 TWCC_OPERATIONERROR
-9506 TWCC_BADCAP
-9509 TWCC_BADPROTOCOL
-9510 TWCC_BADVALUE
-9511 TWCC_SEQERROR
-9512 TWCC_BADDEST
-9513 TWCC_CAPUNSUPPORTED
-9514 TWCC_CAPBADOPERATION
-9515 TWCC_CAPSEQERROR
-9516 TWCC_DENIED
-9517 TWCC_FILEEXISTS
-9518 TWCC_FILENOTFOUND
-9519 TWCC_NOTEMPTY
-9520 TWCC_PAPERJAM
-9521 TWCC_PAPERDOUBLEFEED
-9522 TWCC_FILEWRITEERROR
-9523 TWCC_CHECKDEVICEONLINE
-9524 TWCC_INTERLOCK
-9525 TWCC_DAMAGEDCORNER
-9526 TWCC_FOCUSERROR
-9527 TWCC_DOCTOOLIGHT
-9528 TWCC_DOCTOODARK
-9529 TWCC_NOMEDIA
-9600 TWRC_SUCCESS
-9601 TWRC_FAILURE
-9602 TWRC_CHECKSTATUS
-9603 TWRC_CANCEL
-9604 TWRC_DSEVENT
-9605 TWRC_NOTDSEVENT
-9606 TWRC_XFERDONE
-9607 TWRC_ENDOFLIST
-9608 TWRC_INFONOTSUPPORTED
-9609 TWRC_DATANOTAVAILABLE
-9610 TWRC_BUSY
-9611 TWRC_SCANNERLOCKED
+3016 Fout
+3017 Tijdelijke bestandsmap bestaat niet
+3018 werd gebeld
+3019 Tijdelijk beeldbestand is
+3020 Fout bij het maken van een tijdelijk afbeeldingsbestand
+3021 Afbeeldingsbestand is succesvol aangemaakt
+3022 Waarden ingesteld bij terugkeer
+3023 Meer
+3024 Capaciteitenlijst
+3025 Standaardbron
 9700 DTWAIN Twain Library, v{short_version}, {company_name}, {copyright}
 9999 Exception error occurred during call to Twain DSM.  Possible corrupted Twain session?
 10000 [Gebruikersbericht]
-10001 Error in closing Twain DSM
-10002 Error in closing Twain Session
-10003 Error in closing DTWAIN Manager
-10004 TWAIN Source Manager, Session, and DTWAIN closed successfully
-10005 Could not remove subclass from user window
+10001 Fout bij het sluiten van Twain DSM  
+10002 Fout bij het sluiten van Twain-sessie  
+10003 Fout bij het sluiten van DTWAIN Manager  
+10004 TWAIN Source Manager, sessie en DTWAIN succesvol gesloten  
+10005 Kon subklasse niet verwijderen van gebruikersvenster  
+10006 Apparaattype en vereiste TWAIN-type komen niet overeen.
