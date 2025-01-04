@@ -1,5 +1,15 @@
 TwainSave version changes
 
+1.1.0
+
+- Ensure that twain resource files will be read from the twainsave.exe
+  directory instead of the system path.
+
+- Add additional option checking to the --verbose and --details commands.
+
+- Various bug fixes.
+
+
 1.0.11
 
 - Add --jquality to set the JPEG Quality Factor when acquiring JPEG images.
