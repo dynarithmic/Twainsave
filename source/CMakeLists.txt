@@ -20,6 +20,7 @@ set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/twain.h
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/winconst.h
         ${PROJECT_SOURCE_DIR}/twainsave.h
+        ${PROJECT_SOURCE_DIR}/twainsave_verinfo.h
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/acquire_characteristics.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/capability_interface.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/compiler_details.hpp
@@ -101,7 +102,7 @@ link_directories($ENV{BOOST_LIBRARY_DIR_V142_64}
                  $ENV{BOOST_LIBRARY_DIR_V142_32}
                  $ENV{BOOST_LIBRARY_DIR_V143_64}
                  $ENV{BOOST_LIBRARY_DIR_V143_32})
-add_definitions(-DUNICODE -D_UNICODE -DDTWAIN_NOIMPORTLIB)
+add_definitions(-DUNICODE -D_UNICODE -DDTWAIN_CPP_NOIMPORTLIB)
 add_executable(twainsave-opensource
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/acquire_characteristics.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/buffered_transfer_info.cpp
@@ -126,3 +127,6 @@ target_sources(twainsave-opensource PRIVATE ${PROJECT_SOURCE_DIR}/twainsave-open
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
 endif()
+add_custom_command(TARGET twainsave-opensource POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/twainsave.ini "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
+                   )

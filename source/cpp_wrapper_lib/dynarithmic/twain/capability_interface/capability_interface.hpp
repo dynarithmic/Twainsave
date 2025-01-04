@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -310,6 +310,7 @@ namespace twain {
         mutable cap_return_type m_return_type;
 
         struct capability_info_struct;
+        bool m_feeder_supported = false;
 
         template <typename Container>
         void copy_to_cache(const Container& ct, int capvalue) const
@@ -395,6 +396,10 @@ namespace twain {
                 DTWAIN_LONG theType = API_INSTANCE DTWAIN_GetCapDataType(m_Source, s + 1000);
                 m_extendedimage_caps[s] = { szBuffer, DTWAIN_CO_GET, theType };
             }
+
+            // get the feeder status
+            m_feeder_supported = API_INSTANCE DTWAIN_IsFeederSupported(m_Source);
+
             return !vCaps.empty();
         }
 
@@ -1101,6 +1106,12 @@ namespace twain {
             return m_extendedimage_caps.find(capValue) != m_extendedimage_caps.end();
         }
 
+        // Special case
+        bool is_feeder_supported() const
+        {
+            return m_feeder_supported;
+        }
+
         template <typename Cap, typename std::enable_if<
                         std::is_floating_point<typename Cap::value_type>::value ||
                         std::is_integral<typename Cap::value_type>::value, bool>::type = 1>
@@ -1111,7 +1122,7 @@ namespace twain {
                 return false;
             if ( !ret.second )
             {
-                auto vect = get_cap_values<std::vector<typename Cap::value_type>>(capToTest); 
+                auto vect = get_cap_values<std::vector<typename Cap::value_type>>(static_cast<typename CAP_SUPPORTEDCAPS_::value_type>(capToTest));
                 auto cType = get_cap_container_type(capToTest, get());
                 if ( cType != twain_container_type::CONTAINER_RANGE)
                 {

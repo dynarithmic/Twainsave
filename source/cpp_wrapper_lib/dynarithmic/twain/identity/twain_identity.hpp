@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ namespace dynarithmic
             }
 
             TW_IDENTITY m_identity;
+            std::string m_str_id_info;
 
         public:
             explicit twain_identity(TW_IDENTITY& t) : m_identity(t) {}
@@ -76,6 +77,7 @@ namespace dynarithmic
             twain_identity& set_product_family(const std::string& s) { copy_util(s, m_identity.ProductFamily, 32U); return *this; }
             twain_identity& set_product_name(const std::string& s) { copy_util(s, m_identity.ProductName, 32U); return *this; }
             twain_identity& set_version_info(const std::string& s) { copy_util(s, m_identity.Version.Info, 32U); return *this; }
+            twain_identity& set_extra_info(const std::string& s) { m_str_id_info = s; return *this; }
 
             twain_identity& set_major_num(uint16_t val) { m_identity.Version.MajorNum = val; return *this; }
             twain_identity& set_minor_num(uint16_t val) { m_identity.Version.MinorNum = val; return *this; }
@@ -94,6 +96,8 @@ namespace dynarithmic
             uint16_t get_country() const            {  return m_identity.Version.Country; } 
             std::string get_version_info() const    {  return m_identity.Version.Info; }    
             uint32_t get_id() const                 { return m_identity.Id; }
+            std::string get_extra_info()   const    { return m_str_id_info; }
+
             static std::string get_supported_groups_string(uint32_t sgroups)
             {
                 constexpr uint32_t dgroups[] = { DG_CONTROL, DG_IMAGE, DG_AUDIO, DF_DSM2, DF_APP2, DF_DS2 };

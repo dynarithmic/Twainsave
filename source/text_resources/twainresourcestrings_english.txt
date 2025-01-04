@@ -1,3 +1,4 @@
+0 No Error
 1 NULL Window Handle
 2 Memory Allocation Failure
 3 Invalid DLL Handle
@@ -69,6 +70,24 @@
 1054 Source not installed
 1055 Source does not support memory file transfers
 1056 Area array is too small.  Array should have at least 4 items.
+1057 Could not create DTWAIN log file.
+1058 Source does not support TWAIN file system.
+1059 Tile mode not supported for this TWAIN Source.
+1060 DTWAIN32.INI not found
+1061 DTWAIN64.INI not found
+1062 CRC check failed.  Check for corrupted twaininfo.txt file
+1063 The twaininfo.txt file version is invalid for this version of DTWAIN
+1064 Windows API Error
+1065 No TWAIN ID matches the string
+1066 Duplicate resource ID found
+1067 Unavailable extended image info value
+1068 Invalid bitmap returned by TWAIN Source (TWAINDSM 2.x)
+1069 No images acquired.
+1070 Image resample error
+1071 Unknown TWAIN Return Code
+1072 Unknown TWAIN Condition Code
+1073 Resource data error: Exception thrown
+1074 Audio transfers are not supported
 1100 TWAIN Condition Code: Could not complete operation.  Insufficient Memory.
 1101 TWAIN Condition Code: No Error
 1102 TWAIN Condition Code: Unknown cause of failure
@@ -186,13 +205,23 @@
 2088 Invalid color space.  Only RGB, Grayscale, and Black/White color spaces are supported
 2089 PDF not supported.
 2090 Missing or corrupt DTWTS.DLL.  TwainSave not available
-2100 Invalid OCR page specified
+2101 Invalid OCR page specified
+2102 Invalid OCR Engine
+2103 OCR Engine not active
+2104 Invalid OCR file type
+2105 Invalid OCR pixel type
+2106 Invalid OCR bit depth
+2107 OCR Recognition error
 2500 Could not open TWAIN source
 2501 Could not close TWAIN source
+2502 Invalid Image Information on acquiring image
+2503 Error writing data to file
+2504 Operation not supported
 3000 Select Source
 3001 &Select
 3002 &Cancel
 3003 Sources:
+3004 Select OCR Engine
 3005 Entering
 3006 Exiting
 3007 returning value of
@@ -204,60 +233,16 @@
 3013 Output: return code from DSM
 3014 No information for 
 3015 returned error code
-5000 Courier
-5001 Courier-Bold
-5002 Courier-BoldOblique
-5003 Courier-Oblique
-5004 Helvetica
-5005 Helvetica-Bold
-5006 Helvetica-BoldOblique
-5007 Helvetica-Oblique
-5008 Times-Bold
-5009 Times-BoldItalic
-5010 Times-Roman
-5011 Times-Italic
-5012 Symbol
-5013 ZapfDingbats
-9500 TWCC_SUCCESS
-9501 TWCC_BUMMER
-9502 TWCC_LOWMEMORY
-9503 TWCC_NODS
-9504 TWCC_MAXCONNECTIONS
-9505 TWCC_OPERATIONERROR
-9506 TWCC_BADCAP
-9509 TWCC_BADPROTOCOL
-9510 TWCC_BADVALUE
-9511 TWCC_SEQERROR
-9512 TWCC_BADDEST
-9513 TWCC_CAPUNSUPPORTED
-9514 TWCC_CAPBADOPERATION
-9515 TWCC_CAPSEQERROR
-9516 TWCC_DENIED
-9517 TWCC_FILEEXISTS
-9518 TWCC_FILENOTFOUND
-9519 TWCC_NOTEMPTY
-9520 TWCC_PAPERJAM
-9521 TWCC_PAPERDOUBLEFEED
-9522 TWCC_FILEWRITEERROR
-9523 TWCC_CHECKDEVICEONLINE
-9524 TWCC_INTERLOCK
-9525 TWCC_DAMAGEDCORNER
-9526 TWCC_FOCUSERROR
-9527 TWCC_DOCTOOLIGHT
-9528 TWCC_DOCTOODARK
-9529 TWCC_NOMEDIA
-9600 TWRC_SUCCESS
-9601 TWRC_FAILURE
-9602 TWRC_CHECKSTATUS
-9603 TWRC_CANCEL
-9604 TWRC_DSEVENT
-9605 TWRC_NOTDSEVENT
-9606 TWRC_XFERDONE
-9607 TWRC_ENDOFLIST
-9608 TWRC_INFONOTSUPPORTED
-9609 TWRC_DATANOTAVAILABLE
-9610 TWRC_BUSY
-9611 TWRC_SCANNERLOCKED
+3016 Error
+3017 Temporary file directory does not exist
+3018 called
+3019 Temporary Image File is
+3020 Error creating temporary Image File
+3021 Image file created successfully
+3022 Values set on return
+3023 More
+3024 Capability listing
+3025 Default Source
 9700 DTWAIN Twain Library, v{short_version}, {company_name}, {copyright}
 9999 Exception error occurred during call to Twain DSM.  Possible corrupted Twain session?
 10000 [User Message]
@@ -266,3 +251,4 @@
 10003 Error in closing DTWAIN Manager
 10004 TWAIN Source Manager, Session, and DTWAIN closed successfully
 10005 Could not remove subclass from user window
+10006 Device type and TWAIN required type do not match.

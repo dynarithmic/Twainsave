@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
 DYNARITHMIC SOFTWARE. DYNARITHMIC SOFTWARE DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
 OF THIRD PARTY RIGHTS.
 */
-#ifndef DTWAIN_NOIMPORTLIB 
-#include <dtwain.h>
+#ifndef DTWAIN_CPP_NOIMPORTLIB 
+    #include <dtwain.h>
 #else
     #include <dtwainx2.h>
     #include <dtwpdft.h>

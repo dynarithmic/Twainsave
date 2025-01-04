@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ namespace dynarithmic
 
         bool twain_session::start(bool bCleanStart)
         {
-#ifdef DTWAIN_NOIMPORTLIB
+#ifdef DTWAIN_CPP_NOIMPORTLIB
             if (bCleanStart && !get_dllhandle())
             {
 #ifndef DTWAIN_USELOADEDLIB
@@ -83,7 +83,17 @@ namespace dynarithmic
             if (!API_INSTANCE DTWAIN_IsInitialized())
             {
                 if (bCleanStart)
+                {
+                    m_bOCRStarted = false;
                     m_Handle = API_INSTANCE DTWAIN_SysInitialize();
+                    if (m_Handle)
+                    {
+                        if (!API_INSTANCE DTWAIN_InitOCRInterface())
+                            m_error_logger.add_error(API_INSTANCE DTWAIN_GetLastError());
+                        else
+                            m_bOCRStarted = true;
+                    }
+                }
                 if (!m_Handle)
                 {
                     m_error_logger.add_error(DTWAIN_ERR_NOT_INITIALIZED);
@@ -112,7 +122,7 @@ namespace dynarithmic
             API_INSTANCE DTWAIN_GetVersionCopyrightA(retBuf.data(), static_cast<int32_t>(retBuf.size()));
             m_version_copyright = retBuf.data();
 
-            if (m_logger.second && m_logger.second->is_enabled())
+            if (m_logger.second/* && m_logger.second->is_enabled()*/)
                 setup_logging();
 #ifdef _WIN64
             m_twain_characteristics.set_dsm(dsm_type::version2_dsm);
@@ -181,12 +191,19 @@ namespace dynarithmic
             if (m_logger.second)
             {
                 auto& details = *(m_logger.second.get());
-                int32_t log_destination = 0; // static_cast<int32_t>(details.get_destination());
-                const int32_t log_verbosity = static_cast<int32_t>(details.get_verbosity_aslong());
-                log_destination |= DTWAIN_LOG_USECALLBACK;
-                API_INSTANCE DTWAIN_SetLoggerCallbackA(dynarithmic::twain::logger_callback_proc, PtrToInt64(this));
-                API_INSTANCE DTWAIN_SetTwainLogA(log_destination | log_verbosity, "");
+                if (details.is_enabled())
+                {
+                    auto log_destination = details.get_destination_aslong();
+                    auto log_verbosity = details.get_verbosity_aslong();
+                    log_destination |= DTWAIN_LOG_USECALLBACK;
+                    API_INSTANCE DTWAIN_SetLoggerCallbackA(dynarithmic::twain::logger_callback_proc, PtrToInt64(this));
+                    API_INSTANCE DTWAIN_SetTwainLogA(log_destination | log_verbosity, details.get_filename().c_str());
+                }
+                else
+                    // Turn off logging
+					API_INSTANCE DTWAIN_SetTwainLogA(0, "");
             }
+
         }
 
         void twain_session::mover(twain_session&& rhs) noexcept
@@ -217,7 +234,7 @@ namespace dynarithmic
         twain_session::~twain_session()
         {
             try {
-#ifdef DTWAIN_NOIMPORTLIB
+#ifdef DTWAIN_CPP_NOIMPORTLIB
                 cache_dll_handle(false);
 #endif
                 stop();
@@ -262,7 +279,7 @@ namespace dynarithmic
         bool twain_session::stop()
         {
             using namespace std::chrono_literals;
-#ifdef DTWAIN_NOIMPORTLIB
+#ifdef DTWAIN_CPP_NOIMPORTLIB
             struct HandleCloser
             {
                 HMODULE h_;
@@ -292,11 +309,16 @@ namespace dynarithmic
                     m_Handle = nullptr;
                     m_logger = { nullptr, nullptr };
                     m_source_cache.clear();
+                    while (!m_selected_sources.empty())
+                    {
+                        auto iter = m_selected_sources.begin();
+                        (*iter)->close();
+                    }
                     m_bStarted = false;
                     return true;
                 }
             }
-#ifdef DTWAIN_NOIMPORTLIB
+#ifdef DTWAIN_CPP_NOIMPORTLIB
             hCloser.detach();
 #endif
             return false;
@@ -599,6 +621,36 @@ namespace dynarithmic
             m_source_detail_map.insert({ sMapKey, sAllDetails });
             return sAllDetails;
 #endif
+        }
+
+        struct HandleDestroyer
+        {
+            HANDLE h;
+            HandleDestroyer(HANDLE h_) : h(h_) {}
+            ~HandleDestroyer() { if (h) { GlobalUnlock(h); GlobalFree(h); } }
+        };
+
+        std::string twain_session::to_api_string(const std::string& str)
+        {
+            HANDLE h = API_INSTANCE DTWAIN_ConvertToAPIStringA(str.c_str());
+            if (h)
+            {
+                HandleDestroyer hRAII(h);
+                LPCSTR pData = (LPCSTR)GlobalLock(h);
+                if ( pData )
+                    return std::string(pData, GlobalSize(h));
+            }
+            return {};
+        }
+
+        void twain_session::add_source(twain_source* pSource)
+        {
+            m_selected_sources.insert(pSource);
+        }
+
+        void twain_session::remove_source(twain_source* pSource)
+        {
+            m_selected_sources.erase(pSource);
         }
 
         LRESULT CALLBACK twain_session::error_callback_proc(LONG error, LONG64 UserData)

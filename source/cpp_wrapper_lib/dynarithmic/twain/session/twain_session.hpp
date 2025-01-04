@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ OF THIRD PARTY RIGHTS.
 #include <type_traits>
 #include <functional>
 #include <memory>
+#include <set>
 
 #if __cplusplus >= 201703L
 #include <optional>
@@ -49,8 +50,11 @@ OF THIRD PARTY RIGHTS.
 #include <dynarithmic/twain/types/twain_callback.hpp>
 #include <dynarithmic/twain/types/twain_array.hpp>
 #include <dynarithmic/twain/twain_details.hpp>
-#include <dtwain.h>
-
+#ifdef DTWAIN_CPP_NOIMPORTLIB
+    #include <dtwainx2.h>
+#else
+    #include <dtwain.h>
+#endif
 #ifdef _MSC_VER
     #pragma warning( push )  // Stores the current warning state for every warning.
     #pragma warning( disable:4996)
@@ -64,10 +68,55 @@ namespace dynarithmic
         class twain_source;
         class twain_identity;
 
-        template <int N>
+        struct source_functions_twain
+        {
+            typedef DTWAIN_SOURCE value_type;
+            static constexpr bool try_open = true;
+            static value_type Select()
+            { 
+                return API_INSTANCE DTWAIN_SelectSource(); 
+            }
+            
+            static value_type Select2ExA(HWND hWndParent, LPCSTR szTitle, LONG xPos, LONG yPos, LPCSTR szIncludeNames, LPCSTR szExcludeNames, LPCSTR szNameMapping, LONG nOptions)
+            {
+                return API_INSTANCE DTWAIN_SelectSource2ExA(hWndParent, szTitle, xPos, yPos, szIncludeNames, szExcludeNames, szNameMapping, nOptions);
+            }
+
+            static value_type SelectDefault()
+            { 
+                return API_INSTANCE DTWAIN_SelectDefaultSource();  
+            }
+
+            static value_type SelectByNameA(LPCSTR name) { return API_INSTANCE DTWAIN_SelectSourceByNameA(name); }
+        };
+
+        struct source_functions_ocr
+        {
+            typedef DTWAIN_OCRENGINE value_type;
+            static constexpr bool try_open = false;
+            static value_type Select()
+            {
+                return API_INSTANCE DTWAIN_SelectOCREngine();
+            }
+
+            static value_type Select2ExA(HWND hWndParent, LPCSTR szTitle, LONG xPos, LONG yPos, LPCSTR szIncludeNames, LPCSTR szExcludeNames, LPCSTR szNameMapping, LONG nOptions)
+            {
+                return API_INSTANCE DTWAIN_SelectOCREngine2ExA(hWndParent, szTitle, xPos, yPos, szIncludeNames, szExcludeNames, szNameMapping, nOptions);
+            }
+
+            static value_type SelectDefault()
+            {
+                return API_INSTANCE DTWAIN_SelectDefaultOCREngine();
+            }
+
+            static value_type SelectByNameA(LPCSTR name) { return API_INSTANCE DTWAIN_SelectOCREngineByNameA(name); }
+        };
+
+        template <typename SourceFn, int N>
         struct source_selector
         {
             enum { value = N };
+            SourceFn source_fn;
             twain_select_dialog get_dialog() const { return twain_select_dialog{}; }
         };
 
@@ -75,13 +124,14 @@ namespace dynarithmic
             Template instantiation denoting to use the TWAIN Select Source dialog when selecting a TWAIN Data Source.
             This is aliased by dynarithmic::twain::select_usedialog()
          */
-        template <>
-        struct source_selector<select_type::use_orig_dialog>
+        template <typename SourceFn>
+        struct source_selector<SourceFn, select_type::use_orig_dialog>
         {
+            typedef SourceFn source_value_type;
             enum { value = select_type::use_orig_dialog };
             twain_select_dialog get_dialog() const { return twain_select_dialog{}; }
 
-            static DTWAIN_SOURCE select(twain_select_dialog& dlg)
+            static typename SourceFn::value_type select(twain_select_dialog& dlg)
             {
                 #ifdef _WIN32
                 auto position = dlg.get_position();
@@ -90,7 +140,7 @@ namespace dynarithmic
                 for (auto& f : flags)
                 {
                     if (f == twain_select_dialog::uselegacy)
-                        return API_INSTANCE DTWAIN_SelectSource();
+                        return SourceFn::Select(); 
                     allFlags |= static_cast<int32_t>(f);
                 }
                 if (allFlags & static_cast<int32_t>(twain_select_dialog::useposition))
@@ -98,17 +148,17 @@ namespace dynarithmic
 
                 std::string strTitle = dlg.get_title();
                 API_INSTANCE DTWAIN_SetTwainDialogFont(dlg.get_font());
-                return API_INSTANCE DTWAIN_SelectSource2ExA(dlg.get_parent_window(),
+                return SourceFn::Select2ExA(dlg.get_parent_window(),
                                             (allFlags & twain_select_dialog::usedefaulttitle)?nullptr:strTitle.c_str(),
-                                            position.first, 
+                                            position.first,
                                             position.second,
                                             dlg.get_includename_list().c_str(),
                                             dlg.get_excludename_list().c_str(),
                                             dlg.get_name_mapping_s().c_str(),
-                                            allFlags); 
-                                                                                                  
+                                            allFlags);
+
                 #else
-                    return API_INSTANCE DTWAIN_SelectSource();
+                    return API_INSTANCE SourceFn::Select();
                 #endif
             }
         };
@@ -116,56 +166,63 @@ namespace dynarithmic
         /**
             Template instantiation denoting to select the default TWAIN Data Source
          */
-        template <>
-        struct source_selector<select_type::use_default>
+        template <typename SourceFn>
+        struct source_selector<SourceFn, select_type::use_default>
         {
             enum { value = 1 };
+            typedef SourceFn source_value_type;
             twain_select_dialog get_dialog() const { return twain_select_dialog{}; }
-            static DTWAIN_SOURCE select(twain_select_dialog&) { return API_INSTANCE DTWAIN_SelectDefaultSource(); }
+            static typename SourceFn::value_type select(twain_select_dialog&) { return SourceFn::SelectDefault(); } // API_INSTANCE DTWAIN_SelectDefaultSource();
         };
 
         /**
             Template instantiation denoting to select the TWAIN source using the Product Name
          */
-        template <>
-        struct source_selector<select_type::use_name>
+        template <typename SourceFn>
+        struct source_selector<SourceFn, select_type::use_name>
         {
             enum { value = select_type::use_name };
+            typedef SourceFn source_value_type;
             twain_select_dialog get_dialog() const { return twain_select_dialog{}; }
             private:
                 std::string m_name;
             public:
                 source_selector(std::string name /**< [in] Product Name of the TWAIN device to open */) : m_name(std::move(name)) {}
-                DTWAIN_SOURCE select(twain_select_dialog&) const { return API_INSTANCE DTWAIN_SelectSourceByNameA(m_name.c_str()); }
+                typename SourceFn::value_type select(twain_select_dialog&) const { return SourceFn::SelectByNameA(m_name.c_str()); }// API_INSTANCE DTWAIN_SelectSourceByNameA(m_name.c_str());
         };
 
         /**
         Template instantiation denoting to select the TWAIN source using the Product Name
         */
-        template <>
-        struct source_selector<select_type::use_dialog>
+        template <typename SourceFn>
+        struct source_selector<SourceFn, select_type::use_dialog>
         {
             enum { value = select_type::use_dialog };
+            typedef SourceFn source_value_type;
             twain_select_dialog get_dialog() const { return m_user_dialog; }
 
             private:
                 twain_select_dialog m_user_dialog;
             public:
                 source_selector(twain_select_dialog& dlg /**< [in] User-defined twain_dialog to use */) : m_user_dialog(dlg) {}
-                DTWAIN_SOURCE select(twain_select_dialog& user_dialog) const 
-            {
-                return source_selector<select_type::use_orig_dialog>::select(user_dialog);
-            }
+                typename SourceFn::value_type select(twain_select_dialog& user_dialog) const
+                {
+                    return source_selector<SourceFn, select_type::use_orig_dialog>::select(user_dialog);
+                }
         };
 
 
         /**
             Template instantiation denoting to use the TWAIN Select Source dialog when selecting a TWAIN Data Source
          */
-        using select_useorigdialog = source_selector<select_type::use_orig_dialog>;
-        using select_default = source_selector<select_type::use_default>;
-        using select_byname = source_selector<select_type::use_name>;
-        using select_usedialog = source_selector<select_type::use_dialog>;
+        using select_useorigdialog = source_selector<source_functions_twain, select_type::use_orig_dialog>;
+        using select_default = source_selector<source_functions_twain, select_type::use_default>;
+        using select_byname = source_selector<source_functions_twain, select_type::use_name>;
+        using select_usedialog = source_selector<source_functions_twain, select_type::use_dialog>;
+        using ocrselect_useorigdialog = source_selector<source_functions_ocr, select_type::use_orig_dialog>;
+        using ocrselect_default = source_selector<source_functions_ocr, select_type::use_default>;
+        using ocrselect_byname = source_selector<source_functions_ocr, select_type::use_name>;
+        using ocrselect_usedialog = source_selector<source_functions_ocr, select_type::use_dialog>;
 
         /* Non-template calls to select_source using this struct */
         struct select_source_traits
@@ -191,14 +248,14 @@ namespace dynarithmic
         };
 
         /**
-            The twain_session class is the main class that allows the startup and stopping of the TWAIN system.<br> 
+            The twain_session class is the main class that allows the startup and stopping of the TWAIN system.<br>
             This is the main driver class, as no TWAIN interaction can occur without instantiating a twain_session.
-            The twain_session class uses RAII (Resource Acquisition Is Initialization) techniques, meaning that when a 
+            The twain_session class uses RAII (Resource Acquisition Is Initialization) techniques, meaning that when a
             twain_session object goes out of scope, the destructor for the twain_session will automatically close out the TWAIN session.<br>
-            Note that if there are TWAIN devices still active (acquiring images), the twain_session destructor will not return until all 
+            Note that if there are TWAIN devices still active (acquiring images), the twain_session destructor will not return until all
             the TWAIN sources are closed.  This may or may not be desirable, but currently this is how the twain_session is implemented.
         **/
-        class twain_session 
+        class twain_session
         {
         public:
             using twain_app_info = twain_identity;
@@ -236,7 +293,7 @@ namespace dynarithmic
                     }
             };
 
-        private:                
+        private:
             using callback_map_type = std::unordered_map<twain_source*, std::unique_ptr<twain_callback>>;
             using source_basic_info = twain_app_info;
 
@@ -245,6 +302,7 @@ namespace dynarithmic
             std::vector<std::string> m_fileExtensions;
             twain_characteristics m_twain_characteristics;
             bool m_bStarted = false;
+            bool m_bOCRStarted = false;
             bool m_bTripletsNotify = false;
             std::string m_dsm_path;
             std::string m_long_name;
@@ -259,27 +317,28 @@ namespace dynarithmic
             std::unordered_map<std::string, std::string> m_source_detail_map;
             std::unordered_map<std::string, source_status> m_source_status_map;
             std::unordered_map<std::string, DTWAIN_SOURCE> m_source_name_to_handle;
-        #ifdef DTWAIN_NOIMPORTLIB
+            std::set<twain_source*> m_selected_sources;
+        #ifdef DTWAIN_CPP_NOIMPORTLIB
             HMODULE m_DynamicHandle = 0;
             bool    m_bCacheHandle = true;
-        #endif  
+        #endif
         public:
 
-        #ifdef DTWAIN_NOIMPORTLIB
+        #ifdef DTWAIN_CPP_NOIMPORTLIB
             twain_session& cache_dll_handle(bool b = true) { m_bCacheHandle = b; return *this; }
             bool is_dllhandle_cached() const { return m_bCacheHandle; }
-            void set_dllhandle(HMODULE h) 
-            { 
-                m_DynamicHandle = h;  
-                RuntimeDLL::DTWAIN_API__.InitDTWAINInterface(nullptr, h); 
+            void set_dllhandle(HMODULE h)
+            {
+                m_DynamicHandle = h;
+                RuntimeDLL::DTWAIN_API__.InitDTWAINInterface(nullptr, h);
             }
             HMODULE get_dllhandle() const { return m_DynamicHandle; }
-        #endif  
-    
+        #endif
+
             private:
                 friend twain_source;
                 error_logger m_error_logger;
-            twain_logger m_dummy_logger;
+                twain_logger m_dummy_logger;
                 mutable std::vector<supported_filetype_info> m_singlepage_filetype_cache;
                 mutable std::vector<supported_filetype_info> m_multipage_filetype_cache;
 
@@ -293,11 +352,12 @@ namespace dynarithmic
                 void update_source_status(const twain_source& ts);
 
                 template <typename SourceSelector>
-                DTWAIN_SOURCE select_source_impl(const SourceSelector& selector, twain_select_dialog& dlg, bool bOpen = true)
+                typename SourceSelector::source_value_type::value_type select_source_impl(const SourceSelector& selector, twain_select_dialog& dlg, bool bOpen = true)
                 {
                     if (m_Handle)
                     {
-                        API_INSTANCE DTWAIN_OpenSourcesOnSelect(bOpen ? TRUE : FALSE);
+                        if (SourceSelector::source_value_type::try_open)
+                            API_INSTANCE DTWAIN_OpenSourcesOnSelect(bOpen ? TRUE : FALSE);
                         auto src = selector.select(dlg);
                         return src;
                     }
@@ -364,10 +424,11 @@ namespace dynarithmic
                 void setup_error_logging();
                 void setup_logging();
                 void mover(twain_session&& rhs) noexcept;
-
+                void add_source(twain_source* pSource);
+                void remove_source(twain_source* pSource);
             public:
                 using callback_handle = callback_map_type::iterator;
- 
+
                 twain_session(const twain_session&) = delete;
                 twain_session& operator=(const twain_session&) = delete;
                 twain_session(startup_mode mode = startup_mode::none);
@@ -383,8 +444,8 @@ namespace dynarithmic
                 }
 
                 /// Destructor --  Automatically shuts down TWAIN Session
-                /// 
-                /// The destructor effectively calls the stop() function.  
+                ///
+                /// The destructor effectively calls the stop() function.
                 /// @see stop()
                 ~twain_session();
 
@@ -399,27 +460,27 @@ namespace dynarithmic
                 operator bool() const noexcept { return m_bStarted; }
 
                 /// Attaches to an existing DTWAIN_HANDLE
-                /// @returns **true** if successful, **false** if TWAIN session could not be started.  
+                /// @returns **true** if successful, **false** if TWAIN session could not be started.
                 bool attach(DTWAIN_HANDLE handle);
 
                 /// Starts a TWAIN session by opening the TWAIN Data Source Manager (DSM).
-                /// 
+                ///
                 /// When the TWAIN DSM is started, the current set of twain_characteristics are used when initializing the TWAIN session.
-                /// @returns **true** if successful, **false** if TWAIN session could not be started.  
+                /// @returns **true** if successful, **false** if TWAIN session could not be started.
                 /// @note Only a single TWAIN session can be started per thread.
                 /// @see stop() get_twain_characteristics()
                 bool start();
 
-                /// Stops the TWAIN Data Source Manager (DSM).  
-                /// 
-                /// Once the DSM is stopped, a call to start() must be issued to restart the TWAIN DSM.  
+                /// Stops the TWAIN Data Source Manager (DSM).
+                ///
+                /// Once the DSM is stopped, a call to start() must be issued to restart the TWAIN DSM.
                 /// @returns **true** if successful, **false** if unsuccessful
                 /// @see start() get_twain_characteristics()
                 /// @warning Calling stop() while a device is in the acquisition state will place your program in a busy-wait loop until the device(s) are out of the acquisition state.
                 bool stop();
 
                 /// (For advanced TWAIN programmers) Allows low-level TWAIN triplet calls to the TWAIN Data Source Manager.
-                /// 
+                ///
                 /// This function is intended for advanced or highly specialized calls to the TWAIN DSM, and is not usually necessary for almost all TWAIN-enabled applications.
                 /// @returns The TWAIN return code that the TWAIN triplet is documented to return (for example: TWRC_SUCCESS, TWRC_FAILURE, etc.)
                 /// @param[in,out] pSource Source TW_IDENTITY
@@ -439,67 +500,67 @@ namespace dynarithmic
                                     void* pdata);
 
                 /// Returns an error string that describes the error given by **error_number**
-                /// 
+                ///
                 /// @param[in] error_number The number of the error.
                 /// @returns An error string that describes the error
                 /// @see get_last_error() twain_characteristics.get_language()
                 /// @note The error string will be in the language specified by twain_characteristics::get_language()
                 static std::string get_error_string(int32_t error_number);
 
-                /// Returns a resource string 
-                /// 
+                /// Returns a resource string
+                ///
                 /// @param[in] resource id.  For user-defined resources, this value should be >= DTWAIN_USERRES_START
                 /// @returns A resource string
                 /// @note The string will be in the language specified by twain_characteristics::get_language()
                 static std::string get_resource_string(int32_t resource_id);
 
                 /// Returns the last error encountered by the underlying DTWAIN library
-                /// 
+                ///
                 /// @returns An error number that represents the last error
                 /// @see get_error_string()
                 static int32_t get_last_error();
 
-                /// Returns the string version of the TWAIN constant name.  
+                /// Returns the string version of the TWAIN constant name.
                 /// For example:
-                /// 
+                ///
                 /// get_twain_name(twain_category::TWPT, 0);
-                /// 
-                /// will return "TWPT_BW", since the TWAIN names that start with TWPT, 
+                ///
+                /// will return "TWPT_BW", since the TWAIN names that start with TWPT,
                 /// such as TWPT_BW has the value of 0 (see twain.h for verification).
-                /// 
+                ///
                 /// @returns A string version of the TWAIN constant name
                 static std::string get_twain_name(twain_constant_category twain_category, int32_t twain_constant);
 
                 error_logger& get_error_logger() noexcept { return m_error_logger; }
 
                 /// Returns a short string that identifies the name of the Dynarithmic TWAIN Library version
-                /// 
+                ///
                 /// @returns a string that identifies the version of the underlying DTWAIN library in use.
                 std::string get_short_version_name() const  noexcept { return m_short_name; }
 
                 /// Returns a int32_t version string that identifies the name of the Dynarithmic TWAIN Library version
-                /// 
+                ///
                 /// @returns a int32_t version string that identifies the version of the underlying DTWAIN library in use.
                 std::string get_long_version_name() const noexcept { return m_long_name; }
 
                 /// Returns a short string that identifies the version and copyright of the Dynarithmic TWAIN Library version
-                /// 
+                ///
                 /// @returns a string that identifies the version and copyright of the underlying DTWAIN library in use.
                 std::string get_version_copyright() const  noexcept { return m_version_copyright; }
 
                 /// Returns the full path of the TWAIN Data Source Manager in use.
-                /// 
+                ///
                 /// @returns string that identifies the path of the TWAIN Data Source Manager
                 std::string get_dsm_path() const noexcept { return m_dsm_path; }
 
                 /// Returns the full path of the DTWAIN shared library being utilized.
-                /// 
+                ///
                 /// @returns Full path of the DTWAIN shared library being utilized.
                 std::string get_dtwain_path() const noexcept { return m_dtwain_path; }
 
                 /// Registers a twain_callback object with a TWAIN source for this TWAIN session.
-                /// 
-                /// The twain_callback class allows your application to monitor and trap TWAIN events when the acquire is invoked.  
+                ///
+                /// The twain_callback class allows your application to monitor and trap TWAIN events when the acquire is invoked.
                 /// The twain_session keeps track of all the registered listeners.
                 /// @param[in] source The twain_source that the callback will be registering the callback.
                 /// @param[in] callback The user-defined callback object.
@@ -522,14 +583,14 @@ namespace dynarithmic
                 }
 
                 /// Removes a twain_callback for this twain_session.
-                /// 
+                ///
                 /// @param[in] handle The callback_handle returned by register_callback.
                 /// @returns **true** if the twain_callback is successfully removed, **false** otherwise.
                 /// @see register_callback()
                 bool unregister_callback(callback_handle handle);
 
                 /// Registers a custom logging object derived from twain_logger with this TWAIN session.
-                /// 
+                ///
                 /// @param[in] logger custom logger object
                 /// @see unregister_logger
                 template <typename Logger, typename ...Args>
@@ -542,7 +603,7 @@ namespace dynarithmic
                 }
 
                 /// Removes logger from this TWAIN session
-                /// 
+                ///
                 /// @see register_logger
                 void unregister_logger()
                 {
@@ -552,7 +613,7 @@ namespace dynarithmic
                 }
 
             /// Allows logging to be turned on or off during a TWAIN Session.
-            /// 
+            ///
             /// To set the details of the logging setting, use the get_twain_characteristics().get_logger_details() to set the various details.
             /// @note enable_logger() is the only mechanism that can be used to enable or disable logging after a TWAIN
             /// session has started.
@@ -560,20 +621,20 @@ namespace dynarithmic
             void enable_logger(bool enable = true);
 
             /// Sets the enabling of triplet notifications being sent to the application
-            /// 
+            ///
             /// @returns reference to the object that identifies this session by TWAIN.
             twain_session& enable_triplets_notification(bool bEnable);
 
             /// Returns the complete object that represents this TWAIN session's identity.
-            /// 
+            ///
             /// @returns reference to the object that identifies this session by TWAIN.
             /// @note Unlike get_twain_id(), get_id() returns an object that describes the TWAIN session's name, language, etc.
             /// @see get_twain_id()
             twain_identity& get_id() { return m_twain_characteristics.get_app_info(); }
 
             /// Returns the TW_IDENTITY* that represents this TWAIN session.
-            /// 
-            /// @returns a pointer to the **TW_IDENTITY** that represents this TWAIN session.  
+            ///
+            /// @returns a pointer to the **TW_IDENTITY** that represents this TWAIN session.
             /// @note The return value can be used in a call to call_dsm().
             /// @see call_dsm() get_id()
             TW_IDENTITY* get_twain_id() { return static_cast<TW_IDENTITY*>(&get_id().get_identity()); }
@@ -618,7 +679,7 @@ namespace dynarithmic
 
 
             /// Returns a container of twain_source_info, which describes each installed TWAIN device.
-            /// 
+            ///
             /// The container defaults to std::vector<twain_source_info>
             /// @returns A container (default is std::vector<twain_source_info>) of twain_source_info, which describes each installed TWAIN device
             template <typename Container = std::vector<twain_identity>>
@@ -634,7 +695,7 @@ namespace dynarithmic
 
 
             /// Returns a container of supported_fileytpe_info, which describes each supported file type
-            /// 
+            ///
             /// The container defaults to std::vector<supported_filetype_info>
             /// @returns A container (default is std::vector<supported_filetype_info>) of supported_filetype_info, which describes each supported file type
             template <typename Container = std::vector<supported_filetype_info>>
@@ -644,12 +705,12 @@ namespace dynarithmic
                 static_assert(std::is_same<typename Container::value_type, supported_filetype_info>::value == 1,
                     "Container is not of type supported_filetype_info");
                 if (m_bStarted)
-                    get_filetypes_impl(C, m_singlepage_filetype_cache, &API_INSTANCE DTWAIN_EnumSupportedSinglePageFileTypes);
+                    get_filetypes_impl(C, m_singlepage_filetype_cache, API_INSTANCE DTWAIN_EnumSupportedSinglePageFileTypes);
                 return C;
             }
 
             /// Returns a container of supported_fileytpe_info, which describes each supported file type
-            /// 
+            ///
             /// The container defaults to std::vector<supported_filetype_info>
             /// @returns A container (default is std::vector<supported_filetype_info>) of supported_filetype_info, which describes each supported file type
             template <typename Container = std::vector<supported_filetype_info>>
@@ -659,13 +720,13 @@ namespace dynarithmic
                 static_assert(std::is_same<typename Container::value_type, supported_filetype_info>::value == 1,
                     "Container is not of type supported_filetype_info");
                 if (m_bStarted)
-                    get_filetypes_impl(C, m_multipage_filetype_cache, &API_INSTANCE DTWAIN_EnumSupportedMultiPageFileTypes);
+                    get_filetypes_impl(C, m_multipage_filetype_cache, API_INSTANCE DTWAIN_EnumSupportedMultiPageFileTypes);
                 return C;
             }
 
 
             /// Selects a TWAIN Device that will be used to acquire images.
-            /// 
+            ///
             /// Allows selection of a TWAIN Source using one of 3 methods, as denoted by the selector parameter:
             /// <ul>
             ///     <li>1. Using the TWAIN Select Source dialog</li>
@@ -674,11 +735,11 @@ namespace dynarithmic
             /// </ul>
             /// If no device is selected, the returned source_select_info will have the source_select_info::creation_status set to **false**.
             /// @param[in] selector The type of selection to use (dialog, by product name, or default)
-            /// @param[in] open_source If **true**, and a TWAIN device is successfully selected, automatically opens the device for further operations. 
+            /// @param[in] open_source If **true**, and a TWAIN device is successfully selected, automatically opens the device for further operations.
             /// @returns A source_select_info that describes the DTWAIN_SOURCE selected.
             /// @note if the **open_source** parameter is **false**, the program must call the twain_source::open() function.
             /// @see dynarithmic::twain::source_selector<select_type::use_dialog>() dynarithmic::twain::source_selector<select_type::use_name>() dynarithmic::twain::source_selector<select_type::use_default>()
-            /// 
+            ///
             /**
             \code {.cpp}
              #include <dynarithmic\twain\twain_session.hpp>
@@ -698,9 +759,9 @@ namespace dynarithmic
             }
             \endcode
             */
-            template <typename T = select_useorigdialog>
-            source_select_info select_source(const T& selector = dynarithmic::twain::source_selector<select_type::use_orig_dialog>(),
-                bool open_source = true)
+
+            template <typename SourceFn = source_functions_twain, typename T = select_useorigdialog>
+            source_select_info select_source(const T& selector = dynarithmic::twain::source_selector<SourceFn, select_type::use_orig_dialog>(),bool open_source = true)
             {
                 if (!started())
                 {
@@ -711,7 +772,7 @@ namespace dynarithmic
                     }
                 }
                 bool isCanceled = false;
-                DTWAIN_SOURCE ret = nullptr;
+                typename SourceFn::value_type ret = nullptr;
                 if (static_cast<int>(selector.value) == static_cast<int>(select_type::use_dialog))
                 {
                     auto dlg = selector.get_dialog();
@@ -730,6 +791,26 @@ namespace dynarithmic
 
             source_select_info select_source(select_source_traits& traits);
 
+            source_select_info select_ocr()
+            {
+                return select_source<source_functions_ocr, ocrselect_useorigdialog>();
+            }
+
+            source_select_info select_ocr(std::string name)
+            {
+                return select_source<source_functions_ocr, ocrselect_byname>(source_selector<source_functions_ocr, select_type::use_name>(name.c_str()));
+            }
+
+            source_select_info select_default_ocr()
+            {
+                return select_source<source_functions_ocr, ocrselect_default>(source_selector<source_functions_ocr, select_type::use_default>());
+            }
+
+            source_select_info select_ocr(twain_select_dialog& dialog)
+            {
+                return select_source<source_functions_ocr, ocrselect_usedialog>(source_selector<source_functions_ocr, select_type::use_dialog>(dialog));
+            }
+            
             /** Adds an error value to the error log
             *
             */
@@ -743,7 +824,7 @@ namespace dynarithmic
             twain_session& set_temporary_directory(std::string dir);
 
             /// Gets the current directory used to store temporary images when acquiring to files
-            /// 
+            ///
             /// @returns string representing the current temporary directory.
             /// @see set_temporary_directory()
             std::string get_temporary_directory() const noexcept;
@@ -765,11 +846,11 @@ namespace dynarithmic
 
 
             /// Sets whether acquiring images requires a user-defined TWAIN message loop to run.
-            /// 
+            ///
             ///   An application that desires to have a customized TWAIN acquisition loop must call this function with a **true** value when twain_source::acquire() is called. Once this is done
             ///   the application must provide the loop to be processed when images are being acquired (see the dynarithmic::twain::twain_loop_win32 class as an example).
-            /// 
-            ///   If there is no custom TWAIN loop, then the looping mechanism internal to this library will be used. By default, the application will not use 
+            ///
+            ///   If there is no custom TWAIN loop, then the looping mechanism internal to this library will be used. By default, the application will not use
             ///   a custom loop, and will use the internal looping method when obtaining images.
             ///   @params[in] use_custom If **true**, sets the application to use a custom TWAIN loop
             ///   @returns Reference to current twain_session object (**this**)
@@ -789,7 +870,7 @@ namespace dynarithmic
 
             twain_session& register_error_callback(error_logger_func fn);
             /// Gets a reference to current application information
-            /// 
+            ///
             /// @returns Reference to the current twain_app_info that describes the application information
             /// @see set_app_info()
             twain_app_info& get_app_info();
@@ -798,6 +879,9 @@ namespace dynarithmic
             std::string get_details(details_info info = { true, 2 });
             source_status get_source_status(const twain_source& ts);
             source_status get_source_status(std::string prodName);
+
+            std::string to_api_string(const std::string& str);
+
             DTWAIN_SOURCE get_source_handle_from_name(std::string prodName);
             twain_logger& get_logger() noexcept
             {
@@ -806,6 +890,8 @@ namespace dynarithmic
                 return m_dummy_logger;
             }
             logger_type& get_logger_type() noexcept { return m_logger; }
+
+            bool is_ocr_available() { return m_bOCRStarted; }
         };
     }
 }

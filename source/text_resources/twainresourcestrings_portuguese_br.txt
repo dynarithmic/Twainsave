@@ -1,3 +1,4 @@
+0 Nenhum erro
 1 Identificador de janela NULL
 2 Falha na alocação de memória
 3 Identificador de DLL inválido
@@ -69,6 +70,24 @@
 1054 Source not installed
 1055 Source does not support memory file transfers
 1056 A matriz de área é muito pequena. A matriz deve ter pelo menos 4 itens.
+1057 Erro ao criar arquivo de log.
+1058 Source does not support TWAIN file system.
+1059 Modo de azulejo não suportado para esta fonte TWAIN.
+1060 DTWAIN32.INI não encontrado  
+1061 DTWAIN64.INI não encontrado  
+1062 Verificação de CRC falhou. Verifique se o arquivo twaininfo.txt está corrompido  
+1063 A versão do arquivo twaininfo.txt é inválida para esta versão do DTWAIN  
+1064 Erro da API do Windows
+1065 Nenhum ID TWAIN corresponde à string  
+1066 ID de recurso duplicado encontrado  
+1067 Valor de informação de imagem estendida indisponível
+1068 Bitmap inválido retornado pela Fonte TWAIN (TWAINDSM 2.x)
+1069 Nenhuma imagem adquirida.
+1070 Erro de imagem  
+1071 Código de retorno TWAIN desconhecido  
+1072 Código de condição TWAIN desconhecido  
+1073 Erro de dados de recurso: Exceção lançada
+1074 Transferências de áudio não são suportadas
 1100 Código de Condição TWAIN: Não foi possível concluir a operação. Memória insuficiente.
 1101 Código de Condição TWAIN: Sem Erros
 1102 Código de Condição TWAIN: Falha de causa desconhecida
@@ -187,11 +206,20 @@
 2090 DTWTS.DLL ausente ou corrompido. TwainSave não disponível
 2500 Não foi possível abrir o dispositivo TWAIN
 2501 Não foi possível fechar o dispositivo TWAIN
-2100 Página OCR inválida especificada
+2502 Informações de imagem inválidas
+2503 Erro ao gravar dados no arquivo
+2504 Operação não suportada  
+2102 OCR inválido  
+2103 OCR não ativo  
+2104 Tipo de arquivo OCR inválido  
+2105 Tipo de pixel OCR inválido  
+2106 Profundidade de bits OCR inválida  
+2107 Erro de reconhecimento OCR  
 3000 Selecionar fonte
 3001 &Select
 3002 &Cancel
 3003 Fontes:
+3004 Selecionar OCR
 3005 Entrando
 3006 Saindo
 3007 retornando valor de
@@ -199,69 +227,26 @@
 3009 Modulo
 3010 Nenhuma informação de parâmetro
 3011 Erro ao obter informações para a função
-3012 Input
+3012 Entrada
 3013 Saída: código de retorno do DSM
 3014 No information for 
 3015 returned error code
-5000 Courier
-5001 Courier-Bold
-5002 Courier-BoldOblique
-5003 Courier-Oblique
-5004 Helvetica
-5005 Helvetica-Bold
-5006 Helvetica-BoldOblique
-5007 Helvetica-Oblique
-5008 Times-Bold
-5009 Times-BoldItalic
-5010 Times-Roman
-5011 Times-Italic
-5012 Symbol
-5013 ZapfDingbats
-9500 TWCC_SUCCESS
-9501 TWCC_BUMMER
-9502 TWCC_LOWMEMORY
-9503 TWCC_NODS
-9504 TWCC_MAXCONNECTIONS
-9505 TWCC_OPERATIONERROR
-9506 TWCC_BADCAP
-9509 TWCC_BADPROTOCOL
-9510 TWCC_BADVALUE
-9511 TWCC_SEQERROR
-9512 TWCC_BADDEST
-9513 TWCC_CAPUNSUPPORTED
-9514 TWCC_CAPBADOPERATION
-9515 TWCC_CAPSEQERROR
-9516 TWCC_DENIED
-9517 TWCC_FILEEXISTS
-9518 TWCC_FILENOTFOUND
-9519 TWCC_NOTEMPTY
-9520 TWCC_PAPERJAM
-9521 TWCC_PAPERDOUBLEFEED
-9522 TWCC_FILEWRITEERROR
-9523 TWCC_CHECKDEVICEONLINE
-9524 TWCC_INTERLOCK
-9525 TWCC_DAMAGEDCORNER
-9526 TWCC_FOCUSERROR
-9527 TWCC_DOCTOOLIGHT
-9528 TWCC_DOCTOODARK
-9529 TWCC_NOMEDIA
-9600 TWRC_SUCCESS
-9601 TWRC_FAILURE
-9602 TWRC_CHECKSTATUS
-9603 TWRC_CANCEL
-9604 TWRC_DSEVENT
-9605 TWRC_NOTDSEVENT
-9606 TWRC_XFERDONE
-9607 TWRC_ENDOFLIST
-9608 TWRC_INFONOTSUPPORTED
-9609 TWRC_DATANOTAVAILABLE
-9610 TWRC_BUSY
-9611 TWRC_SCANNERLOCKED
+3016 Erro
+3017 O diretório de arquivos temporários não existe
+3018 foi chamado
+3019 Arquivo de imagem temporário é
+3020 Erro ao criar arquivo de imagem temporário
+3021 Arquivo de imagem criado com sucesso
+3022 Valores definidos no retorno2101 Página OCR inválida especificada
+3023 Mais
+3024 Lista de Capacidades
+3025 Fonte Padrão
 9700 DTWAIN Twain Library, v{short_version}, {company_name}, {copyright}
 9999 Ocorreu um erro de exceção durante a chamada para o Twain DSM. Possível sessão Twain corrompida
 10000 [Mensagem do usuário]
-10001 Error in closing Twain DSM
-10002 Error in closing Twain Session
-10003 Error in closing DTWAIN Manager
-10004 TWAIN Source Manager, Session, and DTWAIN closed successfully
-10005 Could not remove subclass from user window
+10001 Erro ao fechar o DSM do Twain  
+10002 Erro ao fechar a sessão do Twain  
+10003 Erro ao fechar o gerenciador DTWAIN  
+10004 Gerenciador de fonte TWAIN, sessão e DTWAIN fechados com sucesso  
+10005 Não foi possível remover a subclasse da janela do usuário  
+10006 O tipo de dispositivo e o tipo exigido pelo TWAIN não correspondem.

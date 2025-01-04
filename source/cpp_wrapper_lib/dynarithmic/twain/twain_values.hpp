@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2024 Dynarithmic Software.
+Copyright (c) 2002-2025 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,11 @@ OF THIRD PARTY RIGHTS.
 #ifndef DTWAIN_TWAIN_VALUES_HPP
 #define DTWAIN_TWAIN_VALUES_HPP
 
-#include <dtwain.h>
+#ifdef DTWAIN_CPP_NOIMPORTLIB
+    #include <dtwainx2.h>
+#else
+    #include <dtwain.h>
+#endif
 #include <cstdint>
 #include <map>
 #include <unordered_set>
@@ -1972,8 +1976,9 @@ namespace dynarithmic
         class twain_session;
         struct source_select_info
         {
-            DTWAIN_SOURCE source_handle = nullptr;      /**< [out] Low-level source_handle */
-            twain_session* session_handle = nullptr;    /**< [out] twain_session that opened the source */
+            DTWAIN_SOURCE source_handle = nullptr;      /**< [out] Low-level source handle */
+            DTWAIN_OCRENGINE ocrengine_handle = nullptr; /**< [out] Low-level ocr engine handle */
+            twain_session* session_handle = nullptr;    /**< [out] twain_session that opened the source or ocr engine */
             bool is_canceled = false;                   /**< [out] status indicator */
             bool canceled() const { return is_canceled; }
         };
