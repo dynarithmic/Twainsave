@@ -844,6 +844,7 @@ namespace dynarithmic
             twain_session& set_dsm_search_order(std::string search_order, std::string user_directory) noexcept;
             twain_session& set_dsm_search_order(int search_order) noexcept;
 
+            twain_session& set_resource_directory(std::string resDir) noexcept;
 
             /// Sets whether acquiring images requires a user-defined TWAIN message loop to run.
             ///

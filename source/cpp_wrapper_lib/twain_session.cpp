@@ -526,6 +526,7 @@ namespace dynarithmic
         /// @see set_dsm_search_order() get_dsm_search_order() twain_session::get_dsm_path() twain_session::start()
         twain_session& twain_session::set_dsm(dsm_type dsm) noexcept { m_twain_characteristics.set_dsm(dsm); return *this; }
 
+        twain_session& twain_session::set_resource_directory(std::string resDir) noexcept { m_twain_characteristics.set_resource_directory(resDir); return *this; }
 
         twain_session& twain_session::set_dsm_search_order(std::string search_order, std::string user_directory) noexcept
         {
