@@ -130,3 +130,6 @@ endif()
 add_custom_command(TARGET twainsave-opensource POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/twainsave.ini "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
                    )
+add_custom_command(TARGET twainsave-opensource POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/twainsave-opensource.exe "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/twainsave_${CMAKE_GENERATOR_PLATFORM}.exe"
+                   )
