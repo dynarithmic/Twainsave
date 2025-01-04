@@ -22,6 +22,12 @@ To get started,
 
 The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
+5) To get help for **Twainsave**:
+    a) issue the **--help** option to list the various options available.  For example:
+    **twainsave --help** or **twainsave64 --help** from the command-line will list the options available.
+    
+    b) Note that there is also a Windows-based [help file](https://github.com/dynarithmic/Twainsave/tree/master/help) that explains most of these options.  This help file is periodically updated.
+
 ----
 The current open source TwainSave version is **1.1.0**.
 
