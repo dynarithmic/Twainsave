@@ -94,7 +94,7 @@ See the [DTWAIN source main page](https://github.com/dynarithmic/twain_library_s
 
 4) Since TwainSave relies on the DTWAIN library to run successfully, you must ensure that **dtwain32u.dll** and **dtwain64u.dll** are available at run time.  Along with these files, the text resources should be made available.  
 
-You can get these runtime files directly from the [binaries](https://github.com/dynarithmic/Twainsave/tree/master/binaries/32-bit) folder and unzipping the packages you see there, and either placing the files directly in the path where the TwainSave executable is existing, or place those files in a directory specified by the PATH environment variable.
+You can get these runtime files directly from the [binaries](https://github.com/dynarithmic/Twainsave/tree/master/binaries/32-bit) folder, and either placing the files directly in the path where the TwainSave executable is existing, or place those files in a directory specified by the PATH environment variable.
 
 ---------
 ## To-do list
