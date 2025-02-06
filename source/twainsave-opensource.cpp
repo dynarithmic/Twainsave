@@ -108,6 +108,7 @@ MAPBOX_ETERNAL_CONSTEXPR const auto g_FileTypeMap = mapbox::eternal::map<stringv
     INIT_TYPE(dcx, filetype_value,dcx),
     INIT_TYPE(pdf, filetype_value,pdf),
     INIT_TYPE(ico, filetype_value,windowsicon),
+    INIT_TYPE(icov,filetype_value,windowsvistaicon),
     INIT_TYPE(png, filetype_value,png),
     INIT_TYPE(tga, filetype_value,targa),
     INIT_TYPE(tgarle, filetype_value, targarle),
@@ -440,12 +441,6 @@ std::vector<std::string> SplitPath(const filesys::path &src)
     for (const auto &p : src)
         elements.push_back(p.filename().string()); 
     return elements;
-}
-
-std::string GetTwainSaveExecutionPath()
-{
-	const auto symlocation = boost::dll::symbol_location(TWAINSAVE_VERINFO_ORIGINALFILENAME);
-	return symlocation.parent_path().string();
 }
 
 std::string GetNewFileName(const std::string& fullpath, int inc, int maxWidth)
@@ -1465,7 +1460,6 @@ int start_acquisitions(const po::variables_map& varmap)
     twain_session::twain_app_info appInfo;
     appInfo.set_product_name(TWAINSAVE_DEFAULT_TITLE).set_version_info(TWAINSAVE_FULL_VERSION);
     ts.set_app_info(appInfo);
-    ts.set_resource_directory(GetTwainSaveExecutionPath());
 
     // Start the TWAIN session
     ts.start();
@@ -1589,6 +1583,13 @@ int start_acquisitions(const po::variables_map& varmap)
         }
     }
     return 0;
+}
+
+
+std::string GetTwainSaveExecutionPath()
+{
+    const auto symlocation = boost::dll::symbol_location(TWAINSAVE_VERINFO_ORIGINALFILENAME);
+    return symlocation.parent_path().string();
 }
 
 void LoadCustomResourcesFromIni()
