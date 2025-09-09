@@ -37,7 +37,7 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsTwainAvailable(VOID_PROTOTYPE);
 DTWAIN_HANDLE  DLLENTRY_DEF      DTWAIN_SysInitialize(VOID_PROTOTYPE);
 
 /* Initialize DTWAIN without having the "Resources not found" error box blocking the client */
-DTWAIN_HANDLE  DLLENTRY_DEF      DTWAIN_SysInitializeNoBlocking();
+DTWAIN_HANDLE  DLLENTRY_DEF      DTWAIN_SysInitializeNoBlocking(VOID_PROTOTYPE);
 
 /* Uninitialize DTWAIN (closes all open sources, shuts down the link to the TWAIN DSM) */
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SysDestroy(VOID_PROTOTYPE);
@@ -71,7 +71,7 @@ LONG           DLLENTRY_DEF      DTWAIN_GetAPIHandleStatus(DTWAIN_HANDLE pHandle
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_EnableMsgNotify(DTWAIN_BOOL bSet);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsMsgNotifyEnabled(VOID_PROTOTYPE);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_EnableTripletsNotify(DTWAIN_BOOL bSet);
-DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsNotifyTripletsEnabled();
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_IsNotifyTripletsEnabled(VOID_PROTOTYPE);
 
 /* Callback procedure for alternate DTWAIN message notification */
 DTWAIN_CALLBACK_PROC DLLENTRY_DEF DTWAIN_SetCallback(DTWAIN_CALLBACK_PROC Fn,LONG UserData);
@@ -212,6 +212,7 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_RangeGetExpValue( DTWAIN_RANGE pArray, L
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_RangeGetExpValueLong( DTWAIN_RANGE pArray, LONG lPos, LPLONG pVal );
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_RangeGetExpValueFloat( DTWAIN_RANGE pArray, LONG lPos, LPDTWAIN_FLOAT pVal );
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_RangeExpand(DTWAIN_RANGE pSource,LPDTWAIN_ARRAY pArray );
+DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_RangeExpandEx(DTWAIN_RANGE Range);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_RangeGetNearestValue( DTWAIN_RANGE pArray, LPVOID pVariantIn,LPVOID pVariantOut, LONG RoundType);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_RangeNearestValueLong( DTWAIN_RANGE pArray, LONG lIn,LPLONG pOut, LONG RoundType);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_RangeNearestValueFloat( DTWAIN_RANGE pArray, DTWAIN_FLOAT dIn,LPDTWAIN_FLOAT pOut, LONG RoundType);
@@ -426,6 +427,7 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPixelType(DTWAIN_SOURCE Source, LONG PixelTyp
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetBitDepth(DTWAIN_SOURCE Source, LONG BitDepth,  DTWAIN_BOOL bSetCurrent);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetBitDepth(DTWAIN_SOURCE Source, LPLONG BitDepth, DTWAIN_BOOL bCurrent);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumPixelTypes(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY pArray);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumPixelTypesEx(DTWAIN_SOURCE Source);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumBitDepths(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY pArray);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsPixelTypeSupported(DTWAIN_SOURCE Source, LONG PixelType);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumBitDepthsEx(DTWAIN_SOURCE Source, LONG PixelType, LPDTWAIN_ARRAY pArray);
@@ -434,7 +436,7 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumFileTypeBitsPerPixel(LONG FileType, LPDTWAIN
 
 /* Support for CAP_CUSTOMDSDATA */
 HANDLE DLLENTRY_DEF DTWAIN_GetCustomDSData(DTWAIN_SOURCE Source, LPBYTE Data, DWORD dSize, LPDWORD pActualSize,LONG nFlags);
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetCustomDSData(DTWAIN_SOURCE Source, HANDLE hData, const BYTE* Data, DWORD dSize, LONG nFlags);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetCustomDSData(DTWAIN_SOURCE Source, HANDLE hData, LPCBYTE Data, DWORD dSize, LONG nFlags);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsCustomDSDataSupported(DTWAIN_SOURCE Source);
 
 /* Only to be used by static libraries.  This is mapped to DTWAIN_SysInitializexxx() for DLL */
@@ -443,6 +445,8 @@ DTWAIN_HANDLE DLLENTRY_DEF  DTWAIN_SysInitializeLib(HINSTANCE hInstance);
 /* Set JPEG Quality for JPEG file transfers */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetJpegValues(DTWAIN_SOURCE Source, LONG Quality, LONG Progressive);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetJpegValues(DTWAIN_SOURCE Source, LPLONG pQuality, LPLONG Progressive);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetJpegXRValues(DTWAIN_SOURCE Source, LONG Quality, LONG Progressive);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetJpegXRValues(DTWAIN_SOURCE Source, LPLONG pQuality, LPLONG Progressive);
 
 /* Set PDF Options for PDF file transfers */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFOrientation(DTWAIN_SOURCE Source, LONG lPOrientation);
@@ -451,7 +455,7 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFPageScale(DTWAIN_SOURCE Source, LONG nOpti
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFCompression(DTWAIN_SOURCE Source, DTWAIN_BOOL bCompression);
 
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFASCIICompression(DTWAIN_SOURCE Source, DTWAIN_BOOL bSet);
-/*DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFAESEncryption(DTWAIN_SOURCE Source, BOOL bUseAES);*/
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFAESEncryption(DTWAIN_SOURCE Source, LONG nWhichEncryption, DTWAIN_BOOL bUseAES);
 
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPostScriptType(DTWAIN_SOURCE Source, LONG PSType);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFJpegQuality(DTWAIN_SOURCE Source, LONG Quality);
@@ -459,7 +463,7 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFJpegQuality(DTWAIN_SOURCE Source, LONG Qua
 /* Text element used for DTWAIN_AddPDFTextEx function */
 DTWAIN_PDFTEXTELEMENT DLLENTRY_DEF DTWAIN_CreatePDFTextElement(DTWAIN_SOURCE Source);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_DestroyPDFTextElement(DTWAIN_PDFTEXTELEMENT TextElement);
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_AddPDFTextEx(DTWAIN_SOURCE Source, DTWAIN_PDFTEXTELEMENT TextElement, LONG Flags);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_AddPDFTextEx(DTWAIN_SOURCE Source, DTWAIN_PDFTEXTELEMENT TextElement, DWORD Flags);
 
 /* Setting the text element */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFTextElementFloat(DTWAIN_PDFTEXTELEMENT TextElement, DTWAIN_FLOAT val1, DTWAIN_FLOAT val2, LONG Flags);
@@ -554,6 +558,8 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_InitExtImageInfo(DTWAIN_SOURCE Source);
 /* Return all the supported ExtImageInfo types.  This function is useful if your app
    wants to know what types of Extended Image Information is supported by the Source */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumExtImageInfoTypes(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY pArray);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumExtImageInfoTypesEx(DTWAIN_SOURCE Source);
+
 
 /* This function actualy initiates the querying of the ext image information.  This function
    will query the TWAIN Source.  If your TWAIN Source has bugs, this will be where any problem
@@ -576,6 +582,7 @@ return the actual data, only the information as to the number of items, data typ
 that the Source reports for the data item.  Use DTWAIN_GetExtImageInfoData to get the
 data */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetExtImageInfoItem(DTWAIN_SOURCE Source, LONG nWhich, LPLONG InfoID, LPLONG NumItems, LPLONG Type);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetExtImageInfoItemEx(DTWAIN_SOURCE Source, LONG nWhich, LPLONG InfoID, LPLONG NumItems, LPLONG Type, LPLONG ReturnCode);
 
 /* Uninitializes the Extended Inmage information interface.  This also must be called  */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_FreeExtImageInfo(DTWAIN_SOURCE Source);
@@ -602,6 +609,8 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_FlipBitmap( HANDLE hDib );
 
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumSupportedCapsEx( DTWAIN_SOURCE Source, LPDTWAIN_ARRAY pArray );
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumExtendedCapsEx(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY pArray);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumSupportedExtImageInfo(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY pArray);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumSupportedExtImageInfoEx(DTWAIN_SOURCE Source);
 
 /* Test DTWAIN support libraries for various image types */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsTIFFSupported(VOID_PROTOTYPE);
@@ -610,19 +619,23 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsPNGSupported(VOID_PROTOTYPE);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsJPEGSupported(VOID_PROTOTYPE);
 
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsFileSystemSupported( DTWAIN_SOURCE Source );
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumTopCameras(DTWAIN_SOURCE Source,    LPDTWAIN_ARRAY Cameras);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumTopCameras(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY Cameras);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumBottomCameras(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY Cameras);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumCameras(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY Cameras);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumCamerasEx(DTWAIN_SOURCE Source, LONG nWhichCamera, LPDTWAIN_ARRAY Cameras);
 
+/* Equivalent camera functions that return DTWAIN_ARRAYs */
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumCamerasEx2(DTWAIN_SOURCE Source);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumCamerasEx3(DTWAIN_SOURCE Source, LONG nWhichCamera);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumTopCamerasEx(DTWAIN_SOURCE Source);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumBottomCamerasEx(DTWAIN_SOURCE Source);
+
 
 /* Blank page detection functions */
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetBlankPageDetection(DTWAIN_SOURCE Source, DTWAIN_FLOAT threshold,
-                                                      LONG discard_option, DTWAIN_BOOL bSet);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetBlankPageDetection(DTWAIN_SOURCE Source, DTWAIN_FLOAT threshold, LONG discard_option, DTWAIN_BOOL bSet);
 LONG DLLENTRY_DEF DTWAIN_GetBlankPageAutoDetection(DTWAIN_SOURCE Source);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsBlankPageDetectionOn(DTWAIN_SOURCE Source);
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetBlankPageDetectionEx(DTWAIN_SOURCE Source, DTWAIN_FLOAT threshold,
-                                                        LONG autodetect, LONG detectOpts, DTWAIN_BOOL bSet);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetBlankPageDetectionEx(DTWAIN_SOURCE Source, DTWAIN_FLOAT threshold,LONG autodetect, LONG detectOpts, DTWAIN_BOOL bSet);
 LONG DLLENTRY_DEF DTWAIN_IsDIBBlank(HANDLE hDib, DTWAIN_FLOAT threshold);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_DeleteDIB(HANDLE hDib);
 
@@ -878,8 +891,8 @@ DTWAIN_LOGGER_PROCA DLLENTRY_DEF DTWAIN_GetLoggerCallbackA(VOID_PROTOTYPE);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetLoggerCallbackW(DTWAIN_LOGGER_PROCW logProc, DTWAIN_LONG64 UserData);
 DTWAIN_LOGGER_PROCW DLLENTRY_DEF DTWAIN_GetLoggerCallbackW(VOID_PROTOTYPE);
 
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetErrorCallback(DTWAIN_ERROR_PROC, LONG UserData);
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetErrorCallback64(DTWAIN_ERROR_PROC64, DTWAIN_LONG64 UserData64);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetErrorCallback(DTWAIN_ERROR_PROC proc, LONG UserData);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetErrorCallback64(DTWAIN_ERROR_PROC64 proc, DTWAIN_LONG64 UserData64);
 DTWAIN_ERROR_PROC DLLENTRY_DEF DTWAIN_GetErrorCallback(VOID_PROTOTYPE);
 DTWAIN_ERROR_PROC64 DLLENTRY_DEF DTWAIN_GetErrorCallback64(VOID_PROTOTYPE);
 
@@ -895,6 +908,16 @@ DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayConvertFix32ToFloat(DTWAIN_ARRAY Fix32Arra
 LONG DLLENTRY_DEF DTWAIN_ArrayGetStringLength(DTWAIN_ARRAY a, LONG nWhichString);
 LONG DLLENTRY_DEF DTWAIN_ArrayGetMaxStringLength(DTWAIN_ARRAY a);
 
+/* functions to create array of strings from array of DTWAIN_FLOATs */
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayFloatToANSIString(DTWAIN_ARRAY FloatArray);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayFloatToWideString(DTWAIN_ARRAY FloatArray);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayFloatToString(DTWAIN_ARRAY FloatArray);
+
+/* functions to create array of doubles from array of strings */
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayANSIStringToFloat(DTWAIN_ARRAY StringArray);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayWideStringToFloat(DTWAIN_ARRAY StringArray);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayStringToFloat(DTWAIN_ARRAY StringArray);
+
 /* function to destroy array of DTWAIN_FRAME objects */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayDestroyFrames(DTWAIN_ARRAY FrameArray);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_RangeGetPosFloat( DTWAIN_RANGE pArray, DTWAIN_FLOAT Val, LPLONG pPos );
@@ -903,20 +926,26 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_RangeGetPosLong( DTWAIN_RANGE pArray, LONG Value
 /* load the language resource */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_LoadLanguageResource(LONG nLanguage);
 
-/* get a frame from a DTWAIN_ARRAYFRAME */
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayFrameGetAt(DTWAIN_ARRAY FrameArray, LONG nWhere, LPDTWAIN_FLOAT pleft, LPDTWAIN_FLOAT ptop, LPDTWAIN_FLOAT pright, LPDTWAIN_FLOAT pbottom );
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayFrameSetAt(DTWAIN_ARRAY FrameArray, LONG nWhere, DTWAIN_FLOAT left, DTWAIN_FLOAT top, DTWAIN_FLOAT right, DTWAIN_FLOAT bottom );
-DTWAIN_FRAME DLLENTRY_DEF DTWAIN_ArrayFrameGetFrameAt(DTWAIN_ARRAY FrameArray, LONG nWhere );
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayFrameSetFrameAt(DTWAIN_ARRAY FrameArray, LONG nWhere, DTWAIN_FRAME theFrame);
+/* specific DTWAIN_ARRAYFRAME functions */
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayGetAtFrame(DTWAIN_ARRAY FrameArray, LONG nWhere, LPDTWAIN_FLOAT pleft, LPDTWAIN_FLOAT ptop, LPDTWAIN_FLOAT pright, LPDTWAIN_FLOAT pbottom);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArraySetAtFrame(DTWAIN_ARRAY FrameArray, LONG nWhere, DTWAIN_FLOAT left, DTWAIN_FLOAT top, DTWAIN_FLOAT right, DTWAIN_FLOAT bottom);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayGetAtFrameEx(DTWAIN_ARRAY FrameArray, LONG nWhere, DTWAIN_FRAME Frame);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArraySetAtFrameEx(DTWAIN_ARRAY FrameArray, LONG nWhere, DTWAIN_FRAME Frame);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayAddFrameN(DTWAIN_ARRAY pArray, DTWAIN_FRAME frame, LONG num);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayAddFrame(DTWAIN_ARRAY pArray, DTWAIN_FRAME frame);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayInsertAtFrameN(DTWAIN_ARRAY pArray, LONG nWhere, DTWAIN_FRAME frame, LONG num);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayInsertAtFrame(DTWAIN_ARRAY pArray, LONG nWhere, DTWAIN_FRAME frame);
+
 
 /* TWAIN 1.x memory allocation functions */
-HANDLE      DLLENTRY_DEF DTWAIN_AllocateMemory(LONG memSize);
+HANDLE      DLLENTRY_DEF DTWAIN_AllocateMemory(DWORD memSize);
+HANDLE      DLLENTRY_DEF DTWAIN_AllocateMemory64(ULONG64 memSize);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_FreeMemory(HANDLE h);
 DTWAIN_MEMORY_PTR DLLENTRY_DEF DTWAIN_LockMemory(HANDLE h);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_UnlockMemory(HANDLE h);
 
 /* TWAIN 2.x memory allocation functions (actual low-level functions determined by TWAINDSM.DLL) */
-HANDLE      DLLENTRY_DEF DTWAIN_AllocateMemoryEx(LONG memSize);
+HANDLE      DLLENTRY_DEF DTWAIN_AllocateMemoryEx(DWORD memSize);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_FreeMemoryEx(HANDLE h);
 DTWAIN_MEMORY_PTR DLLENTRY_DEF DTWAIN_LockMemoryEx(HANDLE h);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_UnlockMemoryEx(HANDLE h);
@@ -969,6 +998,12 @@ DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumCompressionTypesEx2(DTWAIN_SOURCE Source, L
 /* Customize doubling the page count if acquiring in duplex mode */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetDoublePageCountOnDuplex(DTWAIN_SOURCE Source, DTWAIN_BOOL bDoubleCount);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsDoublePageCountOnDuplex(DTWAIN_SOURCE Source);
+
+/* Get the capability values and return the DTWAIN_ARRAY of cap values.  These functions mimic 
+   the DTWAIN_GetCapValues... set of API functions */
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayGetCapValues(DTWAIN_SOURCE Source, LONG lCap, LONG lGetType); 
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayGetCapValuesEx(DTWAIN_SOURCE Source, LONG lCap, LONG lGetType, LONG lContainerType);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_ArrayGetCapValuesEx2(DTWAIN_SOURCE Source, LONG lCap, LONG lGetType, LONG lContainerType, LONG nDataType);
 
 #include "dtwstrfn.h"
 

@@ -13,6 +13,7 @@
 12 Origen de TWAIN abre a ejecutar el mandato adelante.
 27 No podríamos completar la scan.   Los X/Y o los las Resoluciones sienta para los valores diferentes
 28 Inválido Lima Nombre Especificado
+32 triplete TWAIN no ejecutado. El administrador de Twain no es válido.
 1000 ***
 1001 Los  inválido DTWAIN_HANDLE
 1002 Invalid los DTWAIN_SOURCE
@@ -89,6 +90,18 @@
 1073 Error de datos de recurso: Se lanzó una excepción
 1074 Las transferencias de audio no son compatibles.
 1075 La fuente informa que el alimentador está disponible, pero no supera la prueba de conformidad TWAIN (CAP_PAPERDETECTABLE)
+1076 El informe de la fuente indica que no hay capacidades. Fallo en la prueba de conformidad para CAP_SUPPORTEDCAPS
+1077 Fallo en la prueba de conformidad para CAP_SUPPORTEDCAPS. CAP_SUPPORTEDCAPS, ICAP_PIXELTYPE o ICAP_XFERMECH faltan de la lista de capacidades
+1078 Fallo en la prueba de conformidad para ICAP_PIXELTYPE.
+1079 Fallo en la prueba de conformidad para ICAP_PIXELTYPE. No hay información sobre el tipo de píxel.
+1080 Fallo en la prueba de conformidad para ICAP_BITDEPTH.
+1081 Fallo en la prueba de cumplimiento para ICAP_XFERMECH.  
+1082 Fallo en la prueba de cumplimiento para las capacidades estándar.  
+1083 Desajuste en el tipo de información de imagen extendida. Fallo en el cumplimiento de TWAIN.  
+1084 Error al recuperar información de imagen extendida.
+1085 El valor de DTWAIN_RANGE está fuera de los límites  
+1086 DTWAIN_RANGE tiene un tamaño de paso de 0
+1087 Se detectó un nombre vacío o en blanco.
 1100 Condición de TWAIN no podría Codificar a no podríamos completar funcionamiento.   Memoria Insuficiente.
 1101 Error de Código de Condición de TWAIN
 1102 TWAIN Condiciona Código Unknown causa del fracaso
@@ -190,6 +203,7 @@
 2070 DTWIMG32.DLL not found
 2071 Wrong version of DTWIMG32.DLL
 2072 Manual Duplex mode unavailable in this version of DTWAIN
+2073 La operación ha excedido el tiempo de espera
 2074 Invalid bitmap width/height for non-Vista Windows ICO format
 2075 TWAIN_32.DLL no encontrados
 2076 TWAINDSM.DLL no encontrados	 
@@ -253,3 +267,32 @@
 10005 No se pudo eliminar la subclase de la ventana del usuario  
 10006 El tipo de dispositivo y el tipo requerido de TWAIN no coinciden.
 10007 Advertencia: El tipo de compresión de archivo es desconocido o no coincide con el tipo de imagen seleccionado.
+
+9500 Error de Código de Condición de TWAIN
+9501 TWAIN Condiciona Código Unknown causa del fracaso
+9502 Condición de TWAIN no podría Codificar a no podríamos completar funcionamiento.   Memoria Insuficiente.
+9503 Origen de los Datos de Código de Condición de TWAIN
+9504 Origen de los Datos de Código de Condición de TWAIN es conectada a las solicitudes maximum y posibles
+9505 Origen de de Gerente de Origen de los Datos los Datos de Código de Condición de TWAIN reseñó error.   Solicitud no responsable.
+9506 TWAIN Condiciona Código Unknown TWAIN la capacidad encountered
+9509 Código de Condición de TWAIN combinación Unrecognized de tresillo de TWAIN
+9510 Parámetro de los Datos de Código de Condición de TWAIN está fuera de gama
+9511 TWAIN Condiciona Código TWAIN tresillo fuera de es esperado secuencia
+9512 Código de Condición de TWAIN Solicitud Desconocida de en los DSM destino función Entry
+9513 La Capacidad de Código de Condición de TWAIN no es apoyada antes de la Procedencia de los Datos
+9514 Funcionamiento de Código de Condición de TWAIN no es apoyado antes de la capacidad
+9515 La Capacidad de Código de Condición de TWAIN tiene los dependancy en otro la capacidad
+9516 Archivo de Código de Condición de TWAIN es protegido
+9517 Código de Condición de TWAIN Lima ya a subsiste
+9518 Código de Condición de TWAIN no Lima a no fundar
+9519 Directorio de Código de Condición de TWAIN no es empty
+9520 Alimentador de Código de Condición de TWAIN es interferido
+9521 Alimentador de Código de Condición de TWAIN detectó múltiplo los pajes
+9522 Error de Código de Condición de TWAIN que escribe lima que quizás disk esté lleno
+9523 Aparato de Código de Condición de TWAIN fue offline durante funcionamiento
+9524 Código de condición TWAIN: Operación fallida (la cubierta o puerta del dispositivo está abierta)  
+9525 Código de condición TWAIN: Operación fallida (el documento tiene una esquina dañada)  
+9526 Código de condición TWAIN: Operación fallida (error de enfoque durante la captura del documento)  
+9527 Código de condición TWAIN: Operación fallida (documento demasiado claro)  
+9528 Código de condición TWAIN: Operación fallida (documento demasiado oscuro)  
+9529 Código de condición TWAIN: Operación fallida (la fuente no tiene nada para capturar y transferir)

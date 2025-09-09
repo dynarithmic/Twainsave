@@ -115,6 +115,7 @@ namespace dynarithmic
             std::swap(left.m_bUIOnlyOn, right.m_bUIOnlyOn);
 			std::swap(left.m_bUIOnlySupported, right.m_bUIOnlySupported);
             std::swap(left.m_pTwainSourceImpl, right.m_pTwainSourceImpl);
+            std::swap(left.m_extImageInfo, right.m_extImageInfo);
         }
 
         void twain_source::create_interfaces()
@@ -414,6 +415,11 @@ namespace dynarithmic
             API_INSTANCE DTWAIN_SetPDFPageScale(source, static_cast<LONG>(po.get_page_scale_options().get_page_scale()), xscale, yscale);
 
             // Set encryption options
+
+            // First, turn off all AES encryption
+            API_INSTANCE DTWAIN_SetPDFAESEncryption(source, DTWAIN_PDF_AES128, 0);
+            API_INSTANCE DTWAIN_SetPDFAESEncryption(source, DTWAIN_PDF_AES256, 0);
+
             auto& encrypt_opts = po.get_encryption_options();
             if (encrypt_opts.is_use_encryption())
             {
@@ -421,6 +427,14 @@ namespace dynarithmic
                     encrypt_opts.get_owner_password().c_str(),
                     encrypt_opts.get_permissions_int(),
                     encrypt_opts.is_use_strong_encryption());
+
+                bool encryptAES128 = encrypt_opts.is_use_AES128_encryption();
+                bool encryptAES256 = encrypt_opts.is_use_AES256_encryption();
+                if (encryptAES256)
+                    API_INSTANCE DTWAIN_SetPDFAESEncryption(source, DTWAIN_PDF_AES256, 1);
+                else
+                if (encryptAES128)
+                    API_INSTANCE DTWAIN_SetPDFAESEncryption(source, DTWAIN_PDF_AES128, 1);
             }
         }
 
@@ -780,6 +794,13 @@ namespace dynarithmic
                 return retContainer;
             }
             return {};
+        }
+
+        std::unique_ptr<extendedimage_info> twain_source::init_extendedimage_info()
+        {
+            auto extInfo = std::make_unique<extendedimage_info>();
+            extInfo->attach(this);
+            return extInfo;
         }
 
         bool twain_source::showui_only()

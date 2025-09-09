@@ -1,0 +1,24 @@
+20000 TwainSave wurde erfolgreich ausgeführt.  
+20001 Dateiname wurde nicht angegeben. Die TwainSave-Befehlszeile enthält nicht die Option --filename.  
+20002 TWAIN-System konnte nicht gestartet werden.  
+20003 TWAIN-Gerät konnte nicht gestartet werden. Wenn der Befehl --selectdefault verwendet wurde, um das TWAIN-Gerät zu öffnen, ist das Standardgerät (TWAIN-Treiber oder Hardware) fehlerhaft.  
+20004 Datei konnte nicht erfolgreich gespeichert werden.  
+20005 Ungültiges oder fehlerhaftes Befehlszeilenargument.  
+20006 Benutzer hat TwainSave abgebrochen, indem kein Gerät ausgewählt wurde.  
+20007 Fehler beim Starten des Erfassungsprozesses vom Gerät.  
+20008 Gerät unterstützt keine Schwarz/Weiß-, Graustufen-, RGB-, Paletten-, CMY- oder CMYK-Bilder.  
+20009 Konsole nicht verfügbar. Verwenden Sie die Option -noconsole.  
+20010 TwainSave ist abgelaufen, da innerhalb des angegebenen Zeitrahmens kein Papier in den Einzug gelegt wurde. Siehe --nouiwait und --nouiwaittime für weitere Informationen.  
+20011 TwainSave-Benutzeroberfläche konnte nicht aktiviert werden.  
+20012 TwainSave wurde beendet, da die Datei bereits existiert. Dieser Rückgabecode tritt auf, wenn --overwritemode 2 angegeben ist.  
+20013 Gerät unterstützt den für Modus 2 angegebenen Dateityp nicht. Siehe --filetype für Dateitypen von Modus 2.  
+20014 Gerät unterstützt den Modus --uionly nicht.  
+20015 Befehlsdatei, die mit -@ angegeben wurde, wurde nicht gefunden.  
+20016 Befehlsdatei, die mit -@ angegeben wurde, konnte nicht geöffnet werden.
+20017 Ungültiger --filetype wurde angegeben
+20018 Ungültiger --unitofmeasure wurde angegeben
+20019 Ungültiger --papersize wurde angegeben
+20020 Ungültiger --color wurde angegeben
+20021 Ungültiger --orientation wurde angegeben
+20022 Ungültiger --jobcontrol wurde angegeben
+20023 TwainSave hat den Code zurückgegeben:

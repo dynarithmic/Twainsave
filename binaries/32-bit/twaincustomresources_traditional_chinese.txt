@@ -1,0 +1,24 @@
+20000 TwainSave 執行成功。
+20001 未指定檔案名稱。TwainSave 命令列缺少 --filename 選項。
+20002 無法啟動 TWAIN 系統。
+20003 無法啟動 TWAIN 裝置。如果使用 --selectdefault 命令開啟 TWAIN 裝置，則預設裝置（TWAIN 驅動程式或硬體）有問題。
+20004 無法成功儲存檔案。
+20005 命令列參數錯誤或非法。
+20006 使用者未選擇裝置而取消 TwainSave。
+20007 啟動裝置擷取程序時發生錯誤。
+20008 裝置不支援黑白、灰階、RGB、調色盤、CMY 或 CMYK 影像。
+20009 主控台不可用。請使用 -noconsole 選項。
+20010 TwainSave 因在指定時間內未放入進紙器紙張而逾時。詳見 --nouiwait 和 --nouiwaittime。
+20011 無法啟用 TwainSave 使用者介面。
+20012 因檔案已存在而結束 TwainSave。若指定 --overwritemode 2，將會出現此返回碼。
+20013 裝置不支援指定的模式 2 檔案類型。詳見 --filetype 的模式 2 檔案類型。
+20014 裝置不支援 --uionly 模式。
+20015 由 -@ 指定的指令檔案未找到。
+20016 由 -@ 指定的指令檔案無法開啟。
+20017 指定了無效的 --filetype。
+20018 指定了無效的 --unitofmeasure。
+20019 指定了無效的 --papersize。
+20020 指定了無效的 --color。
+20021 指定了無效的 --orientation。
+20022 指定了無效的 --jobcontrol。
+20023 TwainSave 返回代碼：
