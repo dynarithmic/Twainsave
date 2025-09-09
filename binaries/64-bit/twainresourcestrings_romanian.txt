@@ -13,6 +13,7 @@
 12 Sursa TWAIN trebuie să fie deschisă înainte de a executa comanda.  
 27 Nu s-a putut finaliza scanarea. Rezoluțiile X/Y setate pentru valori diferite  
 28 Nume de fișier specificat invalid  
+32 TWAIN triplet nu a fost executat. Managerul Twain este invalid.
 1000 ***  
 1001 DTWAIN_HANDLE invalid  
 1002 DTWAIN_SOURCE invalid  
@@ -89,6 +90,18 @@
 1073 Eroare de date resursă: Excepție generată
 1074 Transferurile audio nu sunt acceptate.
 1075 Sursa raportează că alimentatorul este disponibil, dar nu trece testul de conformitate TWAIN (CAP_PAPERDETECTABLE)
+1076 Sursa raportează că nu există capacități. Test de conformitate eșuat pentru CAP_SUPPORTEDCAPS  
+1077 Eșec al testului de conformitate pentru CAP_SUPPORTEDCAPS. CAP_SUPPORTEDCAPS, ICAP_PIXELTYPE sau ICAP_XFERMECH lipsesc din lista de capacități  
+1078 Eșec al testului de conformitate pentru ICAP_PIXELTYPE.  
+1079 Eșec al testului de conformitate pentru ICAP_PIXELTYPE. Informații despre tipul de pixel lipsesc.  
+1080 Eșec al testului de conformitate pentru ICAP_BITDEPTH.  
+1081 Eșecul testului de conformitate pentru ICAP_XFERMECH.  
+1082 Eșecul testului de conformitate pentru capabilitățile standard.  
+1083 Neconformitate a tipului de informații extinse despre imagine. Eșec de conformitate TWAIN.
+1084 Eroare la recuperarea informațiilor extinse despre imagine.
+1085 Valoarea DTWAIN_RANGE este în afara limitelor  
+1086 DTWAIN_RANGE are o dimensiune a pasului de 0
+1087 Nume gol sau necompletat a fost detectat
 1100 Codul de condiție TWAIN: Nu s-a putut finaliza operațiunea. Memorie insuficientă.  
 1101 Codul de condiție TWAIN: Fără eroare  
 1102 Codul de condiție TWAIN: Cauza eșecului este necunoscută  
@@ -190,6 +203,7 @@
 2070 DTWIMG32.DLL nu a fost găsit  
 2071 Versiune greșită a DTWIMG32.DLL  
 2072 Mod Duplex manual indisponibil în această versiune a DTWAIN  
+2073 Operațiunea a expirat.
 2074 Lățime/înălțime bitmap invalidă pentru formatul ICO non-Vista Windows  
 2075 TWAIN_32.DLL sau Managerul de surse de date TWAIN specificat nu a fost găsit, este corupt sau nu a putut fi deschis  
 2076 TWAINDSM.DLL sau Managerul de surse de date TWAIN specificat nu a fost găsit, este corupt sau nu a putut fi deschis  
@@ -254,3 +268,31 @@
 10005 Nu s-a putut elimina subclasa din fereastra utilizatorului  
 10006 Tipul de dispozitiv și tipul necesar TWAIN nu se potrivesc.
 10007 Avertisment: Tipul de compresie a fișierului este necunoscut sau nu se potrivește cu tipul de imagine ales.
+9500 Codul de condiție TWAIN: Fără eroare  
+9501 Codul de condiție TWAIN: Cauza eșecului este necunoscută  
+9502 Codul de condiție TWAIN: Nu s-a putut finaliza operațiunea. Memorie insuficientă.  
+9503 Codul de condiție TWAIN: Fără sursă de date  
+9504 Codul de condiție TWAIN: Sursa de date este conectată la maximum posibil de aplicații  
+9505 Codul de condiție TWAIN: Sursa de date a managerului de surse de date a raportat o eroare. Aplicația nu este responsabilă.  
+9506 Codul de condiție TWAIN: Capacitate TWAIN necunoscută întâlnită  
+9509 Codul de condiție TWAIN: Combinație de triplet TWAIN nerecunoscută  
+9510 Codul de condiție TWAIN: Parametrul de date este în afara intervalului  
+9511 Codul de condiție TWAIN: Tripletul TWAIN este în afara secvenței așteptate  
+9512 Codul de condiție TWAIN: Aplicația destinație necunoscută în funcția DSM_Entry  
+9513 Codul de condiție TWAIN: Capacitatea nu este suportată de sursa de date  
+9514 Codul de condiție TWAIN: Operațiunea nu este suportată de capacitate  
+9515 Codul de condiție TWAIN: Capacitatea depinde de o altă capacitate  
+9516 Codul de condiție TWAIN: Fișierul este protejat  
+9517 Codul de condiție TWAIN: Fișierul există deja  
+9518 Codul de condiție TWAIN: Fișierul nu a fost găsit  
+9519 Codul de condiție TWAIN: Directorul nu este gol  
+9520 Codul de condiție TWAIN: Alimentatorul este blocat  
+9521 Codul de condiție TWAIN: Alimentatorul a detectat mai multe pagini  
+9522 Codul de condiție TWAIN: Eroare la scrierea fișierului (disc poate fi plin)  
+9523 Codul de condiție TWAIN: Dispozitivul a ieșit offline în timpul operațiunii  
+9524 Cod de condiție TWAIN: Operațiune eșuată (capac sau ușă pe dispozitiv este deschisă)  
+9525 Cod de condiție TWAIN: Operațiune eșuată (documentul are un colț deteriorat)  
+9526 Cod de condiție TWAIN: Operațiune eșuată (eroare de focalizare în timpul capturării documentului)  
+9527 Cod de condiție TWAIN: Operațiune eșuată (document prea deschis)  
+9528 Cod de condiție TWAIN: Operațiune eșuată (document prea întunecat)  
+9529 Cod de condiție TWAIN: Operațiune eșuată (sursa nu are nimic de capturat pentru transfer)  

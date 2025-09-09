@@ -1,0 +1,24 @@
+20000 TwainSave is succesvol uitgevoerd.
+20001 Bestandsnaam is niet opgegeven. De TwainSave opdrachtregel mist de --filename optie.
+20002 Kan TWAIN-systeem niet starten.
+20003 Kan TWAIN-apparaat niet starten. Als de --selectdefault opdracht is gebruikt om het TWAIN-apparaat te openen, is het standaardapparaat (TWAIN-stuurprogramma of hardware) defect.
+20004 Kan bestand niet succesvol opslaan.
+20005 Slechte of ongeldige opdrachtregelparameter(s).
+20006 Gebruiker heeft TwainSave geannuleerd door geen apparaat te selecteren.
+20007 Fout bij het starten van het acquisitieproces vanaf het apparaat.
+20008 Apparaat ondersteunt geen Zwart/Wit, Grijswaarden, RGB, Palet, CMY of CMYK afbeeldingen.
+20009 Console niet beschikbaar. Gebruik de -noconsole optie.
+20010 TwainSave is verlopen omdat er binnen de opgegeven tijd geen papier in de invoer is geplaatst. Zie --nouiwait en --nouiwaittime voor meer informatie.
+20011 TwainSave gebruikersinterface kon niet worden ingeschakeld.
+20012 TwainSave is gestopt omdat het bestand al bestaat. Deze retourcode treedt op als --overwritemode 2 is opgegeven.
+20013 Apparaat ondersteunt het opgegeven bestandstype van modus 2 niet. Zie --filetype voor bestandstypen van modus 2.
+20014 Apparaat ondersteunt de --uionly modus niet.
+20015 Opdrachtbestand opgegeven met -@ is niet gevonden.
+20016 Opdrachtbestand opgegeven met -@ kon niet worden geopend.
+20017 Ongeldige --filetype is opgegeven.
+20018 Ongeldige --unitofmeasure is opgegeven.
+20019 Ongeldige --papersize is opgegeven.
+20020 Ongeldige --color is opgegeven.
+20021 Ongeldige --orientation is opgegeven.
+20022 Ongeldige --jobcontrol is opgegeven.
+20023 TwainSave geretourneerde code:

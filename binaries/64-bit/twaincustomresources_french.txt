@@ -1,0 +1,24 @@
+20000 TwainSave s'est exécuté avec succès.
+20001 Le nom de fichier n'a pas été spécifié. La ligne de commande TwainSave manque l'option --filename.
+20002 Impossible de démarrer le système TWAIN.
+20003 Impossible de démarrer le périphérique TWAIN. Si la commande --selectdefault a été utilisée pour ouvrir le périphérique TWAIN, le périphérique par défaut (pilote TWAIN ou matériel) est défectueux.
+20004 Impossible d'enregistrer le fichier avec succès.
+20005 Argument(s) de ligne de commande incorrect(s) ou illégal(aux).
+20006 L'utilisateur a annulé TwainSave en ne sélectionnant pas de périphérique.
+20007 Erreur lors du démarrage du processus d'acquisition depuis le périphérique.
+20008 Le périphérique ne prend pas en charge les images Noir/Blanc, Niveaux de gris, RVB, Palette, CMJ ou CMJN.
+20009 Console non disponible. Utilisez l'option -noconsole.
+20010 TwainSave a expiré car aucun papier n'a été placé dans l'alimentation dans le délai spécifié. Voir --nouiwait et --nouiwaittime pour plus d'informations.
+20011 L'interface utilisateur de TwainSave n'a pas pu être activée.
+20012 TwainSave s'est arrêté car le fichier existe déjà. Ce code de retour se produit si --overwritemode 2 est spécifié.
+20013 Le périphérique ne prend pas en charge le type de fichier mode 2 spécifié. Voir --filetype pour les types de fichiers mode 2.
+20014 Le périphérique ne prend pas en charge le mode --uionly.
+20015 Le fichier de commande spécifié par -@ est introuvable.
+20016 Le fichier de commande spécifié par -@ n'a pas pu être ouvert.
+20017 --filetype spécifié non valide
+20018 --unitofmeasure spécifié non valide
+20019 --papersize spécifié non valide
+20020 --color spécifié non valide
+20021 --orientation spécifié non valide
+20022 --jobcontrol spécifié non valide
+20023 TwainSave a retourné le code :

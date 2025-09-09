@@ -1,0 +1,24 @@
+20000 TwainSave a rulat cu succes.  
+20001 Numele fișierului nu a fost specificat. Linia de comandă TwainSave nu conține opțiunea --filename.  
+20002 Nu s-a putut porni sistemul TWAIN.  
+20003 Nu s-a putut porni dispozitivul TWAIN. Dacă a fost folosită comanda --selectdefault pentru a deschide dispozitivul TWAIN, dispozitivul implicit (driverul sau hardware-ul TWAIN) este defect.  
+20004 Nu s-a putut salva fișierul cu succes.  
+20005 Argument(e) de linie de comandă incorect(e) sau ilegal(e).  
+20006 Utilizatorul a anulat TwainSave prin neselectarea unui dispozitiv.  
+20007 Eroare la pornirea procesului de achiziție de la dispozitiv.  
+20008 Dispozitivul nu suportă imagini Black/White, Grayscale, RGB, Palette, CMY sau CMYK.  
+20009 Consola nu este disponibilă. Folosiți opțiunea -noconsole.  
+20010 TwainSave a expirat deoarece nu a fost introdusă hârtie în alimentator în intervalul de timp specificat. Consultați --nouiwait și --nouiwaittime pentru mai multe informații.  
+20011 Interfața utilizator TwainSave nu a putut fi activată.  
+20012 TwainSave s-a încheiat deoarece fișierul există deja. Acest cod de retur apare dacă este specificat --overwritemode 2.  
+20013 Dispozitivul nu suportă tipul de fișier mod 2 specificat. Consultați --filetype pentru tipurile de fișiere mod 2.  
+20014 Dispozitivul nu suportă modul --uionly.  
+20015 Fișierul de comandă specificat prin -@ nu a fost găsit.  
+20016 Fișierul de comandă specificat prin -@ nu a putut fi deschis.  
+20017 A fost specificat un --filetype invalid.  
+20018 A fost specificat un --unitofmeasure invalid.  
+20019 A fost specificat un --papersize invalid.  
+20020 A fost specificat un --color invalid.  
+20021 A fost specificat un --orientation invalid.  
+20022 A fost specificat un --jobcontrol invalid.
+20023 TwainSave a returnat codul:

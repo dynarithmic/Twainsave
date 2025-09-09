@@ -33,6 +33,7 @@ set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/acquire_characteristics/acquire_characteristics.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/capability_interface/capability_interface.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/characteristics/twain_select_dialog.hpp
+        ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/extimageinfo/extendedimage_info.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/identity/twain_identity.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/imagehandler/image_handler.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/info/asyncdeviceevents_info.hpp
@@ -106,6 +107,7 @@ add_definitions(-DUNICODE -D_UNICODE -DDTWAIN_CPP_NOIMPORTLIB)
 add_executable(twainsave-opensource
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/acquire_characteristics.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/buffered_transfer_info.cpp
+    ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/extendedimage_info.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/imprinter_info.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/logger_callback.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_characteristics.cpp

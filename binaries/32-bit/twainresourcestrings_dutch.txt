@@ -13,6 +13,7 @@
 12 TWAIN bron before uitgevoerd bevel.
 27 Niet voleindigde scan.   X/Y Resolutions want verschillende waarden
 28 Kwalijkene File Namen Gespecificeerd
+32 TWAIN-drieling niet uitgevoerd. Ongeldige Twain Manager
 1000 ***
 1001 Kwalijken DTWAIN_HANDLE
 1002 Kwalijken DTWAIN_SOURCE
@@ -89,6 +90,18 @@
 1073 Hulpbron gegevensfout: Uitzondering opgetreden
 1074 Audiotransfers worden niet ondersteund 
 1075 Bronrapport feeder is beschikbaar, maar slaagt niet voor de TWAIN-conformiteitstest (CAP_PAPERDETECTABLE)
+1076 Bron meldt dat er geen mogelijkheden zijn. Mislukte conformiteitstest voor CAP_SUPPORTEDCAPS  
+1077 Mislukking van het conformiteitstest voor CAP_SUPPORTEDCAPS. CAP_SUPPORTEDCAPS, ICAP_PIXELTYPE of ICAP_XFERMECH ontbreekt op de lijst van mogelijkheden  
+1078 Mislukking van het conformiteitstest voor ICAP_PIXELTYPE.  
+1079 Mislukking van het conformiteitstest voor ICAP_PIXELTYPE. Geen pixeltype-informatie.  
+1080 Mislukking van het conformiteitstest voor ICAP_BITDEPTH.
+1081 Fout bij de conformiteitstest voor ICAP_XFERMECH.
+1082 Fout bij de conformiteitstest voor de standaardmogelijkheden.
+1083 Mismatch in het type uitgebreide afbeeldingsinformatie. Fout bij de TWAIN-conformiteit.
+1084 Fout bij het ophalen van uitgebreide afbeeldingsinformatie.
+1085 DTWAIN_RANGE waarde is buiten de grenzen
+1086 DTWAIN_RANGE heeft een stapgrootte van 0
+1087 Leeg of blanco naam gedetecteerd
 1100 TWAIN Gesteldheid niet Code: niet voleindigde operaties.   Ontoerijkende Herinnering
 1101 TWAIN Gesteldheid Code: Vergissing
 1102 TWAIN Gesteldheid Code: Unknown oorzaak of mislukking
@@ -190,6 +203,7 @@
 2070 DTWIMG32.DLL not found
 2071 Wrong version of DTWIMG32.DLL
 2072 Manual Duplex mode unavailable in this version of DTWAIN
+2073 De bewerking is verlopen
 2074 Invalid bitmap width/height for non-Vista Windows ICO format
 2075 TWAIN_32.DLL niet grondend
 2076 TWAINDSM.DLL niet grondend
@@ -253,3 +267,31 @@
 10005 Kon subklasse niet verwijderen van gebruikersvenster  
 10006 Apparaattype en vereiste TWAIN-type komen niet overeen.
 10007 Waarschuwing: Bestandscompressietype is onbekend of komt niet overeen met het gekozen afbeeldings type.
+9500 TWAIN Gesteldheid Code: Vergissing
+9501 TWAIN Gesteldheid Code: Unknown oorzaak of mislukking
+9502 TWAIN Gesteldheid niet Code: niet voleindigde operaties.   Ontoerijkende Herinnering
+9503 TWAIN Gesteldheid Code: Nulpunt Bron
+9504 TWAIN Gesteldheid Code: Nulpunt Bron verbonden naar maximaal mogelijke toepassing
+9505 TWAIN Gesteldheid Code: Nulpunt Bron of Nulpunt Bron Manager rapporteert vergissing.   Toepassing niet verantwoordelijken
+9506 TWAIN Gesteldheid Code: Unknown TWAIN vermogen tegenkomt
+9509 TWAIN Gesteldheid Code: Unrecognized TWAIN triplet combinatie
+9510 TWAIN Gesteldheid Code: Nulpunt parameter stel out of reikwijdte
+9511 TWAIN Condition Code: TWAIN triplet out of verwachtte opeenvolging
+9512 TWAIN Gesteldheid Code: Onbekenden bestemming Toepassing in DSM _Entry functies
+9513 TWAIN Gesteldheid Code: Vermogen niet gesteund bij Nulpunt Bron
+9514 TWAIN Gesteldheid Code: Operaties niet gesteund bij vermogen
+9515 TWAIN Gesteldheid Code: Vermogen heeft dependancy op een andere vermogen
+9516 TWAIN Gesteldheid Code: Bestanden beschermde
+9517 TWAIN Gesteldheid Code: File reeds bestaan
+9518 TWAIN Gesteldheid Code: niet File niet grondend
+9519 TWAIN Gesteldheid Code: Adresboek is empty
+9520 TWAIN Gesteldheid Code: Feeder Vergissing
+9521 TWAIN Gesteldheid Code: Feeder detected multiple pagina
+9522 TWAIN Gesteldheid Code: Vergissing geschreven file (schijf stel vollen
+9523 TWAIN Gesteldheid Code: Middel ging offline overdag operaties
+9524 TWAIN Statuscode: Bewerking mislukt (deksel of klep van het apparaat is geopend)
+9525 TWAIN Statuscode: Bewerking mislukt (document heeft een beschadigde hoek)
+9526 TWAIN Statuscode: Bewerking mislukt (fout bij scherpstelling tijdens documentcaptatie)
+9527 TWAIN Statuscode: Bewerking mislukt (document is te licht)
+9528 TWAIN Statuscode: Bewerking mislukt (document is te donker)
+9529 TWAIN Statuscode: Bewerking mislukt (bron heeft niets om te capturen voor overdracht)

@@ -519,6 +519,9 @@ namespace dynarithmic
         /// @see set_temporary_directory()
         std::string twain_session::get_temporary_directory() const noexcept { return m_twain_characteristics.get_temporary_directory(); }
 
+        twain_session& twain_session::set_resource_directory(std::string dir) noexcept { m_twain_characteristics.set_resource_directory(dir); return *this; }
+        std::string twain_session::get_resource_directory() const noexcept { return m_twain_characteristics.get_resource_directory(); }
+
         /// Indicates the TWAIN Data Source Manager to use (version 1.x or 2.x, or default) when the TWAIN session is started.
         /// @param[in] dsm TWAIN Data Source Manager to use when TWAIN session is started.
         /// @returns Reference to current twain_session object (**this**)
@@ -526,7 +529,6 @@ namespace dynarithmic
         /// @see set_dsm_search_order() get_dsm_search_order() twain_session::get_dsm_path() twain_session::start()
         twain_session& twain_session::set_dsm(dsm_type dsm) noexcept { m_twain_characteristics.set_dsm(dsm); return *this; }
 
-        twain_session& twain_session::set_resource_directory(std::string resDir) noexcept { m_twain_characteristics.set_resource_directory(resDir); return *this; }
 
         twain_session& twain_session::set_dsm_search_order(std::string search_order, std::string user_directory) noexcept
         {
@@ -630,6 +632,12 @@ namespace dynarithmic
             HandleDestroyer(HANDLE h_) : h(h_) {}
             ~HandleDestroyer() { if (h) { GlobalUnlock(h); GlobalFree(h); } }
         };
+
+        int twain_session::get_twain_constant(std::string twainName)
+        {
+            auto val = API_INSTANCE DTWAIN_GetTwainIDFromNameA(twainName.c_str());
+            return val;
+        }
 
         std::string twain_session::to_api_string(const std::string& str)
         {

@@ -118,6 +118,7 @@ MAPBOX_ETERNAL_CONSTEXPR const auto g_FileTypeMap = mapbox::eternal::map<stringv
     INIT_TYPE(wmf, filetype_value,windowsmetafile),
     INIT_TYPE(jpeg, filetype_value,jpeg),
     INIT_TYPE(jp2, filetype_value,jpeg2k),
+    INIT_TYPE(jpegxr, filetype_value,jpegxr),
     INIT_TYPE(tif1, filetype_value,tiffnocompress),
     INIT_TYPE(tif2, filetype_value,tiffpackbits),
     INIT_TYPE(tif3, filetype_value, tiffgroup3),
@@ -395,6 +396,8 @@ struct pdf_controls
 {
     bool m_bAscii;
     bool m_bStrong;
+    bool m_bAES128Encrypt;
+    bool m_bAES256Encrypt;
     bool m_bWeak;
     bool m_bEncrypt;
     bool m_bRandomOwner;
@@ -441,6 +444,12 @@ std::vector<std::string> SplitPath(const filesys::path &src)
     for (const auto &p : src)
         elements.push_back(p.filename().string()); 
     return elements;
+}
+
+std::string GetTwainSaveExecutionPath()
+{
+	const auto symlocation = boost::dll::symbol_location(TWAINSAVE_VERINFO_ORIGINALFILENAME);
+	return symlocation.parent_path().string();
 }
 
 std::string GetNewFileName(const std::string& fullpath, int inc, int maxWidth)
@@ -526,6 +535,8 @@ parse_return_type parse_options(int argc, char *argv[])
             ("overwritemode", po::value< int >(&s_options.m_nOverwriteMode)->default_value(1), "Mode to use when file already exists.  Default is 1 (always overwrite existing file)")
             ("papersize", po::value< std::string >(&s_options.m_strPaperSize)->default_value("letter"), "Paper size.  Default is \"letter\"")
             ("pdfascii", po::bool_switch(&pdf_commands.m_bAscii)->default_value(false), "create ASCII compressed (text-based) PDF files")
+            ("pdfaes128", po::bool_switch(&pdf_commands.m_bAES128Encrypt)->default_value(false), "use PDF AES 128-bit encryption")
+            ("pdfaes256", po::bool_switch(&pdf_commands.m_bAES256Encrypt)->default_value(false), "use PDF AES 256-bit encryption")
             ("pdf128", po::bool_switch(&pdf_commands.m_bStrong)->default_value(false), "use PDF 128-bit (strong) encryption")
             ("pdf40", po::bool_switch(&pdf_commands.m_bWeak)->default_value(true), "use PDF 40-bit encryption")
             ("pdfauthor", po::value< std::string >(&pdf_commands.m_strAuthor)->default_value(""), "Sets the PDF Author field")
@@ -931,7 +942,8 @@ void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
         {
             std::vector<std::string> encryptcommands = {
                 "pdfownerpass", "pdfuserpass", "pdfrandowner",
-                "pdfranduser", "pdfpermit", "pdf128" };
+                "pdfranduser", "pdfpermit", "pdf128", "pdfaes128", "pdfaes256"};
+
             encryption_on = std::find_if(encryptcommands.begin(), encryptcommands.end(), [&](const std::string& s)
                 { return !varmap[s].defaulted(); }) != encryptcommands.end();
         }
@@ -943,6 +955,8 @@ void set_pdf_options(twain_source& mysource, const po::variables_map& varmap)
                 set_user_password(pdf_commands.m_strUserPass).
                 use_autogen_password(pdf_commands.m_bRandomOwner || pdf_commands.m_bRandomUser).
                 use_strong_encryption(pdf_commands.m_bStrong);
+            encrypt_opts.use_AES128_encryption(pdf_commands.m_bAES128Encrypt);
+            encrypt_opts.use_AES256_encryption(pdf_commands.m_bAES256Encrypt);
 
             // parse the permissions string
             std::vector<std::string> sAllPermissions;
@@ -1460,6 +1474,7 @@ int start_acquisitions(const po::variables_map& varmap)
     twain_session::twain_app_info appInfo;
     appInfo.set_product_name(TWAINSAVE_DEFAULT_TITLE).set_version_info(TWAINSAVE_FULL_VERSION);
     ts.set_app_info(appInfo);
+    ts.set_resource_directory(GetTwainSaveExecutionPath());
 
     // Start the TWAIN session
     ts.start();
@@ -1583,13 +1598,6 @@ int start_acquisitions(const po::variables_map& varmap)
         }
     }
     return 0;
-}
-
-
-std::string GetTwainSaveExecutionPath()
-{
-    const auto symlocation = boost::dll::symbol_location(TWAINSAVE_VERINFO_ORIGINALFILENAME);
-    return symlocation.parent_path().string();
 }
 
 void LoadCustomResourcesFromIni()
