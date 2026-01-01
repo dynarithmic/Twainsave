@@ -15,10 +15,4 @@
 20014 Device does not support the --uionly mode.
 20015 Command File specified by -@ was not found
 20016 Command File specified by -@ could not be opened
-20017 Invalid --filetype was specified
-20018 Invalid --unitofmeasure was specified
-20019 Invalid --papersize was specified
-20020 Invalid --color was specified
-20021 Invalid --orientation was specified
-20022 Invalid --jobcontrol was specified
-20023 TwainSave returned code:
+20017 Invalid argument for --filetype was given

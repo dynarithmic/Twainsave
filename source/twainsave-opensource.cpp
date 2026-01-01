@@ -1707,6 +1707,7 @@ int main(int argc, char *argv[])
     auto retcode = s_options.get_return_code();
     if (s_options.m_bNoConsole && !s_options.m_bNoPause)
     {
+        ShowWindow(GetConsoleWindow(), SW_SHOW);
         // display a pause message
         std::string s = "TwainSave returned code: " + std::to_string(retcode);
         s += " (" + s_options.m_ReturnCodesMap[retcode] + ")\nPress any key to continue...";
@@ -1717,6 +1718,7 @@ int main(int argc, char *argv[])
     }
     else
     {
+		ShowWindow(GetConsoleWindow(), SW_SHOW);
         std::string s = "TwainSave returned code: " + std::to_string(retcode);
         s += " (" + s_options.m_ReturnCodesMap[retcode] + ")";
         std::cout << s;
