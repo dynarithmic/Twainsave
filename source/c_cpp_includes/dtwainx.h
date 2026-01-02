@@ -1,6 +1,6 @@
 /*
     This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-    Copyright (c) 2002-2025 Dynarithmic Software.
+    Copyright (c) 2002-2026 Dynarithmic Software.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -130,8 +130,11 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SetAllCapsToDefault(DTWAIN_SOURCE Source
 LONG           DLLENTRY_DEF      DTWAIN_GetCapArrayType(DTWAIN_SOURCE Source, LONG nCap);
 LONG           DLLENTRY_DEF      DTWAIN_GetCapDataType(DTWAIN_SOURCE Source, LONG nCap);
 LONG           DLLENTRY_DEF      DTWAIN_GetCapContainerEx(LONG nCap,DTWAIN_BOOL bSetContainer,LPDTWAIN_ARRAY ConTypes);
+DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_GetCapContainerEx2(LONG nCap, DTWAIN_BOOL bSetContainer);
+
 LONG           DLLENTRY_DEF      DTWAIN_GetCapContainer(DTWAIN_SOURCE Source, LONG nCap,LONG lCapType);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_GetAcquireArea(DTWAIN_SOURCE Source,LONG lGetType,LPDTWAIN_ARRAY FloatEnum);
+DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_GetAcquireAreaEx(DTWAIN_SOURCE Source, LONG lGetType);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SetAcquireArea(DTWAIN_SOURCE Source,LONG lSetType,DTWAIN_ARRAY FloatEnum,DTWAIN_ARRAY ActualEnum);
 
 /* DTWAIN Array functions */
@@ -254,6 +257,7 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_AcquireNativeEx(DTWAIN_SOURCE Source,LON
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_AcquireBufferedEx(DTWAIN_SOURCE Source,LONG PixelType,LONG nMaxPages,DTWAIN_BOOL bShowUI,DTWAIN_BOOL bCloseSource,DTWAIN_ARRAY Acquisitions,LPLONG pStatus);
 
 HANDLE         DLLENTRY_DEF      DTWAIN_GetCurrentAcquiredImage( DTWAIN_SOURCE Source );
+DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_GetAllSourceDibs(DTWAIN_SOURCE Source);
 LONG           DLLENTRY_DEF      DTWAIN_GetCurrentPageNum( DTWAIN_SOURCE Source );
 DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_GetSourceAcquisitions(DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SetMaxAcquisitions( DTWAIN_SOURCE Source, LONG MaxAcquires);
@@ -400,6 +404,9 @@ DTWAIN_BOOL    DLLENTRY_DEF       DTWAIN_IsAutoFeedEnabled(DTWAIN_SOURCE Source)
 DTWAIN_BOOL    DLLENTRY_DEF       DTWAIN_IsAutoFeedSupported(DTWAIN_SOURCE Source);
 LONG           DLLENTRY_DEF       DTWAIN_GetFeederFuncs(DTWAIN_SOURCE Source);
 DTWAIN_BOOL    DLLENTRY_DEF       DTWAIN_IsPaperDetectable(DTWAIN_SOURCE Source);
+DTWAIN_BOOL    DLLENTRY_DEF       DTWAIN_SetFeederWaitTime(DTWAIN_SOURCE Source, LONG waitTime, LONG flags);
+LONG           DLLENTRY_DEF       DTWAIN_GetFeederWaitTime(DTWAIN_SOURCE Source);
+
 
 /* Duplex Scanner support */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetDuplexType(DTWAIN_SOURCE Source, LPLONG lpDupType);
@@ -561,7 +568,7 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumExtImageInfoTypes(DTWAIN_SOURCE Source, LPDT
 DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumExtImageInfoTypesEx(DTWAIN_SOURCE Source);
 
 
-/* This function actualy initiates the querying of the ext image information.  This function
+/* This function actually initiates the querying of the ext image information.  This function
    will query the TWAIN Source.  If your TWAIN Source has bugs, this will be where any problem
    will exist */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetExtImageInfo(DTWAIN_SOURCE Source);
@@ -571,10 +578,9 @@ Image Information, the application will call DTWAIN_AddExtImageInfoQuery multipl
 each time for each Image Information desired  */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_AddExtImageInfoQuery(DTWAIN_SOURCE Source, LONG ExtImageInfo);
 
-/* This returns the data that the Source returned when the item is queried.  Application
-   must make sure that the LPVOID passed in fits the data that is returned from the Source.
-   Use DTWAIN_GetExtImageInfoItem to determine the type of data.   */
+/* This returns the data that the Source returned when the item is queried.  */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetExtImageInfoData(DTWAIN_SOURCE Source, LONG nWhich, LPDTWAIN_ARRAY Data);
+DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_GetExtImageInfoDataEx(DTWAIN_SOURCE Source, LONG nWhich);
 
 /* This returns the information pertaining to a certain item in the list.  The application
 will call this for each information retrieved from the Source.  This function does not
@@ -824,7 +830,7 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_DisableAppWindow(HWND hWnd, DTWAIN_BOOL bDisable
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_OpenSourcesOnSelect(DTWAIN_BOOL bSet);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsOpenSourcesOnSelect(VOID_PROTOTYPE);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetVersionEx(LPLONG lMajor, LPLONG lMinor,LPLONG lVersionType, LPLONG lPatchLevel);
-LONG        DLLENTRY_DEF DTWAIN_GetSavedFilesCount(DTWAIN_SOURCE Source);
+LONG        DLLENTRY_DEF DTWAIN_GetFileSavePageCount(DTWAIN_SOURCE Source);
 
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetEOJDetectValue(DTWAIN_SOURCE Source, LONG nValue);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetQueryCapSupport(DTWAIN_BOOL bSet);

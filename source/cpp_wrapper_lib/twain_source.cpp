@@ -1,6 +1,6 @@
 /*
 This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-Copyright (c) 2002-2025 Dynarithmic Software.
+Copyright (c) 2002-2026 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -365,6 +365,7 @@ namespace dynarithmic
             // Set the JPEG quality in case we acquire to JPEG files
             imagetype_options& iOpts = ac.get_imagetype_options();
             API_INSTANCE DTWAIN_SetJpegValues(m_theSource, iOpts.get_jpegquality(), false);
+            API_INSTANCE DTWAIN_SetJpegXRValues(m_theSource, iOpts.get_jpegquality(), false);
 
             // If non-TWAIN scaling is enabled, enable it now
             auto& imageOptions = ac.get_imageparameter_options();
