@@ -1,6 +1,6 @@
 /*
     This file is part of the Dynarithmic TWAIN Library (DTWAIN).
-    Copyright (c) 2002-2025 Dynarithmic Software.
+    Copyright (c) 2002-2026 Dynarithmic Software.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -66,8 +66,12 @@
         #pragma message ("Microsoft Visual Studio 2017 compiler defined")
     #elif _MSC_VER >= 1920 && _MSC_VER < 1930
         #pragma message ("Microsoft Visual Studio 2019 compiler defined")
-    #elif _MSC_VER >= 1930
-        #pragma message ("Microsoft Visual Studio 2022 (or greater) compiler defined")
+    #elif _MSC_VER >= 1930 && _MSC_VER < 1940
+        #pragma message ("Microsoft Visual Studio 2022 compiler defined")
+    #elif _MSC_VER >= 1940 && _MSC_VER < 1950
+        #pragma message ("Microsoft Visual Studio 2022 version 17.1x defined")
+    #elif _MSC_VER >= 1950
+        #pragma message ("Microsoft Visual Studio 2026 or higher defined")
     #endif
 #endif
 

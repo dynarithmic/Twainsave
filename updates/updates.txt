@@ -1,5 +1,19 @@
 TwainSave version changes
 
+1.3.1
+
+- Address issues with some TWAIN devices not behaving correctly when showing the
+  device's user interface (UI), or did not start scanning when no user-interface 
+  was selected.  For user-interface, this includes devices that had unresponsive 
+  UI control buttons, for example a "Scan" button didn't start the scanning process.
+
+- Fixed issue with --noconsole not closing out the running twainsave process.
+
+- Add --devicelist option that returns a JSON list of all the TWAIN devices.
+  Use this command instead of --details if you want to know the device names that are
+  available instead of getting a complete detailed listing of each device.
+
+   
 1.3.0
 
 - Add --pdfaes128 and --pdfaes256 options to allow AES 128-bit and
