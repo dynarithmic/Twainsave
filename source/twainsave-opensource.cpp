@@ -52,6 +52,7 @@ OF THIRD PARTY RIGHTS.
 #include "twainsave.h"
 
 std::string generate_details();
+std::string generate_productnames();
 std::vector<std::string> vReturnStrings;
 
 template <typename E>
@@ -315,6 +316,7 @@ struct scanner_options
     bool m_bShowVersion;
     bool m_bMultiPage;
     bool m_bMultiPage2;
+    bool m_bShowProductNames;
     bool m_bUseDSM2;
     std::string m_strTempDirectory;
     int m_DSMSearchOrder;
@@ -502,6 +504,7 @@ parse_return_type parse_options(int argc, char *argv[])
             ("createdir", po::bool_switch(&s_options.m_bCreateDir)->default_value(false), "Create the directory specified by --filename if directory does not exist")
             ("deskew", po::bool_switch(&s_options.m_bDeskew)->default_value(false), "Deskew image if skewed.  Device must support deskew")
             ("details", po::bool_switch(&s_options.m_bShowDetails)->default_value(false), "Detail information on all available TWAIN devices.")
+			("devicelist", po::bool_switch(&s_options.m_bShowProductNames)->default_value(false), "List names of TWAIN devices.")
             ("diagnose", po::value< int >(&s_options.m_nDiagnose)->default_value(0), "Create diagnostic log.  Level values 1, 2, 3 or 4.")
             ("diagnoselog", po::value< std::string >(&s_options.m_DiagnoseLog)->default_value("stddiag.log"), "file name to store -diagnose messages")
             ("dsmsearchorder", po::value< int >(&s_options.m_DSMSearchOrder)->default_value(0), "Directories TwainSave will search when locating TWAIN_32.DLL or TWAINDSM.DLL")
@@ -1184,8 +1187,11 @@ bool set_device_options(twain_source& mysource, const po::variables_map& varmap)
             enable_duplex(s_options.m_bUseDuplex);
 
         // Turn on/of the user interface
+        bool showNoUI = s_options.m_bNoUI;
+        if (s_options.m_bNoUIWait)
+            showNoUI = true;
         ac.get_userinterface_options().
-            show(!s_options.m_bNoUI).
+            show(!showNoUI).
             show_indicators(s_options.m_bShowIndicator).
             show_onlyui(s_options.m_bShowUIOnly);
 
@@ -1428,6 +1434,20 @@ int start_acquisitions(const po::variables_map& varmap)
         return RETURN_OK;
     }
 
+	defaultIter = varmap.find("devicelist");
+	if (!defaultIter->second.defaulted())
+	{
+		auto s = generate_productnames();
+		if (s_options.m_bNoConsole)
+		{
+			DWORD d;
+			WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
+		}
+		else
+			std::cout << s;
+		s_options.set_return_code(RETURN_OK);
+		return RETURN_OK;
+	}
     // first start the TWAIN session
     twain_session ts(startup_mode::none);
     auto iter = varmap.find("tempdir");
