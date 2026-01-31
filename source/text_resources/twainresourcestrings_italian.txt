@@ -19,7 +19,7 @@
 1002 Invalido DTWAIN_SOURCE
 1003 Invalido DTWAIN_ARRAY
 1004 Incorretto DTWAIN_ARRAY tipo
-1005 Ago fuori da frontiere da DTWAIN_ARRAY
+1005 Ago fuori da frontiere da DTWAIN_ARRAY: %1
 1006 Fuori da mucchio memoria
 1007 DTWAIN non crei TWAIN finestra
 1008 Invalido Pixel Dattilografa
@@ -27,7 +27,7 @@
 1010 Nessun DTWAIN Seduta cominciò.
 1011 Invalido DTWAIN_ACQUIRE numero
 1012 Invalid TWAIN Capacità
-1013 Fonte non caldeggia capacità
+1013 Fonte non caldeggia capacità: %1
 1014 Generale TWAIN Errore.
 1015 Fallii Agganciare applicazione messaggio coda
 1016 Cattivo Schedario nome discussione passò
@@ -102,6 +102,7 @@
 1085 Il valore DTWAIN_RANGE è fuori dai limiti  
 1086 DTWAIN_RANGE ha una dimensione del passo di 0
 1087 Nome vuoto o mancante è stato rilevato
+1088 L'alimentatore documenti non ha un sensore carta o il sensore carta non viene rilevato
 1100 TWAIN Condizione non Cifri: non finendo operazione.   Insufficiente Memoria.
 1101 TWAIN Condizione Codice: Errore
 1102 TWAIN Condiziona Codice: Unknown causa di fallimento
@@ -207,6 +208,7 @@
 2074 Invalid bitmap width/height for non-Vista Windows ICO format
 2075 TWAIN_32.DLL or specified TWAIN Data Source Manager not found, corrupted, or could not be opened
 2076 TWAINDSM.DLL or specified TWAIN Data Source Manager not found, corrupted, or could not be opened
+2077 Directory non valida o inesistente
 2078 Impossibile creare la directory
 2079 Transym OCR DLL not found
 2081 No filename specified.  Use -f option
@@ -231,6 +233,8 @@
 2502 Informazioni sull'immagine non valide
 2503 Errore durante la scrittura dei dati nel file
 2504 Operazione non supportata  
+2505 Elemento di testo PDF non valido
+2506 La capacità non è stata impostata. Sono stati utilizzati valori non validi.
 3000 Selezioni Fonte
 3001 &Selezionar
 3002 &Annullare
@@ -257,6 +261,9 @@
 3023 Di più
 3024 Elenco delle capacità
 3025 Fonte Predefinita
+3026 Registrazione avviata
+3027 Registrazione terminata
+3028 Ultimo errore
 9700 DTWAIN Twain Library, v{short_version}, {company_name}, {copyright}
 9999 Exception error occurred during call to Twain DSM.  Possible corrupted Twain session?
 10000 [Messaggio dell'utente]
@@ -295,3 +302,15 @@
 9527 Codice di Condizione TWAIN: Operazione fallita (documento troppo chiaro)
 9528 Codice di Condizione TWAIN: Operazione fallita (documento troppo scuro)
 9529 Codice di Condizione TWAIN: Operazione fallita (la sorgente non ha nulla da catturare per il trasferimento)
+9600 Codice di ritorno TWAIN: TWRC_SUCCESS
+9601 Codice di ritorno TWAIN: TWRC_FAILURE
+9602 Codice di ritorno TWAIN: TWRC_CHECKSTATUS
+9603 Codice di ritorno TWAIN: TWRC_CANCEL
+9604 Codice di ritorno TWAIN: TWRC_DSEVENT
+9605 Codice di ritorno TWAIN: TWRC_NOTDSEVENT
+9606 Codice di ritorno TWAIN: TWRC_XFERDONE
+9607 Codice di ritorno TWAIN: TWRC_ENDOFLIST
+9608 Codice di ritorno TWAIN: TWRC_INFONOTSUPPORTED
+9609 Codice di ritorno TWAIN: TWRC_DATANOTAVAILABLE
+9610 Codice di ritorno TWAIN: TWRC_BUSY
+9611 Codice di ritorno TWAIN: TWRC_SCANNERLOCKED
