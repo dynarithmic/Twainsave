@@ -29,7 +29,7 @@ The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opens
     b) Note that there is also a Windows-based [help file](https://github.com/dynarithmic/Twainsave/tree/master/help) that explains most of these options.  This help file is periodically updated.
 
 ----
-The current open source TwainSave version is **1.3.0**.
+The current open source TwainSave version is **1.3.1**.
 
 ----
 
