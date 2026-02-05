@@ -1,6 +1,6 @@
 /*
 This file is part of the Twainsave-opensource version
-Copyright (c) 2002-2025 Dynarithmic Software.
+Copyright (c) 2002-2026 Dynarithmic Software.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
