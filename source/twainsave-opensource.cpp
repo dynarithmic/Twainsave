@@ -1429,7 +1429,7 @@ int start_acquisitions(const po::variables_map& varmap)
             WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
         }
         else
-            std::cout << generate_details();
+            std::cout << s;
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
