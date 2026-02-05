@@ -1526,8 +1526,12 @@ int start_acquisitions(const po::variables_map& varmap)
 
             // Customize the dialog
             std::vector<int> vFlags;
+            HWND parentWindow = nullptr;
             if (s_options.m_DialogConfig.m_position == std::make_pair((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::min)()))
-                vFlags.push_back(twain_select_dialog::showcenterscreen);
+            {
+                vFlags.push_back(twain_select_dialog::showcentermonitor);
+                parentWindow = GetConsoleWindow();
+            }
             else
                 twain_dialog.set_position(s_options.m_DialogConfig.m_position);
 
@@ -1541,7 +1545,7 @@ int start_acquisitions(const po::variables_map& varmap)
                 vFlags.push_back(twain_select_dialog::sortnames);
 
             twain_dialog.
-                set_parent_window(nullptr).
+                set_parent_window(parentWindow).
                 set_title(s_options.m_DialogConfig.m_strTwainTitle).
                 set_flags(vFlags);
 
