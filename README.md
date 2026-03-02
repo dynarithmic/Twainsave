@@ -53,7 +53,7 @@ will write the details to the file **details.log**
 
 3) The **--thumbnail** option has been renamed to **--scale**.
 
-3) Running **twainsave.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box.  If a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will be have a randomly generated file name (using a **.BMP** extension).  
+3) Running **twainsave.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box.  If a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will have a randomly generated file name (using a **.BMP** extension).  
 
 4) Running **twainsave.exe** without a --filename setting, but with a --filetype setting: If a device is selected, the name of the file will be randomly generated, with a file extension that matches the file type specified.
 
