@@ -8,15 +8,22 @@
 #include <boost/algorithm/string/join.hpp>
 using namespace dynarithmic::twain;
 
-std::string generate_details()
+std::string generate_details(dynarithmic::twain::twain_session* pSession)
 {
-    twain_session ts(startup_mode::autostart);
-    return ts.get_details(details_info());
+    twain_session ts(startup_mode::none);
+    if ( !pSession )
+        pSession = &ts;
+    pSession->start();
+    return pSession->get_details(details_info());
 }
-std::string generate_productnames()
+
+std::string generate_productnames(dynarithmic::twain::twain_session* pSession)
 {
-	twain_session ts(startup_mode::autostart);
-    auto sourceInfo = ts.get_all_source_info();
+	twain_session ts(startup_mode::none);
+    if (!pSession)
+        pSession = &ts;
+    pSession->start();
+    auto sourceInfo = pSession->get_all_source_info();
     std::vector<std::string> vProductNames;
     auto iter = sourceInfo.begin();
     while (iter != sourceInfo.end())

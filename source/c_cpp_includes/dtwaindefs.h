@@ -148,6 +148,7 @@
 #define DTWAIN_USESOURCEMODE      128
 #define DTWAIN_USELIST            256
 #define DTWAIN_CREATE_DIRECTORY   512
+#define DTWAIN_NODELETEDIBS       1024
 
 
 /* DTWAIN_ARRAY types */
@@ -172,6 +173,7 @@
    if compiling UNICODE applications */
 #define DTWAIN_ARRAYWIDESTRING      12
 #define DTWAIN_ARRAYTWFIX32         200
+#define DTWAIN_ARRAYULONG           13
 
 #define DTWAIN_ArrayTypeINVALID     0
 
@@ -186,6 +188,9 @@
 #define DTWAIN_ARRAYINT32         130
 #define DTWAIN_ARRAYINT64         140
 #define DTWAIN_ARRAYUINT64        150
+#define DTWAIN_ARRAYSHORTINT16    160
+#define DTWAIN_ARRAYSHORTUINT16   170
+
 
 /* DTWAIN_RANGE types */
 #define DTWAIN_RANGELONG      DTWAIN_ARRAYLONG
@@ -251,11 +256,11 @@
 #define DTWAIN_CAPSET                6 /* Set one or more values                   */
 #define DTWAIN_CAPRESET              7 /* Set current value to default value       */
 #define DTWAIN_CAPRESETALL           8 /* Reset all capabilities */
-#define DTWAIN_CAPSETCONSTRAINT      9 /* constrain values */
 
 #define DTWAIN_CAPGETHELP            9
 #define DTWAIN_CAPGETLABEL           10
 #define DTWAIN_CAPGETLABELENUM       11
+#define DTWAIN_CAPSETCONSTRAINT      12 /* constrain values */
 
 /* The following values are ORed with the DTWAIN_CAPSET value */
 #define DTWAIN_CAPSETAVAILABLE       8  /* Sets available values  */
@@ -315,6 +320,7 @@
 /* DTWAIN Special Failure codes */
 #define DTWAIN_FAILURE1       (-1)
 #define DTWAIN_FAILURE2       (-2)
+#define DTWAIN_FAILURE3       0xFFFFFFFFU
 
 /* Other miscellaneous constants */
 #define DTWAIN_DELETEALL      (-1)
@@ -536,6 +542,16 @@
 /* Sent when issuing a file transfer, and the compression chosen is
  * not recognized for the file type */
 #define DTWAIN_TN_FILECOMPRESSTYPEMISMATCH  1302
+
+/* Sent when getting Source details using DTWAIN_GetSourceDetails() */
+#define DTWAIN_TN_SOURCEDETAILS             1304
+
+/* Sent to determine if feeder should continue feeding pages */
+#define DTWAIN_TN_QUERYACQUIREPAGES             1305
+#define DTWAIN_TN_ACQUIREPAGESSTOPPING          1306
+#define DTWAIN_TN_ACQUIREPAGESSTOPPED           1307
+#define DTWAIN_TN_QUERYUPDATEDIBORIG            1308
+#define DTWAIN_TN_QUERYUPDATEDIBRESAMPLED       1309
 
 /* PDF OCR clean text flags */
 #define DTWAIN_PDFOCR_CLEANTEXT1            1
@@ -1053,9 +1069,11 @@
 #define DTWAIN_ERR_OPERATION_NOTSUPPORTED  (-2504)
 #define DTWAIN_ERR_INVALID_PDFTEXTELEMENT  (-2505)
 #define DTWAIN_ERR_SETCAP_FAILED           (-2506)
+#define DTWAIN_ERR_CAP_INVALIDSTATE        (-2507)
+#define DTWAIN_ERR_GETCAP_FAILED           (-2508)
 
-#define DTWAIN_ERR_LAST                    (DTWAIN_ERR_USER_START + 1)
 #define DTWAIN_ERR_USER_START              (-80000)  
+#define DTWAIN_ERR_LAST                    (DTWAIN_ERR_USER_START + 1)
 
 /* Device event constants (these values are pow(2, value), where value
    is the TWAIN 1.8 value)*/
@@ -1409,6 +1427,7 @@ DTWAIN DLL are not displayed */
 #define DTWAIN_DLG_HIGHLIGHTFIRST       8192
 #define DTWAIN_DLG_SAVELASTSCREENPOS    16384
 #define DTWAIN_DLG_CENTER_CURRENT_MONITOR 32768
+#define DTWAIN_DLG_CONSOLEASPARENT     65536
 
 /* DTWAIN Language resource constants */
 #define DTWAIN_RES_ENGLISH              0
@@ -1662,7 +1681,9 @@ DTWAIN DLL are not displayed */
 #define DTWAIN_CONSTANT_CAPCODE_MAP 80
 #define DTWAIN_CONSTANT_ACAP        81
 #define DTWAIN_CONSTANT_CAPCODE_NOMNEMONIC 82
-#define DTWAIN_CONSTANT_LAST     (DTWAIN_CONSTANT_CAPCODE_NOMNEMONIC + 1) 
+#define DTWAIN_CONSTANT_DTWAINCONT_TWAINCONT 83
+#define DTWAIN_CONSTANT_ERROR_NAMES     84
+#define DTWAIN_CONSTANT_LAST     (DTWAIN_CONSTANT_ERROR_NAMES + 1) 
 
 /* This ID is the start of user-defined custom resources */
 #define DTWAIN_USERRES_START     20000

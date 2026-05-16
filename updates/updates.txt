@@ -1,11 +1,15 @@
 TwainSave version changes
 
-1.3.2
+1.4.0
+
+- Add -svg and -svgz file types.
 
 - Optimize generating the --details JSON output.  
 
 - Center the "Select Source" dialog within the current monitor (where the console
   window is located).
+
+- Update TwainSave to be compatible with DTWAIN version 5.9.0
 
 
 1.3.1

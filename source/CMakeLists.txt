@@ -19,6 +19,9 @@ set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/dtwtype.h
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/twain.h
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/winconst.h
+        ${PROJECT_SOURCE_DIR}/twainsave_broker.h
+        ${PROJECT_SOURCE_DIR}/commandline.h
+        ${PROJECT_SOURCE_DIR}/twainsave_app.h
         ${PROJECT_SOURCE_DIR}/twainsave.h
         ${PROJECT_SOURCE_DIR}/twainsave_verinfo.h
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/acquire_characteristics.hpp
@@ -121,7 +124,10 @@ add_executable(twainsave-opensource
     ${PROJECT_SOURCE_DIR}/generate_details.cpp
     ${PROJECT_SOURCE_DIR}/stdafx.cpp
     ${PROJECT_SOURCE_DIR}/twainsave-opensource.cpp
+    ${PROJECT_SOURCE_DIR}/twainsave_app.cpp
+    ${PROJECT_SOURCE_DIR}/twainsave_broker.cpp
     ${PROJECT_SOURCE_DIR}/dtwimpl.cpp
+    ${PROJECT_SOURCE_DIR}/commandline.cpp
     ${HEADER_FILES}
 )
 set_property(TARGET twainsave-opensource PROPERTY CXX_STANDARD 17)
