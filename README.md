@@ -5,17 +5,15 @@ Close to all of the functionality that is in the commercial version of TwainSave
 
 Note that there are two copies of the TwainSave executable files for each architecture and TWAIN device  (32-bit and 64-bit).  To access 32-bit TWAIN devices, you must run the 32-bit version of TwainSave, and similarly, to access 64-bit TWAIN devices, you must run the 64-bit version of TwainSave.
 
-In the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/32-bit" target="_blank">32-bit version of TwainSave</a>, you will see **twainsave.exe**, and **twainsave-opensource.exe**, and for the <a href="https://github.com/dynarithmic/twainsave/tree/master/binaries/64-bit" target="_blank">64-bit version of TwainSave</a>, the executable files are **twainsave-opensource.exe** and **twainsave64.exe**.  
-
 # Getting started
 There currently isn't an installation package, so the installation will be manual (but very simple).
 
 To get started, 
 
-1) For 32-bit TwainSave, copy the files from <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/32-bit" target="_blank">this folder</a> to an empty folder on your computer.
+1) For 32-bit TwainSave, unzip the [32-bit binaries file](https://github.com/dynarithmic/Twainsave/releases/latest/download/twainsave-binaries-x86.zip) to an empty folder on your computer.
 2) You can either run **twainsave.exe** directly from that folder, or set a PATH to the folder and run **twainsave.exe**.
 
-3) For <a href="https://github.com/dynarithmic/TwainSave/tree/master/binaries/64-bit" target="_blank">64-bit TwainSave</a>, create another empty folder and follow steps 1) and 2).  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
+3) For 64-bit TwainSave, unzip the [64-bit binaries file](https://github.com/dynarithmic/Twainsave/releases/latest/download/twainsave-binaries-x86.zip) to another empty folder.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
 
 4) If when running TwainSave, you receive an error stating that **VCRUNTIME140.dll and MSVCP140.dll are missing**, you will need to install the <a href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170" target="_blank">Visual C++ Redistributables</a> for <a href="https://aka.ms/vs/17/release/vc_redist.x86.exe" target="_blank">X86</a> if you are running the 32-bit TwainSave, and 
 <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe" target="_blank">X64</a> if you will be running the 64-bit version of TwainSave.
@@ -29,7 +27,7 @@ The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opens
     b) Note that there is also a Windows-based [help file](https://github.com/dynarithmic/Twainsave/tree/master/help) that explains most of these options.  This help file is periodically updated.
 
 ----
-The current open source TwainSave version is **1.3.1**.
+The current open source TwainSave version is **1.4.0**.
 
 ----
 
@@ -53,19 +51,25 @@ will write the details to the file **details.log**
 
 3) The **--thumbnail** option has been renamed to **--scale**.
 
-3) Running **twainsave.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box.  If a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will have a randomly generated file name (using a **.BMP** extension).  
+4) Running **twainsave.exe** without command-line parameters will default to displaying the TWAIN Select Source dialog box.  If a device is selected, will allow the user to acquire and save the file to a BMP file.  The resulting BMP file will have a randomly generated file name (using a **.BMP** extension).  
 
-4) Running **twainsave.exe** without a --filename setting, but with a --filetype setting: If a device is selected, the name of the file will be randomly generated, with a file extension that matches the file type specified.
+4) Running **twainsave.exe** without a **--filename** setting, but with a **--filetype** setting: If a device is selected, the name of the file will be randomly generated, with a file extension that matches the file type specified.
 
-   For example:
+   For example:  
+
    **twainsave --filetype pdf**
-   will result in a file created with a random name, with a **.pdf** extension.
+     
+    will result in a file created with a random name, using a **.pdf** extension.
    
-6)   Note that the random names will have as the filename in a 128-bit GUID format.  For example:
+6)   Note that the random names will have as the filename in a 128-bit GUID format.  For  example:  
+  
+       **6b29fc40-ca47-1067-b31d-00dd010662da.pdf**
 
-    6b29fc40-ca47-1067-b31d-00dd010662da.pdf
+       would be a randomly generated pdf file.
 
-   would be a randomly generated pdf file.
+7) The **--filetype** command now supports SVG and SVGZ files being generated.  The new types are **svg** and **svgz** respectively.
+
+
    
 
 ----------
