@@ -34,10 +34,12 @@ The current open source TwainSave version is **1.4.0**.
 # Differences in this version and the commercial version of TwainSave
 
 1) The command-line parameters use the traditional Unix-style double-hyphen option specifier.  So for example, instead of this:
-**twainsave -filename test.bmp**
 
-The option for the open source version will be
-**twainsave --filename test.bmp**
+    **twainsave -filename test.bmp**
+
+    the option for the open source version will be
+
+    **twainsave --filename test.bmp**
 
 2) The **--details** listing differs from the commercial version's [**-details**](http://www.dynarithmic.com/onlinehelp/twainsave/_details.htm) setting in two major ways:<br>
     a) The **--details** is in JSON format.  
