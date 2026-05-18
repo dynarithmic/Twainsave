@@ -17,6 +17,21 @@ std::string generate_details(dynarithmic::twain::twain_session* pSession)
     return pSession->get_details(details_info());
 }
 
+std::string generate_dtwainversion_info(dynarithmic::twain::twain_session* pSession)
+{
+	twain_session ts(startup_mode::none);
+	if (!pSession)
+		pSession = &ts;
+	bool started = pSession->start_minimal();
+    if (started)
+    {
+        char szShortVersion[256] = {};
+        API_INSTANCE DTWAIN_GetShortVersionStringA(szShortVersion, 256);
+        return szShortVersion;
+    }
+    return {};
+}
+
 std::string generate_productnames(dynarithmic::twain::twain_session* pSession)
 {
 	twain_session ts(startup_mode::none);

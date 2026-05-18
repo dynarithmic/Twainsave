@@ -50,6 +50,21 @@ namespace dynarithmic
             return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(ptr));
         }                
 
+        bool twain_session::start_minimal()
+        {
+#ifdef DTWAIN_CPP_NOIMPORTLIB
+            if (!get_dllhandle())
+            {
+                HMODULE hDTwainModule = ::LoadLibraryA(DTWAIN_DLLNAME);
+                if (hDTwainModule)
+                    set_dllhandle(hDTwainModule);
+                else
+                    return false;
+            }
+#endif
+            return true;
+        }
+
         bool twain_session::start(bool bCleanStart)
         {
 #ifdef DTWAIN_CPP_NOIMPORTLIB

@@ -1089,6 +1089,8 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
 	if (!defaultIter->second.defaulted())
 	{
 		std::cout << TWAINSAVE_VERINFO_ORIGINALFILENAME << " " << TWAINSAVE_FULL_VERSION << "\n";
+		std::string dtwain_version = generate_dtwainversion_info(pSession);
+		std::cout << "DTWAIN DLL version: " << dtwain_version << "\n";
 		s_options.set_return_code(RETURN_OK);
 		return RETURN_OK;
 	}
@@ -1193,7 +1195,10 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
 		if (!varmap["language"].defaulted())
 		{
 			if (s_options.m_DialogConfig.m_language == "default")
+			{
 				sessionToUse->set_language_resource(s_options.m_strLanguage);
+				reload_custom_resources();
+			}
 			else
 				sessionToUse->set_language_resource(s_options.m_DialogConfig.m_language);
 		}
@@ -1351,6 +1356,17 @@ void twainsave_app::load_custom_resources_from_ini()
 		std::string errorKey = "error" + std::to_string(curError);
 		auto errorValue = customProfile.GetValue("Error Messages", errorKey.c_str(), "");
 		s_options.m_ReturnCodesMap[curError] = errorValue;
+	}
+}
+
+void twainsave_app::reload_custom_resources()
+{
+	for (int curError = DTWAIN_USERRES_START; curError < DTWAIN_USERRES_START + RETURN_CODE_LAST; ++curError)
+	{
+		char szRes[1024];
+		LONG numChars = API_INSTANCE DTWAIN_GetResourceStringA(curError, szRes, 1024);
+		if ( numChars > 0 )
+			s_options.m_ReturnCodesMap[curError - DTWAIN_USERRES_START] = szRes;
 	}
 }
 

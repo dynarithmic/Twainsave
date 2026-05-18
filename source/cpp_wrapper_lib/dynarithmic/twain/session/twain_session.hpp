@@ -349,6 +349,8 @@ namespace dynarithmic
                 static LRESULT CALLBACK error_callback_proc(LONG error, LONG64 UserData);
 
                 bool start(bool bCleanStart);
+                bool start_minimal(bool bCleanStart);
+
                 void update_source_status(const twain_source& ts);
 
                 template <typename SourceSelector>
@@ -470,6 +472,9 @@ namespace dynarithmic
                 /// @note Only a single TWAIN session can be started per thread.
                 /// @see stop() get_twain_characteristics()
                 bool start();
+
+				/// Only loads the DTWAIN DLL at runtime without starting a TWAIN session
+				bool start_minimal();
 
                 /// Stops the TWAIN Data Source Manager (DSM).
                 ///
