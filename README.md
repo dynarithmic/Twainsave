@@ -72,33 +72,147 @@ will write the details to the file **details.log**
 7) The **--filetype** command now supports SVG and SVGZ files being generated.  The new types are **svg** and **svgz** respectively.
 
 
-   
-
+ 
+----------
 ----------
 
 # Building TwainSave from source
 
-If you want to build the source code, the requirements are the same as building the source for the Dynarithmic TWAIN library found [here](https://github.com/dynarithmic/twain_library_source).  
+If you want to build the source code, note that the building of the source is initially set up using [CMake](https://cmake.org/).  The Boost C++ library is required for the build, so the next section clarifies what is done to install the Boost library.
 
-1) Note that the building of the source is initially set up using [CMake](https://cmake.org/).  You can use CMake or CMake-GUI to configure and generate the Visual Studio project files.  Note that you will need either one of the following compilers to build Twainsave successfully:
-    a) Visual Studio 2019 
-    b) Visual Studio 2022
+---
 
-2) You will need an installation of the Boost C++ library, version 1.70 or greater (see the link to building DTWAIN for more information).
+## Boost Dependency Handling Changes
 
-3) The environment variables used by the build process are as follows:
+TwainSave now supports automatic Boost discovery, download, installation, and reuse through CMake.
 
-```plaintext
-BOOST_INCLUDE_DIR
-BOOST_LIBRARY_DIR_V142_64
-BOOST_LIBRARY_DIR_V142_32
-BOOST_LIBRARY_DIR_V143_64
-BOOST_LIBRARY_DIR_V143_32
+Manual Boost installation and environment-variable setup are no longer required, as was the case with previous versions of the `CMakeList.txt` script.
+
+### Automatic Boost Installation
+
+When enabled, CMake can:
+
+```text
+Download Boost binaries
+→ Install Boost silently
+→ Configure include/library paths
+→ Generate Visual Studio project files
 ```
 
-See the [DTWAIN source main page](https://github.com/dynarithmic/twain_library_source) to see how to set these enviroment variables to point to the Boost headers and library directories.  
+Supported configurations:
 
-4) Since TwainSave relies on the DTWAIN library to run successfully, you must ensure that **dtwain32u.dll** and **dtwain64u.dll** are available at run time.  Along with these files, the text resources should be made available.  
+* Visual Studio 2019 (MSVC 14.2)
+* Visual Studio 2022 (MSVC 14.3)
+* Win32
+* x64
+
+---
+
+## Shared Boost Installation Layout
+
+Boost installations are now merged into a common installation root to reduce disk usage.
+
+Example:
+
+```text
+BoostDeps/
+    boost_1_91_0/
+        boost/
+        lib32-msvc-14.2/
+        lib64-msvc-14.2/
+        lib32-msvc-14.3/
+        lib64-msvc-14.3/
+```
+
+This means:
+
+* Boost headers are installed once.
+* Documentation is installed once.
+* Only compiler-specific libraries are added.
+
+Win32 and x64 Boost libraries coexist in the same directory.
+
+Visual Studio 2019 and Visual Studio 2022 libraries also coexist.
+
+---
+
+## Existing Boost Installation Support
+
+Users may optionally point CMake to an existing Boost installation.
+
+Configuration variable:
+
+```text
+TWAIN_EXISTING_BOOST_ROOT
+```
+
+Example:
+
+```text
+TWAIN_EXISTING_BOOST_ROOT=D:/boost_1_90_0
+```
+
+The existing installation must follow the same directory layout as the automatically downloaded Boost installation.
+
+Minimum required layout:
+
+```text
+<boost_root>/
+    boost/
+    lib32-msvc-<toolset>/
+    lib64-msvc-<toolset>/
+```
+
+Example:
+
+```text
+D:/boost_1_90_0/
+    boost/
+    lib32-msvc-14.3/
+    lib64-msvc-14.3/
+```
+
+Only the library directory required for the current build must exist.
+
+Examples:
+
+* VS2022 x64 → `lib64-msvc-14.3`
+* VS2022 Win32 → `lib32-msvc-14.3`
+* VS2019 x64 → `lib64-msvc-14.2`
+* VS2019 Win32 → `lib32-msvc-14.2`
+
+If the required library directory is missing, CMake will stop during Configure and report the missing path.
+
+---
+
+## Optional Cleanup
+
+After a successful automatic installation, CMake may optionally remove:
+
+* downloaded Boost installer (`.exe`)
+* installer log file
+
+Configuration options:
+
+```text
+TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL
+TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL
+```
+
+This helps reduce disk usage after Boost installation completes.
+
+---
+
+## Notes
+
+* Environment variables are not required.
+* Boost include/library paths are written directly into generated Visual Studio project files.
+* Reconfiguration is typically only required when changing:
+
+  * Visual Studio version
+  * target architecture
+  * Boost version
+  * Boost installation location
 
 ---------
 ## To-do list
