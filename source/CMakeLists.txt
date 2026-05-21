@@ -11,177 +11,267 @@ endif()
 project(twainsave-opensource VERSION 0.1.0 LANGUAGES C CXX)
 
 # -----------------------------------------------------------------------------
-# Boost bootstrap support
+# Boost setup
 # -----------------------------------------------------------------------------
-# TwainSave uses the prebuilt Boost binary installers from SourceForge on Windows.
-# This block downloads and silently installs the matching Boost package for the
-# selected Visual Studio toolset and platform.
+# This project can download/install the matching prebuilt Boost binary package
+# for the current Visual Studio toolset and platform.
 #
-# CMake-GUI workflow:
+# CMake-Gui workflow:
 #   1. Press Configure once.
-#   2. Set TWAIN_BOOST_CACHE_ROOT if the default is not desired.
-#   3. Enable TWAIN_AUTO_DOWNLOAD_BOOST.
-#   4. Press Configure again.
-#   5. Press Generate.
+#   2. Set TWAIN_BOOST_CACHE_ROOT if you do not want the default C:/BoostDeps.
+#   3. Set TWAIN_AUTO_DOWNLOAD_BOOST=ON.
+#   4. Press Configure again, then Generate.
 #
-# The Boost root is shared by Win32/x64 builds for the same MSVC toolset, e.g.:
-#   C:/BoostDeps/boost_1_91_0_msvc_14.3/
+# The Boost install root is shared by Visual Studio toolset and bitness, for example:
+#   C:/BoostDeps/boost_1_91_0/
 #       boost/
+#       lib32-msvc-14.2/
+#       lib64-msvc-14.2/
 #       lib32-msvc-14.3/
 #       lib64-msvc-14.3/
-# -----------------------------------------------------------------------------
+#
+# This avoids installing duplicate Boost headers/docs for Win32/x64 and VS2019/VS2022.
+# Do not run multiple Boost installers into the same root concurrently.
 
-set(TWAIN_BOOST_VERSION "1.91.0" CACHE STRING "Boost version to download/use")
-string(REPLACE "." "_" TWAIN_BOOST_VERSION_UNDERSCORE "${TWAIN_BOOST_VERSION}")
+set(TWAIN_BOOST_VERSION "1.91.0" CACHE STRING "Boost version to use")
+set(TWAIN_BOOST_VERSION_UNDERSCORE "1_91_0")
 
 set(TWAIN_BOOST_CACHE_ROOT
     "C:/BoostDeps"
     CACHE PATH
-    "Short directory where Boost installers and installed Boost binaries are stored")
+    "Short directory where Boost installers and binaries are stored")
 
 option(TWAIN_AUTO_DOWNLOAD_BOOST
-       "Automatically download and silently install the matching Boost binary package if missing"
+       "Automatically download/install the required Boost binary package if missing"
        OFF)
 
+option(TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL
+       "Delete the downloaded Boost installer after a successful automatic install"
+       OFF)
+
+option(TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL
+       "Delete the Boost installer log after a successful automatic install"
+       OFF)
+
+set(TWAIN_EXISTING_BOOST_ROOT
+    ""
+    CACHE PATH
+    "Optional existing Boost root folder. If set, no Boost download/install is performed.")
+
 if(NOT MSVC)
-    message(FATAL_ERROR "This CMakeLists.txt currently supports automatic Boost setup only for MSVC/Visual Studio builds.")
+    message(FATAL_ERROR
+        "This CMakeLists.txt currently expects MSVC because it downloads "
+        "Boost Windows binaries for Visual Studio.")
 endif()
 
-# Map Visual Studio toolset to the Boost binary naming convention.
+# Visual Studio / MSVC Boost binary mapping:
+#   VS 2019 v142 => msvc-14.2
+#   VS 2022 v143 => msvc-14.3
 if(MSVC_TOOLSET_VERSION MATCHES "^143")
-    set(TWAIN_BOOST_MSVC "14.3") # Visual Studio 2022
+    set(TWAIN_BOOST_MSVC "14.3")
 elseif(MSVC_TOOLSET_VERSION MATCHES "^142")
-    set(TWAIN_BOOST_MSVC "14.2") # Visual Studio 2019
+    set(TWAIN_BOOST_MSVC "14.2")
 else()
-    message(FATAL_ERROR "Unsupported MSVC toolset version: ${MSVC_TOOLSET_VERSION}. Expected v142 or v143.")
+    message(FATAL_ERROR
+        "Unsupported MSVC toolset version '${MSVC_TOOLSET_VERSION}'. "
+        "Expected v142 or v143.")
 endif()
 
-# Determine the target platform bitness selected by CMake-GUI / generator.
+# Platform mapping. CMAKE_SIZEOF_VOID_P is valid after project() enables C/CXX.
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(TWAIN_BOOST_BITS "64")
 else()
     set(TWAIN_BOOST_BITS "32")
 endif()
 
-set(TWAIN_EFFECTIVE_BOOST_ROOT
-    "${TWAIN_BOOST_CACHE_ROOT}/boost_${TWAIN_BOOST_VERSION_UNDERSCORE}_msvc_${TWAIN_BOOST_MSVC}")
+if(TWAIN_EXISTING_BOOST_ROOT)
+    file(TO_CMAKE_PATH
+         "${TWAIN_EXISTING_BOOST_ROOT}"
+         TWAIN_EFFECTIVE_BOOST_ROOT)
+else()
+    set(TWAIN_EFFECTIVE_BOOST_ROOT
+        "${TWAIN_BOOST_CACHE_ROOT}/boost_${TWAIN_BOOST_VERSION_UNDERSCORE}")
+endif()
 
-set(TWAIN_EFFECTIVE_BOOST_LIBDIR
+set(TWAIN_REQUIRED_BOOST_LIBRARY_DIR
     "${TWAIN_EFFECTIVE_BOOST_ROOT}/lib${TWAIN_BOOST_BITS}-msvc-${TWAIN_BOOST_MSVC}")
 
-set(TWAIN_BOOST_EXE
+if(TWAIN_EXISTING_BOOST_ROOT)
+    if(NOT EXISTS "${TWAIN_EFFECTIVE_BOOST_ROOT}/boost")
+        message(FATAL_ERROR
+            "Existing Boost root does not contain the Boost header directory:\n"
+            "  ${TWAIN_EFFECTIVE_BOOST_ROOT}/boost")
+    endif()
+
+    if(NOT EXISTS "${TWAIN_REQUIRED_BOOST_LIBRARY_DIR}")
+        message(FATAL_ERROR
+            "Existing Boost root does not contain the required library directory for this build:\n"
+            "  ${TWAIN_REQUIRED_BOOST_LIBRARY_DIR}\n\n"
+            "Install the matching Boost binary package or choose automatic Boost download.")
+    endif()
+endif()
+
+if(TWAIN_EXISTING_BOOST_ROOT)
+    # User-supplied Boost installation. Expected layout:
+    #   <root>/boost/version.hpp
+    #   <root>/lib32-msvc-14.x  or  <root>/lib64-msvc-14.x
+    set(TWAIN_EFFECTIVE_BOOST_ROOT "${TWAIN_EXISTING_BOOST_ROOT}")
+else()
+    file(MAKE_DIRECTORY "${TWAIN_BOOST_CACHE_ROOT}")
+
+    # Shared Boost root for this Boost version.
+    # VS toolset and bitness are represented only by the library directory name:
+    #   lib32-msvc-14.2, lib64-msvc-14.2, lib32-msvc-14.3, lib64-msvc-14.3, etc.
+    set(TWAIN_EFFECTIVE_BOOST_ROOT
+        "${TWAIN_BOOST_CACHE_ROOT}/boost_${TWAIN_BOOST_VERSION_UNDERSCORE}")
+endif()
+
+set(TWAIN_BOOST_INCLUDE_DIR "${TWAIN_EFFECTIVE_BOOST_ROOT}")
+set(TWAIN_BOOST_LIBRARY_DIR
+    "${TWAIN_EFFECTIVE_BOOST_ROOT}/lib${TWAIN_BOOST_BITS}-msvc-${TWAIN_BOOST_MSVC}")
+
+set(TWAIN_BOOST_INSTALLER
     "boost_${TWAIN_BOOST_VERSION_UNDERSCORE}-msvc-${TWAIN_BOOST_MSVC}-${TWAIN_BOOST_BITS}.exe")
 
 set(TWAIN_BOOST_URL
-    "https://sourceforge.net/projects/boost/files/boost-binaries/${TWAIN_BOOST_VERSION}/${TWAIN_BOOST_EXE}/download")
+    "https://sourceforge.net/projects/boost/files/boost-binaries/${TWAIN_BOOST_VERSION}/${TWAIN_BOOST_INSTALLER}/download")
 
 set(TWAIN_BOOST_DOWNLOADED_EXE
-    "${TWAIN_BOOST_CACHE_ROOT}/${TWAIN_BOOST_EXE}")
+    "${TWAIN_BOOST_CACHE_ROOT}/${TWAIN_BOOST_INSTALLER}")
 
 set(TWAIN_BOOST_INSTALL_LOG
-    "${TWAIN_BOOST_CACHE_ROOT}/${TWAIN_BOOST_EXE}.install.log")
+    "${TWAIN_BOOST_CACHE_ROOT}/${TWAIN_BOOST_INSTALLER}.install.log")
 
-message(STATUS "Boost toolset selected: msvc-${TWAIN_BOOST_MSVC}")
-message(STATUS "Boost architecture selected: ${TWAIN_BOOST_BITS}-bit")
-message(STATUS "Boost root: ${TWAIN_EFFECTIVE_BOOST_ROOT}")
-message(STATUS "Boost library dir: ${TWAIN_EFFECTIVE_BOOST_LIBDIR}")
+set(TWAIN_BOOST_HEADERS_FOUND FALSE)
+if(EXISTS "${TWAIN_BOOST_INCLUDE_DIR}/boost/version.hpp")
+    set(TWAIN_BOOST_HEADERS_FOUND TRUE)
+endif()
 
-# Check for the architecture-specific library directory.  This lets Win32 and x64
-# installs share the same Boost root while still installing the missing bitness.
-if(NOT EXISTS "${TWAIN_EFFECTIVE_BOOST_LIBDIR}")
+set(TWAIN_BOOST_LIBDIR_FOUND FALSE)
+if(EXISTS "${TWAIN_BOOST_LIBRARY_DIR}")
+    set(TWAIN_BOOST_LIBDIR_FOUND TRUE)
+endif()
+
+if(NOT TWAIN_EXISTING_BOOST_ROOT AND
+   (NOT TWAIN_BOOST_HEADERS_FOUND OR NOT TWAIN_BOOST_LIBDIR_FOUND))
+
     if(NOT TWAIN_AUTO_DOWNLOAD_BOOST)
         message(STATUS "")
-        message(STATUS "Boost is not installed for this configuration:")
-        message(STATUS "  ${TWAIN_EFFECTIVE_BOOST_LIBDIR}")
+        message(STATUS "Boost is not installed for this configuration yet.")
         message(STATUS "")
-        message(STATUS "For CMake-GUI:")
-        message(STATUS "  1. Set TWAIN_BOOST_CACHE_ROOT to a short path, if needed.")
-        message(STATUS "     Example: C:/BoostDeps or D:/BoostDeps")
-        message(STATUS "  2. Enable TWAIN_AUTO_DOWNLOAD_BOOST.")
-        message(STATUS "  3. Press Configure again.")
+        message(STATUS "Expected Boost root:")
+        message(STATUS "  ${TWAIN_EFFECTIVE_BOOST_ROOT}")
+        message(STATUS "Expected Boost library directory:")
+        message(STATUS "  ${TWAIN_BOOST_LIBRARY_DIR}")
         message(STATUS "")
-        message(STATUS "For command-line CMake, add for example:")
-        message(STATUS "  -DTWAIN_BOOST_CACHE_ROOT=D:/BoostDeps -DTWAIN_AUTO_DOWNLOAD_BOOST=ON")
+        message(STATUS "For CMake-Gui:")
+        message(STATUS "  Option A: set TWAIN_EXISTING_BOOST_ROOT to an existing Boost root")
+        message(STATUS "  Option B:")
+        message(STATUS "    1. Set TWAIN_BOOST_CACHE_ROOT if desired, for example D:/BoostDeps")
+        message(STATUS "    2. Set TWAIN_AUTO_DOWNLOAD_BOOST=ON")
+        message(STATUS "    3. Optionally set TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL=ON")
+        message(STATUS "    4. Optionally set TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL=ON")
+        message(STATUS "    5. Press Configure again")
+        message(STATUS "")
+        message(STATUS "For command-line CMake, add:")
+        message(STATUS "  Existing Boost: -DTWAIN_EXISTING_BOOST_ROOT=D:/boost_1_90_0")
+        message(STATUS "  Auto download:  -DTWAIN_BOOST_CACHE_ROOT=D:/BoostDeps -DTWAIN_AUTO_DOWNLOAD_BOOST=ON")
+        message(STATUS "  Delete installer/log after install:")
+        message(STATUS "    -DTWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL=ON")
+        message(STATUS "    -DTWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL=ON")
         message(STATUS "")
         return()
     endif()
 
-    file(MAKE_DIRECTORY "${TWAIN_BOOST_CACHE_ROOT}")
-
     if(NOT EXISTS "${TWAIN_BOOST_DOWNLOADED_EXE}")
-        message(STATUS "Downloading Boost installer:")
-        message(STATUS "  ${TWAIN_BOOST_URL}")
-        message(STATUS "to:")
-        message(STATUS "  ${TWAIN_BOOST_DOWNLOADED_EXE}")
-
+        message(STATUS "Downloading ${TWAIN_BOOST_INSTALLER}")
         file(DOWNLOAD
             "${TWAIN_BOOST_URL}"
             "${TWAIN_BOOST_DOWNLOADED_EXE}"
             SHOW_PROGRESS
-            STATUS boost_download_status
-        )
+            STATUS TWAIN_BOOST_DOWNLOAD_STATUS
+            TLS_VERIFY ON)
 
-        list(GET boost_download_status 0 boost_download_result)
-        list(GET boost_download_status 1 boost_download_message)
-        if(NOT boost_download_result EQUAL 0)
+        list(GET TWAIN_BOOST_DOWNLOAD_STATUS 0 TWAIN_BOOST_DOWNLOAD_RESULT)
+        list(GET TWAIN_BOOST_DOWNLOAD_STATUS 1 TWAIN_BOOST_DOWNLOAD_MESSAGE)
+        if(NOT TWAIN_BOOST_DOWNLOAD_RESULT EQUAL 0)
             message(FATAL_ERROR
-                "Boost download failed.\n"
+                "Boost download failed: ${TWAIN_BOOST_DOWNLOAD_MESSAGE}\n"
                 "URL: ${TWAIN_BOOST_URL}\n"
-                "Destination: ${TWAIN_BOOST_DOWNLOADED_EXE}\n"
-                "Status: ${boost_download_status}\n"
-                "Message: ${boost_download_message}")
+                "Destination: ${TWAIN_BOOST_DOWNLOADED_EXE}")
         endif()
     else()
-        message(STATUS "Using existing Boost installer: ${TWAIN_BOOST_DOWNLOADED_EXE}")
+        message(STATUS "Using existing downloaded Boost installer: ${TWAIN_BOOST_DOWNLOADED_EXE}")
     endif()
 
     message(STATUS "Installing Boost to ${TWAIN_EFFECTIVE_BOOST_ROOT}")
-    message(STATUS "Boost installer log: ${TWAIN_BOOST_INSTALL_LOG}")
-
-    # Boost's Windows binary packages are Inno Setup installers.
     execute_process(
-        COMMAND
-            "${TWAIN_BOOST_DOWNLOADED_EXE}"
-            /VERYSILENT
-            /SUPPRESSMSGBOXES
-            /NORESTART
-            /NOCANCEL
-            /SP-
-            "/DIR=${TWAIN_EFFECTIVE_BOOST_ROOT}"
-            "/LOG=${TWAIN_BOOST_INSTALL_LOG}"
-        RESULT_VARIABLE boost_install_result
-    )
+        COMMAND "${TWAIN_BOOST_DOWNLOADED_EXE}"
+                /VERYSILENT
+                /SUPPRESSMSGBOXES
+                /NORESTART
+                /NOCANCEL
+                /SP-
+                "/DIR=${TWAIN_EFFECTIVE_BOOST_ROOT}"
+                "/LOG=${TWAIN_BOOST_INSTALL_LOG}"
+        RESULT_VARIABLE TWAIN_BOOST_INSTALL_RESULT)
 
-    if(NOT boost_install_result EQUAL 0)
+    if(NOT TWAIN_BOOST_INSTALL_RESULT EQUAL 0)
         message(FATAL_ERROR
-            "Boost installer failed with exit code ${boost_install_result}.\n"
+            "Boost installer failed with exit code ${TWAIN_BOOST_INSTALL_RESULT}.\n"
             "Installer: ${TWAIN_BOOST_DOWNLOADED_EXE}\n"
-            "Log: ${TWAIN_BOOST_INSTALL_LOG}\n"
-            "Try running the installer manually with the same command line.")
+            "Log: ${TWAIN_BOOST_INSTALL_LOG}")
     endif()
 
-    if(NOT EXISTS "${TWAIN_EFFECTIVE_BOOST_LIBDIR}")
-        message(FATAL_ERROR
-            "Boost installation completed, but the expected library directory was not found.\n"
-            "Expected: ${TWAIN_EFFECTIVE_BOOST_LIBDIR}\n"
-            "Installer log: ${TWAIN_BOOST_INSTALL_LOG}")
+    # Optional cleanup after a successful install.  These are OFF by default so
+    # the installer and log remain available for troubleshooting unless the user
+    # explicitly chooses to remove them.
+    if(TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL AND
+       EXISTS "${TWAIN_BOOST_DOWNLOADED_EXE}")
+        file(REMOVE "${TWAIN_BOOST_DOWNLOADED_EXE}")
+        message(STATUS "Deleted Boost installer: ${TWAIN_BOOST_DOWNLOADED_EXE}")
     endif()
 
-    # Avoid reinstalling on later Configure runs unless the user explicitly turns it back on.
+    if(TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL AND
+       EXISTS "${TWAIN_BOOST_INSTALL_LOG}")
+        file(REMOVE "${TWAIN_BOOST_INSTALL_LOG}")
+        message(STATUS "Deleted Boost installer log: ${TWAIN_BOOST_INSTALL_LOG}")
+    endif()
+
+    # Make a later CMake-Gui Configure less likely to re-run installers accidentally.
     set(TWAIN_AUTO_DOWNLOAD_BOOST OFF CACHE BOOL
-        "Automatically download and silently install the matching Boost binary package if missing"
+        "Automatically download/install the required Boost binary package if missing"
         FORCE)
 endif()
 
-# Make Boost discoverable without requiring user environment variables.
-set(BOOST_ROOT "${TWAIN_EFFECTIVE_BOOST_ROOT}")
-set(BOOST_INCLUDEDIR "${TWAIN_EFFECTIVE_BOOST_ROOT}")
-set(BOOST_LIBRARYDIR "${TWAIN_EFFECTIVE_BOOST_LIBDIR}")
-set(Boost_NO_SYSTEM_PATHS ON)
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
+if(NOT EXISTS "${TWAIN_BOOST_INCLUDE_DIR}/boost/version.hpp")
+    message(FATAL_ERROR "Boost headers were not found at: ${TWAIN_BOOST_INCLUDE_DIR}")
+endif()
 
-find_package(Boost REQUIRED)
+if(NOT EXISTS "${TWAIN_BOOST_LIBRARY_DIR}")
+    message(FATAL_ERROR "Boost library directory was not found at: ${TWAIN_BOOST_LIBRARY_DIR}")
+endif()
+
+# These are CMake variables, not machine-wide environment variables. CMake writes
+# the resulting include/library paths into the generated Visual Studio project.
+set(BOOST_ROOT "${TWAIN_EFFECTIVE_BOOST_ROOT}")
+set(BOOST_INCLUDEDIR "${TWAIN_BOOST_INCLUDE_DIR}")
+set(BOOST_LIBRARYDIR "${TWAIN_BOOST_LIBRARY_DIR}")
+
+message(STATUS "Boost root: ${TWAIN_EFFECTIVE_BOOST_ROOT}")
+message(STATUS "Boost include dir: ${TWAIN_BOOST_INCLUDE_DIR}")
+message(STATUS "Boost library dir: ${TWAIN_BOOST_LIBRARY_DIR}")
+if(TWAIN_EXISTING_BOOST_ROOT)
+    message(STATUS "Boost mode: existing user-supplied installation")
+else()
+    message(STATUS "Boost mode: TwainSave cache / auto-download")
+    if(EXISTS "${TWAIN_BOOST_DOWNLOADED_EXE}")
+        message(STATUS "Boost installer: ${TWAIN_BOOST_DOWNLOADED_EXE}")
+    endif()
+    if(EXISTS "${TWAIN_BOOST_INSTALL_LOG}")
+        message(STATUS "Boost installer log: ${TWAIN_BOOST_INSTALL_LOG}")
+    endif()
+endif()
 
 set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/capconst.h
@@ -309,11 +399,11 @@ add_executable(twainsave-opensource
 target_include_directories(twainsave-opensource PRIVATE
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib
     ${PROJECT_SOURCE_DIR}/c_cpp_includes
-    ${Boost_INCLUDE_DIRS}
+    ${TWAIN_BOOST_INCLUDE_DIR}
 )
 
 target_link_directories(twainsave-opensource PRIVATE
-    ${BOOST_LIBRARYDIR}
+    ${TWAIN_BOOST_LIBRARY_DIR}
 )
 
 target_compile_definitions(twainsave-opensource PRIVATE
@@ -325,7 +415,7 @@ target_compile_definitions(twainsave-opensource PRIVATE
 set_property(TARGET twainsave-opensource PROPERTY CXX_STANDARD 17)
 target_sources(twainsave-opensource PRIVATE ${PROJECT_SOURCE_DIR}/twainsave-opensource.rc)
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
+    target_compile_options(twainsave-opensource PRIVATE /Zc:__cplusplus)
 endif()
 add_custom_command(TARGET twainsave-opensource POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/twainsave.ini "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
@@ -333,3 +423,4 @@ add_custom_command(TARGET twainsave-opensource POST_BUILD
 add_custom_command(TARGET twainsave-opensource POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/twainsave-opensource.exe "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/twainsave_${CMAKE_GENERATOR_PLATFORM}.exe"
                    )
+
