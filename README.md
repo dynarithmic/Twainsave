@@ -76,147 +76,164 @@ will write the details to the file **details.log**
 ----------
 ----------
 
-# Building TwainSave from source
+## Building TwainSave from source
 
-If you want to build the source code, note that the building of the source is initially set up using [CMake](https://cmake.org/).  The Boost C++ library is required for the build, so the next section clarifies what is done to install the Boost library.
+TwainSave uses CMake and Microsoft Visual Studio for building the application from source.
 
----
+### Requirements
 
-## Boost Dependency Handling Changes
+Before building TwainSave, ensure the following software is installed:
 
-TwainSave now supports automatic Boost discovery, download, installation, and reuse through CMake.
+#### Microsoft Visual Studio
 
-Manual Boost installation and environment-variable setup are no longer required, as was the case with previous versions of the `CMakeList.txt` script.
+One of the following Visual Studio versions is required:
 
-### Automatic Boost Installation
+* Visual Studio 2019 Community or later
+* Visual Studio 2022 Community or later
+* Visual Studio 2026 Community or later
 
-When enabled, CMake can:
+Community editions may be downloaded free of charge from Microsoft.
 
-```text
-Download Boost binaries
-→ Install Boost silently
-→ Configure include/library paths
-→ Generate Visual Studio project files
-```
+During installation, select the **Desktop Development with C++** workload.
 
-Supported configurations:
+#### CMake
 
-* Visual Studio 2019 (MSVC 14.2)
-* Visual Studio 2022 (MSVC 14.3)
-* Win32
-* x64
+CMake version 3.25.1 or later is required.
 
----
+Download:
 
-## Shared Boost Installation Layout
+* https://cmake.org/download/
 
-Boost installations are now merged into a common installation root to reduce disk usage.
-
-Example:
+After installation, verify that CMake is available from a command prompt:
 
 ```text
-BoostDeps/
-    boost_1_91_0/
-        boost/
-        lib32-msvc-14.2/
-        lib64-msvc-14.2/
-        lib32-msvc-14.3/
-        lib64-msvc-14.3/
+cmake --version
 ```
 
-This means:
+### Boost Libraries
 
-* Boost headers are installed once.
-* Documentation is installed once.
-* Only compiler-specific libraries are added.
+TwainSave uses the Boost C++ Libraries.
 
-Win32 and x64 Boost libraries coexist in the same directory.
+The supplied CMake configuration can automatically download and install the required Boost binaries for the selected Visual Studio version and platform. No separate Boost installation is normally required.
 
-Visual Studio 2019 and Visual Studio 2022 libraries also coexist.
-
----
-
-## Existing Boost Installation Support
-
-Users may optionally point CMake to an existing Boost installation.
-
-Configuration variable:
+The default Boost download location is:
 
 ```text
-TWAIN_EXISTING_BOOST_ROOT
+C:\BoostDeps
 ```
 
-Example:
+### Building TwainSave
+
+The repository includes CMake presets and batch files that simplify the build process.
+
+#### Build all configurations for a Visual Studio version
+
+To build both 32-bit and 64-bit versions using a specific Visual Studio compiler:
 
 ```text
-TWAIN_EXISTING_BOOST_ROOT=D:/boost_1_90_0
+build_all_vs2019.bat
+build_all_vs2022.bat
+build_all_vs2026.bat
 ```
 
-The existing installation must follow the same directory layout as the automatically downloaded Boost installation.
+Each batch file:
 
-Minimum required layout:
+1. Configures the required CMake presets.
+2. Downloads and installs Boost automatically if necessary.
+3. Builds both Win32 and x64 versions.
+4. Produces both Debug and MinSizeRel configurations.
+
+#### Build a single platform
+
+The following batch files build a single platform:
 
 ```text
-<boost_root>/
-    boost/
-    lib32-msvc-<toolset>/
-    lib64-msvc-<toolset>/
+build_vs2019-x32.bat
+build_vs2019-x64.bat
+
+build_vs2022-x32.bat
+build_vs2022-x64.bat
+
+build_vs2026-x32.bat
+build_vs2026-x64.bat
 ```
 
-Example:
+Each batch file configures the corresponding CMake preset and builds:
 
 ```text
-D:/boost_1_90_0/
-    boost/
-    lib32-msvc-14.3/
-    lib64-msvc-14.3/
+Debug
+MinSizeRel
 ```
 
-Only the library directory required for the current build must exist.
+### Using CMake Directly
+
+Advanced users may invoke CMake directly.
 
 Examples:
 
-* VS2022 x64 → `lib64-msvc-14.3`
-* VS2022 Win32 → `lib32-msvc-14.3`
-* VS2019 x64 → `lib64-msvc-14.2`
-* VS2019 Win32 → `lib32-msvc-14.2`
-
-If the required library directory is missing, CMake will stop during Configure and report the missing path.
-
----
-
-## Optional Cleanup
-
-After a successful automatic installation, CMake may optionally remove:
-
-* downloaded Boost installer (`.exe`)
-* installer log file
-
-Configuration options:
+#### Visual Studio 2022 x64
 
 ```text
-TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL
-TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL
+cmake --preset vs2022-x64
+cmake --build --preset vs2022-x64-release
 ```
 
-This helps reduce disk usage after Boost installation completes.
+#### Visual Studio 2022 Win32
 
----
+```text
+cmake --preset vs2022-x32
+cmake --build --preset vs2022-x32-release
+```
 
-## Notes
+Equivalent presets exist for Visual Studio 2019 and Visual Studio 2026.
 
-* Environment variables are not required.
-* Boost include/library paths are written directly into generated Visual Studio project files.
-* Reconfiguration is typically only required when changing:
+### Build Output
 
-  * Visual Studio version
-  * target architecture
-  * Boost version
-  * Boost installation location
+After a successful build, the executable files are placed in the selected configuration directory.
 
----------
-## To-do list
+For 32-bit builds:
 
-- Implement the **--verboselog** option.
+```text
+twainsave-opensource.exe
+twainsave.exe
+```
+
+For 64-bit builds:
+
+```text
+twainsave-opensource.exe
+twainsave64.exe
+```
+
+The `twainsave.exe` and `twainsave64.exe` files are convenience copies of the main executable and exist to preserve compatibility with existing documentation and command-line examples.
+
+### Troubleshooting
+
+#### Boost download fails
+
+If the automatic Boost download fails:
+
+1. Verify your Internet connection.
+2. Re-run the build command.
+3. Ensure the latest version of CMake is installed.
+4. Delete the Boost cache directory if a partially downloaded installer exists:
+
+```text
+C:\BoostDeps
+```
+
+Then run the build again.
+
+#### CMake cannot find Visual Studio
+
+Verify that:
+
+* Visual Studio is installed.
+* The Desktop Development with C++ workload is installed.
+* The selected Visual Studio version matches the batch file or preset being used.
+
+#### Windows SDK errors
+
+If Visual Studio reports missing Windows SDK components, open the Visual Studio Installer and update the Desktop Development with C++ workload to include the Windows SDK.
 
 

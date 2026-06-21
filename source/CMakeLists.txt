@@ -423,6 +423,7 @@ endif()
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(TWAINSAVE_EXE_NAME "twainsave64.exe")
+    set(TWAINSAVE_EXE_NAME2 "twainsave64.exe")
 else()
     set(TWAINSAVE_EXE_NAME "twainsave.exe")
 endif()
@@ -431,6 +432,9 @@ add_custom_command(TARGET twainsave-opensource POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/twainsave-opensource.exe
         ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/${TWAINSAVE_EXE_NAME}
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/twainsave-opensource.exe
+      ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/${TWAINSAVE_EXE_NAME2}
 )
 
 add_custom_command(TARGET twainsave-opensource POST_BUILD
