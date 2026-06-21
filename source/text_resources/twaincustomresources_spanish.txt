@@ -1,0 +1,24 @@
+20000 TwainSave se ejecutó con éxito.
+20001 No se especificó el nombre del archivo. La línea de comandos de TwainSave carece de la opción --filename.
+20002 No se pudo iniciar el sistema TWAIN.
+20003 No se pudo iniciar el dispositivo TWAIN. Si se usó el comando --selectdefault para abrir el dispositivo TWAIN, el dispositivo predeterminado (controlador TWAIN o hardware) está defectuoso.
+20004 No se pudo guardar el archivo correctamente.
+20005 Argumento(s) de línea de comandos incorrecto(s) o ilegal(es).
+20006 El usuario canceló TwainSave al no seleccionar un dispositivo.
+20007 Error al iniciar el proceso de adquisición desde el dispositivo.
+20008 El dispositivo no soporta imágenes en Blanco/Negro, Escala de grises, RGB, Paleta, CMY o CMYK.
+20009 Consola no disponible. Use la opción -noconsole.
+20010 TwainSave ha superado el tiempo de espera debido a que no se colocó papel en el alimentador dentro del tiempo especificado. Consulte --nouiwait y --nouiwaittime para más información.
+20011 No se pudo habilitar la interfaz de usuario de TwainSave.
+20012 TwainSave salió debido a que el archivo ya existe. Este código de retorno ocurrirá si se especifica --overwritemode 2.
+20013 El dispositivo no soporta el tipo de archivo modo 2 especificado. Consulte --filetype para tipos de archivo modo 2.
+20014 El dispositivo no soporta el modo --uionly.
+20015 No se encontró el archivo de comandos especificado por -@.
+20016 No se pudo abrir el archivo de comandos especificado por -@.
+20017 Se especificó un --filetype inválido.
+20018 Se especificó un --unitofmeasure inválido.
+20019 Se especificó un --papersize inválido.
+20020 Se especificó un --color inválido.
+20021 Se especificó una --orientation inválida.
+20022 Se especificó un --jobcontrol inválido.
+20023 TwainSave devolvió código:
