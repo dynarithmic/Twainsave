@@ -8,7 +8,7 @@ if(POLICY CMP0167)
     cmake_policy(SET CMP0167 OLD)
 endif()
 
-project(twainsave-opensource VERSION 0.1.0 LANGUAGES C CXX)
+project(twainsave-opensource VERSION 1.4.1 LANGUAGES C CXX)
 
 # -----------------------------------------------------------------------------
 # Boost setup
@@ -67,14 +67,17 @@ endif()
 # Visual Studio / MSVC Boost binary mapping:
 #   VS 2019 v142 => msvc-14.2
 #   VS 2022 v143 => msvc-14.3
+#   VS 2026 v145 => msvc-14.5
 if(MSVC_TOOLSET_VERSION MATCHES "^143")
     set(TWAIN_BOOST_MSVC "14.3")
 elseif(MSVC_TOOLSET_VERSION MATCHES "^142")
     set(TWAIN_BOOST_MSVC "14.2")
+elseif(MSVC_TOOLSET_VERSION MATCHES "^145")
+    set(TWAIN_BOOST_MSVC "14.5")
 else()
     message(FATAL_ERROR
         "Unsupported MSVC toolset version '${MSVC_TOOLSET_VERSION}'. "
-        "Expected v142 or v143.")
+        "Expected v142, v143, or v145.")
 endif()
 
 # Platform mapping. CMAKE_SIZEOF_VOID_P is valid after project() enables C/CXX.
@@ -417,10 +420,20 @@ target_sources(twainsave-opensource PRIVATE ${PROJECT_SOURCE_DIR}/twainsave-open
 if(MSVC)
     target_compile_options(twainsave-opensource PRIVATE /Zc:__cplusplus)
 endif()
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(TWAINSAVE_EXE_NAME "twainsave64.exe")
+else()
+    set(TWAINSAVE_EXE_NAME "twainsave.exe")
+endif()
+
+add_custom_command(TARGET twainsave-opensource POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/twainsave-opensource.exe
+        ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/${TWAINSAVE_EXE_NAME}
+)
+
 add_custom_command(TARGET twainsave-opensource POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/twainsave.ini "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
-                   )
-add_custom_command(TARGET twainsave-opensource POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/twainsave-opensource.exe "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/twainsave_${CMAKE_GENERATOR_PLATFORM}.exe"
                    )
 
