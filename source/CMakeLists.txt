@@ -421,6 +421,11 @@ if(MSVC)
     target_compile_options(twainsave-opensource PRIVATE /Zc:__cplusplus)
 endif()
 
+set_property(TARGET twainsave-opensource PROPERTY
+    MSVC_RUNTIME_LIBRARY
+    "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<NOT:$<CONFIG:Debug>>:MultiThreaded>"
+)
+
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(TWAINSAVE_EXE_NAME "twainsave64.exe")
     set(TWAINSAVE_EXE_NAME2 "twainsave64.exe")
