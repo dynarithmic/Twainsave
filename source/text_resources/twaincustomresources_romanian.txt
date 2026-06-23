@@ -22,3 +22,5 @@
 20021 A fost specificat un --orientation invalid.  
 20022 A fost specificat un --jobcontrol invalid.
 20023 TwainSave a returnat codul:
+20024 Eroare broker Twainsave  
+20025 DLL-ul DTWAIN nu a fost găsit sau nu a putut fi încărcat.

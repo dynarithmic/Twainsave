@@ -22,3 +22,5 @@
 20021 Se especificó una --orientation inválida.
 20022 Se especificó un --jobcontrol inválido.
 20023 TwainSave devolvió código:
+20024 Error de corredor Twainsave 20024
+20025 No se encontró o no se pudo cargar la DLL de DTWAIN.

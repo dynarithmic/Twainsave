@@ -22,3 +22,5 @@
 20021 Ungültiger --orientation wurde angegeben
 20022 Ungültiger --jobcontrol wurde angegeben
 20023 TwainSave hat den Code zurückgegeben:
+20024 Twainsave Broker-Fehler
+20025 DTWAIN DLL nicht gefunden oder konnte nicht geladen werden.

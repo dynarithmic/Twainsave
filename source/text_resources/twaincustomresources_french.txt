@@ -22,3 +22,5 @@
 20021 --orientation spécifié non valide
 20022 --jobcontrol spécifié non valide
 20023 TwainSave a retourné le code :
+20024 Erreur du courtier Twainsave  
+20025 DLL DTWAIN introuvable ou n’a pas pu être chargée.

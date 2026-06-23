@@ -276,6 +276,45 @@ else()
     endif()
 endif()
 
+set(TEXT_RESOURCE_FILES
+  ${PROJECT_SOURCE_DIR}/text_resources/dtwain32.ini
+  ${PROJECT_SOURCE_DIR}/text_resources/dtwain64.ini
+  ${PROJECT_SOURCE_DIR}/text_resources/twaininfo.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainlanguage.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainsave.ini
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_dutch.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_english.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_french.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_german.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_greek.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_italian.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_japanese.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_korean.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_portuguese.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_portuguese_br.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_romanian.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_russian.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_simplified_chinese.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_spanish.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_traditional_chinese.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_turkish.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_dutch.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_english.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_french.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_german.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_greek.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_italian.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_japanese.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_korean.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_portuguese.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_portuguese_br.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_romanian.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_russian.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_simplified_chinese.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_spanish.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_traditional_chinese.txt
+)
+
 set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/capconst.h
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/dtwain.h
@@ -403,6 +442,12 @@ target_include_directories(twainsave-opensource PRIVATE
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib
     ${PROJECT_SOURCE_DIR}/c_cpp_includes
     ${TWAIN_BOOST_INCLUDE_DIR}
+)
+
+target_sources(twainsave-opensource PRIVATE ${TEXT_RESOURCE_FILES})
+
+source_group(
+    "Text Resources" FILES ${TEXT_RESOURCE_FILES}
 )
 
 target_link_directories(twainsave-opensource PRIVATE

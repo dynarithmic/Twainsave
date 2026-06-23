@@ -22,3 +22,5 @@
 20021 指定了无效的 --orientation。
 20022 指定了无效的 --jobcontrol。
 20023 TwainSave 返回代码：
+20024 Twainsave 经纪人错误
+20025 未找到 DTWAIN DLL 或无法加载。
