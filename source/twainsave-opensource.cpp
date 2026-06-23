@@ -57,7 +57,10 @@ int main(int argc, char *argv[])
         ShowWindow(GetConsoleWindow(), SW_SHOW);
         // display a pause message
         std::string s = "TwainSave returned code: " + std::to_string(retcode);
-        s += " (" + allOptions.m_ReturnCodesMap[retcode] + ")\nPress any key to continue...";
+        std::string s2 = ": " + std::string(DTWAIN_DLLNAME);
+        if (retcode != RETURN_DTWAINDLL_NOT_FOUND)
+            s2.clear();
+        s += " (" + allOptions.m_ReturnCodesMap[retcode] + s2 + ")\nPress any key to continue...";
         DWORD d;
         WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
         char buffer[10];
@@ -67,7 +70,10 @@ int main(int argc, char *argv[])
     {
 		ShowWindow(GetConsoleWindow(), SW_SHOW);
         std::string s = "TwainSave returned code: " + std::to_string(retcode);
-        s += " (" + allOptions.m_ReturnCodesMap[retcode] + ")";
+        std::string s2 = ": " + std::string(DTWAIN_DLLNAME);
+        if (retcode != RETURN_DTWAINDLL_NOT_FOUND)
+            s2.clear();
+        s += " (" + allOptions.m_ReturnCodesMap[retcode] + s2 + ")\nPress any key to continue...";
         std::cout << s;
     }
     return retcode;
