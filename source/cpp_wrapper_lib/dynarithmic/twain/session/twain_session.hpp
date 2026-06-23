@@ -318,6 +318,7 @@ namespace dynarithmic
             std::unordered_map<std::string, source_status> m_source_status_map;
             std::unordered_map<std::string, DTWAIN_SOURCE> m_source_name_to_handle;
             std::set<twain_source*> m_selected_sources;
+            int m_last_error = 0;
         #ifdef DTWAIN_CPP_NOIMPORTLIB
             HMODULE m_DynamicHandle = 0;
             bool    m_bCacheHandle = true;

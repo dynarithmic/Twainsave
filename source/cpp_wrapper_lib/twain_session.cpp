@@ -52,6 +52,7 @@ namespace dynarithmic
 
         bool twain_session::start_minimal(bool bCleanStart)
         {
+            m_last_error = 0;
             #ifdef DTWAIN_CPP_NOIMPORTLIB
             if (bCleanStart && !get_dllhandle())
             {
@@ -63,7 +64,10 @@ namespace dynarithmic
                 if (hDTwainModule)
                     set_dllhandle(hDTwainModule);
                 else
+                {
+                    m_error_logger.add_error(DTWAIN_ERR_DTWAINDLL_LOADERROR);
                     return false;
+                }
             }
             #endif 
             #ifdef DTWAIN_USELOADEDLIB
@@ -104,57 +108,7 @@ namespace dynarithmic
             bool bStartMinimal = start_minimal(bCleanStart);
             if (!bStartMinimal)
                 return false;
-#if 0
-#ifdef DTWAIN_CPP_NOIMPORTLIB
-            if (bCleanStart && !get_dllhandle())
-            {
-#ifndef DTWAIN_USELOADEDLIB
-                HMODULE hDTwainModule = ::LoadLibraryA(DTWAIN_DLLNAME);
-#else
-                HMODULE hDTwainModule = ::GetModuleHandleA(DTWAIN_DLLNAME);
-#endif
-                if (hDTwainModule)
-                    set_dllhandle(hDTwainModule);
-                else
-                    return false;
-            }
-#endif 
-#ifdef DTWAIN_USELOADEDLIB
-            return true;
-#else
-            m_source_detail_map.clear();
-            m_error_logger.clear();
-            m_error_logger.set_maxsize(m_twain_characteristics.get_errorlogger_details().get_maxsize());
 
-            if (bCleanStart && !API_INSTANCE DTWAIN_IsTwainAvailable())
-            {
-                m_error_logger.add_error(DTWAIN_ERR_TWAIN_NOT_INSTALLED);
-                return false;
-            }
-
-            API_INSTANCE DTWAIN_SetResourcePathA(m_twain_characteristics.get_resource_directory().c_str());
-            if (!API_INSTANCE DTWAIN_IsInitialized())
-            {
-                if (bCleanStart)
-                {
-                    m_bOCRStarted = false;
-                    m_Handle = API_INSTANCE DTWAIN_SysInitialize();
-                    if (m_Handle)
-                    {
-                        if (!API_INSTANCE DTWAIN_InitOCRInterface())
-                            m_error_logger.add_error(API_INSTANCE DTWAIN_GetLastError());
-                        else
-                            m_bOCRStarted = true;
-                    }
-                }
-                if (!m_Handle)
-                {
-                    m_error_logger.add_error(DTWAIN_ERR_NOT_INITIALIZED);
-                    return false;
-                }
-            }
-        #endif
-    #endif
             API_INSTANCE DTWAIN_SetErrorCallback64(error_callback_proc, PtrToInt64(this)); 
             API_INSTANCE DTWAIN_LoadCustomStringResourcesA(m_twain_characteristics.get_language().c_str());
 
