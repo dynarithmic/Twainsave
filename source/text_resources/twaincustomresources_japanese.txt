@@ -21,6 +21,8 @@
 20020 無効な--colorが指定されました。
 20021 無効な--orientationが指定されました。
 20022 無効な--jobcontrolが指定されました。
-20023 TwainSaveが返したコード:
+20023 
 20024 Twainsave ブローカーエラー
 20025 DTWAIN DLL が見つからないか、読み込めませんでした。
+20026 破損しているか無効な twaininfo.txt ファイルです。
+20027 dtwain32.ini または dtwain64.ini ファイルを見つけるか開くことができませんでした。

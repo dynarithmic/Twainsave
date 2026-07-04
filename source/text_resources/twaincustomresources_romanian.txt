@@ -21,6 +21,8 @@
 20020 A fost specificat un --color invalid.  
 20021 A fost specificat un --orientation invalid.  
 20022 A fost specificat un --jobcontrol invalid.
-20023 TwainSave a returnat codul:
-20024 Eroare broker Twainsave  
+20023 
+20024 Eroare broker Twainsave
 20025 DLL-ul DTWAIN nu a fost găsit sau nu a putut fi încărcat.
+20026 Fișierul twaininfo.txt este corupt sau invalid.
+20027 Nu s-a putut găsi sau deschide fișierul dtwain32.ini sau dtwain64.ini.

@@ -21,6 +21,8 @@
 20020 Ungültiger --color wurde angegeben
 20021 Ungültiger --orientation wurde angegeben
 20022 Ungültiger --jobcontrol wurde angegeben
-20023 TwainSave hat den Code zurückgegeben:
+20023 
 20024 Twainsave Broker-Fehler
-20025 DTWAIN DLL nicht gefunden oder konnte nicht geladen werden.
+20025 DTWAIN-DLL nicht gefunden oder konnte nicht geladen werden.
+20026 Beschädigte oder ungültige Datei twaininfo.txt.
+20027 dtwain32.ini- oder dtwain64.ini-Datei konnte nicht gefunden oder geöffnet werden.

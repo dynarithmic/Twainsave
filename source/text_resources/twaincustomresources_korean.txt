@@ -21,6 +21,8 @@
 20020 잘못된 --color가 지정되었습니다.
 20021 잘못된 --orientation이 지정되었습니다.
 20022 잘못된 --jobcontrol이 지정되었습니다.
-20023 TwainSave 반환 코드:
-20024 트웨인세이브 브로커 오류
+20023 
+20024 Twainsave 브로커 오류
 20025 DTWAIN DLL을 찾을 수 없거나 로드할 수 없습니다.
+20026 손상되었거나 잘못된 twaininfo.txt 파일입니다.
+20027 dtwain32.ini 또는 dtwain64.ini 파일을 찾거나 열 수 없습니다.

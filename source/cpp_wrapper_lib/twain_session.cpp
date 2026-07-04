@@ -84,7 +84,10 @@ namespace dynarithmic
                 if (bCleanStart)
                 {
                     m_bOCRStarted = false;
-                    m_Handle = API_INSTANCE DTWAIN_SysInitialize();
+                    if ( m_bInitNoBlocking )
+                        m_Handle = API_INSTANCE DTWAIN_SysInitializeNoBlockingEx(false);
+                    else 
+                        m_Handle = API_INSTANCE DTWAIN_SysInitialize();
                     if (m_Handle)
                     {
                         if (!API_INSTANCE DTWAIN_InitOCRInterface())
@@ -95,7 +98,7 @@ namespace dynarithmic
                 }
                 if (!m_Handle)
                 {
-                    m_error_logger.add_error(DTWAIN_ERR_NOT_INITIALIZED);
+                    m_error_logger.add_error(API_INSTANCE DTWAIN_GetLastError());
                     return false;
                 }
             }

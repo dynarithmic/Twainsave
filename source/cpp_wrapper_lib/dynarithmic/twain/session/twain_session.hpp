@@ -304,6 +304,7 @@ namespace dynarithmic
             bool m_bStarted = false;
             bool m_bOCRStarted = false;
             bool m_bTripletsNotify = false;
+            bool m_bInitNoBlocking = false;
             std::string m_dsm_path;
             std::string m_long_name;
             std::string m_short_name;
@@ -629,6 +630,9 @@ namespace dynarithmic
             ///
             /// @returns reference to the object that identifies this session by TWAIN.
             twain_session& enable_triplets_notification(bool bEnable);
+
+            twain_session& init_noblocking(bool bNoBlocking) { m_bInitNoBlocking = bNoBlocking; return *this; }
+            bool is_initnoblocking() const { return m_bInitNoBlocking; }
 
             /// Returns the complete object that represents this TWAIN session's identity.
             ///

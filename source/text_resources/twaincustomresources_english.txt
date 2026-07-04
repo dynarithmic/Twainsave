@@ -21,7 +21,10 @@
 20020 Invalid --color specified.
 20021 Invalid --orientation specified.
 20022 Invalid --jobcontrol specified.
-20023 TwainSave returned code:
+20023 
 20024 Twainsave broker error
 20025 DTWAIN DLL not found or could not be loaded.
+20026 Corrupted or invalid twaininfo.txt file.
+20027 Could not find or open dtwain32.ini or dtwain64.ini file.
+
 

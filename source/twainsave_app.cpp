@@ -1185,6 +1185,7 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
     sessionToUse->set_app_info(appInfo);
     sessionToUse->set_resource_directory(GetTwainSaveExecutionPath());
 
+    sessionToUse->init_noblocking(true);
     // Start the TWAIN session
     if ( !pSession )
         sessionToUse->start();
@@ -1266,14 +1267,24 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
         if (!all_errors.empty())
         {
             auto last_error = all_errors.back();
-            if (last_error == DTWAIN_ERR_DTWAINDLL_LOADERROR)
+            switch (last_error)
             {
-                s_options.set_return_code(RETURN_DTWAINDLL_NOT_FOUND);
-                return RETURN_DTWAINDLL_NOT_FOUND;
+                case DTWAIN_ERR_DTWAINDLL_LOADERROR:
+                    s_options.set_return_code(RETURN_DTWAINDLL_NOT_FOUND);
+                break;
+                case DTWAIN_ERR_CRC_CHECK:
+                case DTWAIN_ERR_RESOURCES_BAD_VERSION:
+                    s_options.set_return_code(RETURN_TWAININFO_FILE_ERROR);
+                break;
+                case DTWAIN_ERR_INI32_NOT_FOUND:
+                case DTWAIN_ERR_INI64_NOT_FOUND:
+                    s_options.set_return_code(RETURN_DTWAININI_FILE_ERROR);
+                break;
+                default:
+                    s_options.set_return_code(RETURN_TWAIN_INIT_ERROR);
             }
+            return s_options.get_return_code();
         }
-        s_options.set_return_code(RETURN_TWAIN_INIT_ERROR);
-        return RETURN_TWAIN_INIT_ERROR;
     }
 
     if (g_source->is_open())

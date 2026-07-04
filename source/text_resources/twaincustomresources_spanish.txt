@@ -21,6 +21,8 @@
 20020 Se especificó un --color inválido.
 20021 Se especificó una --orientation inválida.
 20022 Se especificó un --jobcontrol inválido.
-20023 TwainSave devolvió código:
-20024 Error de corredor Twainsave 20024
-20025 No se encontró o no se pudo cargar la DLL de DTWAIN.
+20023 
+20024 Error del corredor de Twainsave
+20025 No se encontró el DLL de DTWAIN o no se pudo cargar.
+20026 Archivo twaininfo.txt corrupto o inválido.
+20027 No se pudo encontrar o abrir el archivo dtwain32.ini o dtwain64.ini.

@@ -21,6 +21,8 @@
 20020 Ongeldige --color is opgegeven.
 20021 Ongeldige --orientation is opgegeven.
 20022 Ongeldige --jobcontrol is opgegeven.
-20023 TwainSave geretourneerde code:
+20023 
 20024 Twainsave broker fout
 20025 DTWAIN DLL niet gevonden of kon niet worden geladen.
+20026 Beschadigd of ongeldig twaininfo.txt-bestand.
+20027 Kon dtwain32.ini- of dtwain64.ini-bestand niet vinden of openen.

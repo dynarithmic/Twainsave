@@ -21,6 +21,8 @@
 20020 --color spécifié non valide
 20021 --orientation spécifié non valide
 20022 --jobcontrol spécifié non valide
-20023 TwainSave a retourné le code :
-20024 Erreur du courtier Twainsave  
-20025 DLL DTWAIN introuvable ou n’a pas pu être chargée.
+20023 
+20024 Erreur du courtier Twainsave
+20025 DLL DTWAIN introuvable ou impossible à charger.
+20026 Fichier twaininfo.txt corrompu ou invalide.
+20027 Impossible de trouver ou d’ouvrir le fichier dtwain32.ini ou dtwain64.ini.

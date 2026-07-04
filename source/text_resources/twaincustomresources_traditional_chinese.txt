@@ -21,6 +21,8 @@
 20020 指定了無效的 --color。
 20021 指定了無效的 --orientation。
 20022 指定了無效的 --jobcontrol。
-20023 TwainSave 返回代碼：
-20024 Twainsave 經紀人錯誤
-20025 找不到 DTWAIN DLL 或無法載入。
+20023 
+20024 Twainsave 代理錯誤
+20025 找不到或無法載入 DTWAIN DLL。
+20026 twaininfo.txt 檔案已損毀或無效。
+20027 找不到或無法開啟 dtwain32.ini 或 dtwain64.ini 檔案。
