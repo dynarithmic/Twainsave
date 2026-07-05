@@ -1337,6 +1337,21 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
     return 0;
 }
 
+void twainsave_app::load_resources_from_rc()
+{
+    char szBuffer[DTWAIN_USERRES_MAXSIZE + 1]{};
+    HMODULE hMod = GetModuleHandleA(NULL);
+    if (!hMod)
+        return;
+
+    // Load the error strings
+    for (int curError = 0; curError < RETURN_CODE_LAST; ++curError)
+    {
+        if (::LoadStringA(hMod, curError, szBuffer, DTWAIN_USERRES_MAXSIZE))
+            s_options.m_StandardReturnCodesMap[curError] = szBuffer;
+    }
+}
+
 void twainsave_app::load_custom_resources_from_ini()
 {
     // Load the resources

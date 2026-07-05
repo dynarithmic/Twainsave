@@ -131,6 +131,7 @@ struct scanner_options
     std::string m_strLanguage;
     std::unordered_map<stringview, std::pair<dynarithmic::twain::filetype_value::value_type, dynarithmic::twain::compression_value::value_type>> m_MapMode2Map;
     std::map<int, std::string> m_ReturnCodesMap;
+    std::map<int, std::string> m_StandardReturnCodesMap;
     int twainsave_return_value;
     std::string m_strConfigFile;
     struct TwainDialogConfig
@@ -261,6 +262,7 @@ class twainsave_app
         twainsave_app();
         int start_acquisitions(dynarithmic::twain::twain_session* pSession = nullptr);
         void load_custom_resources_from_ini();
+        void load_resources_from_rc();
         void reload_custom_resources();
         scanner_options& get_scanner_options() { return s_options; }
 	    parse_return_type parse_options(int argc, char* argv[]);

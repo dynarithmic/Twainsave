@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 {
     twainsave_app ts_app;
     ts_app.load_custom_resources_from_ini();
+    ts_app.load_resources_from_rc();
     auto retval = ts_app.parse_options(argc, argv);
 	auto& allOptions = ts_app.get_scanner_options();
 
@@ -52,6 +53,11 @@ int main(int argc, char *argv[])
         }
     }
     auto retcode = allOptions.get_return_code();
+    std::string retcode_error = allOptions.m_ReturnCodesMap[retcode];
+    if (retcode_error.empty())
+        retcode_error = allOptions.m_StandardReturnCodesMap[retcode];
+    if (retcode_error.empty())
+        retcode_error = "Unknown error. ";
     if (allOptions.m_bNoConsole && !allOptions.m_bNoPause)
     {
         ShowWindow(GetConsoleWindow(), SW_SHOW);
@@ -60,7 +66,7 @@ int main(int argc, char *argv[])
         std::string s2 = ": " + std::string(DTWAIN_DLLNAME);
         if (retcode != RETURN_DTWAINDLL_NOT_FOUND)
             s2.clear();
-        s += " (" + allOptions.m_ReturnCodesMap[retcode] + s2 + ")\nPress any key to continue...";
+        s += " (" + retcode_error + s2 + ")\nPress any key to continue...";
         DWORD d;
         WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
         char buffer[10];
@@ -73,7 +79,7 @@ int main(int argc, char *argv[])
         std::string s2 = ": " + std::string(DTWAIN_DLLNAME);
         if (retcode != RETURN_DTWAINDLL_NOT_FOUND)
             s2.clear();
-        s += " (" + allOptions.m_ReturnCodesMap[retcode] + s2 + ")\nPress any key to continue...";
+        s += " (" + retcode_error + ")\nPress any key to continue...";
         std::cout << s;
     }
     return retcode;
