@@ -52,11 +52,7 @@ OF THIRD PARTY RIGHTS.
 #include "twainsave.h"
 #include "twainsave_broker.h"
 #include "twainsave_opensource.h"
-
-std::string generate_details(dynarithmic::twain::twain_session* pSession = nullptr);
-std::string generate_dtwainversion_info(dynarithmic::twain::twain_session* pSession = nullptr);
-std::string generate_productnames(dynarithmic::twain::twain_session* pSession = nullptr);
-
+#include "get_dll_version.h"
 struct scanner_options
 {
     std::string m_filetype;
@@ -262,10 +258,12 @@ class twainsave_app
         twainsave_app();
         int start_acquisitions(dynarithmic::twain::twain_session* pSession = nullptr);
         void load_custom_resources_from_ini();
+        std::pair<bool, int> check_dtwaindll_version(VersionNumbers& verNumbers);
         void load_resources_from_rc();
         void reload_custom_resources();
         scanner_options& get_scanner_options() { return s_options; }
 	    parse_return_type parse_options(int argc, char* argv[]);
         parse_return_type parse_config_options(const std::string& filename);
+        void load_language_strings();
 };
 #endif

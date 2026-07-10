@@ -313,6 +313,7 @@ set(TEXT_RESOURCE_FILES
   ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_simplified_chinese.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_spanish.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_traditional_chinese.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_turkish.txt
 )
 
 set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
@@ -336,6 +337,7 @@ set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/twainsave_app.h
         ${PROJECT_SOURCE_DIR}/twainsave.h
         ${PROJECT_SOURCE_DIR}/twainsave_verinfo.h
+        ${PROJECT_SOURCE_DIR}/get_dll_version.h
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/acquire_characteristics.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/capability_interface.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/compiler_details.hpp
@@ -435,6 +437,7 @@ add_executable(twainsave-opensource
     ${PROJECT_SOURCE_DIR}/twainsave_broker.cpp
     ${PROJECT_SOURCE_DIR}/dtwimpl.cpp
     ${PROJECT_SOURCE_DIR}/commandline.cpp
+    ${PROJECT_SOURCE_DIR}/get_dll_version.cpp
     ${HEADER_FILES}
 )
 
@@ -445,6 +448,8 @@ target_include_directories(twainsave-opensource PRIVATE
 )
 
 target_sources(twainsave-opensource PRIVATE ${TEXT_RESOURCE_FILES})
+
+target_link_libraries(twainsave-opensource PRIVATE Version)
 
 source_group(
     "Text Resources" FILES ${TEXT_RESOURCE_FILES}

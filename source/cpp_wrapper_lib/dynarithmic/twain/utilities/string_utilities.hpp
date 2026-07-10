@@ -24,6 +24,10 @@ OF THIRD PARTY RIGHTS.
 #include <string>
 #include <sstream>
 #include <numeric>
+#include <iterator>
+#include <type_traits>
+#include <initializer_list>
+#include <cstddef>
 
 #ifdef _MSC_VER
     #pragma warning( push )  // Stores the current warning state for every warning.
@@ -149,19 +153,76 @@ namespace dynarithmic
             return ltrim_copy(rtrim_copy(str));
         }
 
-        template <typename Container>
-        std::string join(const Container& ct, std::string separator)
+        template <typename StringType, typename Container>
+        StringType join(const Container& c, const StringType& separator)
         {
-            return std::accumulate(ct.begin(), ct.end(), std::string(),
-                [&](const auto& str, typename Container::value_type val)
+            using CharT = typename StringType::value_type;
+            using Stream = std::basic_ostringstream<CharT>;
+
+            Stream os;
+
+            auto it = std::begin(c);
+            const auto last = std::end(c);
+
+            if (it != last)
+            {
+                os << *it;
+                ++it;
+            }
+
+            while (it != last)
+            {
+                os << separator;
+                os << *it;
+                ++it;
+            }
+
+            return os.str();
+        }
+
+        template <typename StringType, typename Container>
+        StringType join(const Container& c, const typename StringType::value_type* separator)
+        {
+            return join<StringType>(c, StringType(separator));
+        }
+
+        template <typename StringType>
+        StringType format_percent_args(const StringType& fmt, std::initializer_list<StringType> args)
+        {
+            using char_type = typename StringType::value_type;
+
+            std::vector<StringType> values(args);
+
+            StringType result;
+            result.reserve(fmt.size());
+
+            for (std::size_t i = 0; i < fmt.size(); ++i)
+            {
+                if (fmt[i] == char_type('%') && i + 1 < fmt.size())
                 {
-                    std::ostringstream strm;
-                    if (!str.empty())
-                        strm << str << separator << val;
-                    else
-                        strm << val;
-                    return strm.str();
-                });
+                    std::size_t j = i + 1;
+                    std::size_t index = 0;
+
+                    while (j < fmt.size() &&
+                        fmt[j] >= char_type('0') &&
+                        fmt[j] <= char_type('9'))
+                    {
+                        index = (index * 10) + static_cast<std::size_t>(fmt[j] - char_type('0'));
+                        ++j;
+                    }
+
+                    if (index >= 1 && index <= values.size())
+                    {
+                        result += values[index - 1];
+                        i = j - 1;
+                        continue;
+                    }
+                }
+
+                result += fmt[i];
+            }
+
+            return result;
         }
     }
 }

@@ -634,6 +634,8 @@ namespace dynarithmic
             twain_session& init_noblocking(bool bNoBlocking) { m_bInitNoBlocking = bNoBlocking; return *this; }
             bool is_initnoblocking() const { return m_bInitNoBlocking; }
 
+            bool check_dtwaindll_version();
+
             /// Returns the complete object that represents this TWAIN session's identity.
             ///
             /// @returns reference to the object that identifies this session by TWAIN.

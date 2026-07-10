@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 #include <boost/algorithm/string/join.hpp>
+#include "generate_details.h"
+
 using namespace dynarithmic::twain;
 
 std::string generate_details(dynarithmic::twain::twain_session* pSession)
@@ -13,7 +15,7 @@ std::string generate_details(dynarithmic::twain::twain_session* pSession)
     twain_session ts(startup_mode::none);
     if ( !pSession )
         pSession = &ts;
-    pSession->start();
+    start_twain_session(*pSession);
     return pSession->get_details(details_info());
 }
 
@@ -22,8 +24,14 @@ std::string generate_dtwainversion_info(dynarithmic::twain::twain_session* pSess
 	twain_session ts(startup_mode::none);
 	if (!pSession)
 		pSession = &ts;
-	bool started = pSession->start_minimal();
-    if (started)
+    bool started = start_twain_session(*pSession, true);
+    auto all_errors = pSession->get_error_logger().get_errors();
+
+    // Test specifically for a DTWAIN DLL Loading error
+    auto iter = std::find(all_errors.begin(), all_errors.end(), DTWAIN_ERR_DTWAINDLL_LOADERROR);
+
+    // Get the DTWAIN version loaded
+    if (started || (!started && iter == all_errors.end()))
     {
         char szShortVersion[256] = {};
         API_INSTANCE DTWAIN_GetShortVersionStringA(szShortVersion, 256);
@@ -37,7 +45,7 @@ std::string generate_productnames(dynarithmic::twain::twain_session* pSession)
 	twain_session ts(startup_mode::none);
     if (!pSession)
         pSession = &ts;
-    pSession->start();
+    start_twain_session(*pSession);
     auto sourceInfo = pSession->get_all_source_info();
     std::vector<std::string> vProductNames;
     auto iter = sourceInfo.begin();

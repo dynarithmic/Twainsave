@@ -26,3 +26,5 @@
 20025 DLL DTWAIN não encontrada ou não pôde ser carregada.
 20026 Arquivo twaininfo.txt corrompido ou inválido.
 20027 Não foi possível encontrar ou abrir o arquivo dtwain32.ini ou dtwain64.ini.
+20028 A versão da DLL DTWAIN não é válida.
+20029 Nome da DLL DTWAIN: %1 | Versão encontrada: %2 | Versão necessária: %3

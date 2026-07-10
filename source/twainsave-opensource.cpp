@@ -27,29 +27,58 @@ OF THIRD PARTY RIGHTS.
 #include "twainsave_opensource.h"
 #include "twainsave_app.h"
 
+#define WIDEN2(x) L##x
+#define WIDEN(x)  WIDEN2(x)
+
+static std::string create_version_error_string(const VersionNumbers& verNumbers, scanner_options& allOptions)
+{
+    std::string retcode_error = allOptions.m_ReturnCodesMap[RETURN_DTWAINDLL_WRONG_VERSION_MSG];
+    std::wstring wide_retcode_error;
+    std::copy(retcode_error.begin(), retcode_error.end(), std::back_inserter(wide_retcode_error));
+    std::wstring ws = dynarithmic::twain::format_percent_args<std::wstring>(wide_retcode_error,
+        { verNumbers.DLLName, verNumbers.FileVersion, verNumbers.FileVersionRequired });
+    std::string outstr;
+    for (auto ch : ws)
+        outstr.push_back(static_cast<char>(ch));
+    return outstr;
+}
+
 int main(int argc, char *argv[])
 {
     twainsave_app ts_app;
     ts_app.load_custom_resources_from_ini();
     ts_app.load_resources_from_rc();
+    bool dllGood = true;
     auto retval = ts_app.parse_options(argc, argv);
-	auto& allOptions = ts_app.get_scanner_options();
+    auto& allOptions = ts_app.get_scanner_options();
+    ts_app.load_language_strings();
 
-    if (retval.first)
+    VersionNumbers verNumbers;
+    verNumbers.DLLName = WIDEN(DTWAIN_DLLNAME);
+    auto verOk = ts_app.check_dtwaindll_version(verNumbers);
+    if (!verOk.first)
     {
-        if (allOptions.m_bStartBroker)
+        dllGood = false;
+        allOptions.set_return_code(RETURN_DTWAINDLL_WRONG_VERSION);
+    }
+    if (dllGood)
+    {
+        if (retval.first)
         {
-            twainsave_broker broker;
-            // Start the broker program
-			auto retCode = broker.StartBroker(ts_app);
-			allOptions.set_return_code(retCode);
-        }
-        else
-        {
-            if (!allOptions.m_strConfigFile.empty())
-                retval = ts_app.parse_config_options(allOptions.m_strConfigFile);
-            if (retval.first)
-                ts_app.start_acquisitions();
+            if (allOptions.m_bStartBroker)
+            {
+                twainsave_broker broker;
+                // Start the broker program
+                auto retCode = broker.StartBroker(ts_app);
+                allOptions.set_return_code(retCode);
+            }
+            else
+            {
+                if (!allOptions.m_strConfigFile.empty())
+                    retval = ts_app.parse_config_options(allOptions.m_strConfigFile);
+                if (retval.first)
+                    ts_app.start_acquisitions();
+            }
         }
     }
     auto retcode = allOptions.get_return_code();
@@ -66,7 +95,10 @@ int main(int argc, char *argv[])
         std::string s2 = ": " + std::string(DTWAIN_DLLNAME);
         if (retcode != RETURN_DTWAINDLL_NOT_FOUND)
             s2.clear();
-        s += " (" + retcode_error + s2 + ")\nPress any key to continue...";
+        std::string s3;
+        if (retcode == RETURN_DTWAINDLL_WRONG_VERSION)
+            s3 = create_version_error_string(verNumbers, allOptions);
+        s += " (" + retcode_error + s2 + s3 + ")\nPress any key to continue...";
         DWORD d;
         WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
         char buffer[10];
@@ -79,7 +111,10 @@ int main(int argc, char *argv[])
         std::string s2 = ": " + std::string(DTWAIN_DLLNAME);
         if (retcode != RETURN_DTWAINDLL_NOT_FOUND)
             s2.clear();
-        s += " (" + retcode_error + ")\nPress any key to continue...";
+        std::string s3;
+        if (retcode == RETURN_DTWAINDLL_WRONG_VERSION)
+            s3 = create_version_error_string(verNumbers, allOptions);
+        s += " (" + retcode_error + s2 + s3 + ")\nPress any key to continue...";
         std::cout << s;
     }
     return retcode;

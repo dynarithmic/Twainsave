@@ -26,6 +26,7 @@ OF THIRD PARTY RIGHTS.
 #include <dynarithmic/twain/options/pdf_options.hpp>
 #include <dynarithmic/twain/acquire_characteristics/acquire_characteristics.hpp>
 #include <dynarithmic/twain/types/eternal_map/include/mapbox/eternal.hpp>
+#include <dynarithmic/twain/utilities/string_utilities.hpp>
 #include <string>
 #include <iostream>
 #include <utility>
@@ -38,12 +39,15 @@ OF THIRD PARTY RIGHTS.
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <array>
 #include "..\simpleini\SimpleIni.h"
 #include "twainsave_verinfo.h"
 #include "twainsave.h"
 #include "twainsave_broker.h"
 #include "twainsave_opensource.h"
 #include "commandline.h"
+#include "generate_details.h"
+#include "get_dll_version.h"
 
 #define INIT_TYPE(x, thetype, y) {#x, dynarithmic::twain::##thetype::##y}
 #define INIT_TYPE_2(x, thetype, y) {x, dynarithmic::twain::##thetype::##y}
@@ -1080,6 +1084,7 @@ bool twainsave_app::check_device_options(bool doOptionCheck)
     return true;
 }
 
+
 int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSession)
 {
     auto& varmap = m_parse_return_type.second;
@@ -1187,8 +1192,8 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
 
     sessionToUse->init_noblocking(true);
     // Start the TWAIN session
-    if ( !pSession )
-        sessionToUse->start();
+    if (!pSession)
+        start_twain_session(*sessionToUse, false);
 
     if (*sessionToUse)
     {
@@ -1337,6 +1342,19 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
     return 0;
 }
 
+std::pair<bool, int> twainsave_app::check_dtwaindll_version(VersionNumbers& verNumbers)
+{
+    HMODULE hMod = LoadLibraryA(DTWAIN_DLLNAME);
+    if (!hMod)
+        return { false, DTWAIN_ERR_DTWAINDLL_LOADERROR };
+    std::array<LONG, 4> components = { DTWAIN_MAJOR_VERSION, DTWAIN_MINOR_VERSION, DTWAIN_PATCHLEVEL_VERSION, DTWAIN_BUILDNUMBER_VERSION };
+    GetDLLVersionNumbers(hMod, verNumbers);
+    verNumbers.FileVersionRequired = dynarithmic::twain::join<std::wstring>(components, L".");
+    if (verNumbers.FileVersionRequired == verNumbers.FileVersion)
+        return { true, DTWAIN_NO_ERROR };
+    return { false, DTWAIN_ERR_DTWAINDLL_VERSION };
+}
+
 void twainsave_app::load_resources_from_rc()
 {
     char szBuffer[DTWAIN_USERRES_MAXSIZE + 1]{};
@@ -1404,6 +1422,40 @@ void twainsave_app::reload_custom_resources()
         if ( numChars > 0 )
             s_options.m_ReturnCodesMap[curError - DTWAIN_USERRES_START] = szRes;
     }
+}
+
+void twainsave_app::load_language_strings()
+{
+    if (s_options.m_strLanguage.empty())
+        return;
+    // Open the custom resource language file
+    std::string resFileName = ".\\twaincustomresources_" + s_options.m_strLanguage + ".txt";
+    std::ifstream resFile(resFileName);
+    if (resFile)
+    {
+        std::string sLine;
+        std::string sText;
+        while (resFile)
+        {
+            std::getline(resFile, sLine);
+            std::istringstream strm(sLine);
+            int nLine;
+            strm >> nLine;
+            std::getline(strm, sText);
+            s_options.m_ReturnCodesMap[nLine - DTWAIN_USERRES_START] = sText;
+        }
+    }
+}
+
+bool start_twain_session(dynarithmic::twain::twain_session& pSession, bool start_minimal /* = false */)
+{
+    pSession.init_noblocking(true);
+    bool bStarted = false;
+    if (!start_minimal)
+        bStarted = pSession.start();
+    else
+        bStarted = pSession.start_minimal();
+    return bStarted;
 }
 
 static std::vector<std::string> SplitPath(const filesys::path& src)
@@ -1534,55 +1586,3 @@ void twainsave_app::DerivedLogger::log(const char* msg)
         break;
     }
 }
-
-#if 0
-int main(int argc, char *argv[])
-{
-    LoadCustomResourcesFromIni();
-    auto retval = parse_options(argc, argv);
-
-    if (retval.first)
-    {
-        if (s_options.m_bStartBroker)
-        {
-            // Start the broker program
-            auto broker_created = UseBroker();
-            if (!broker_created)
-            {
-                s_options.set_return_code(RETURN_BROKER_ERROR);
-            }
-            else
-            {
-                //StartBroker(broker_created, s_options);
-            }
-        }
-        else
-        {
-            if (!s_options.m_strConfigFile.empty())
-                retval = parse_config_options(s_options.m_strConfigFile);
-            if (retval.first)
-                start_acquisitions(retval.second);
-        }
-    }
-    auto retcode = s_options.get_return_code();
-    if (s_options.m_bNoConsole && !s_options.m_bNoPause)
-    {
-        ShowWindow(GetConsoleWindow(), SW_SHOW);
-        // display a pause message
-        std::string s = "TwainSave returned code: " + std::to_string(retcode);
-        s += " (" + s_options.m_ReturnCodesMap[retcode] + ")\nPress any key to continue...";
-        DWORD d;
-        WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
-        char buffer[10];
-        ReadConsoleA(GetStdHandle(STD_INPUT_HANDLE), buffer, 1, &d, NULL);
-    }
-    else
-    {
-        ShowWindow(GetConsoleWindow(), SW_SHOW);
-        std::string s = "TwainSave returned code: " + std::to_string(retcode);
-        s += " (" + s_options.m_ReturnCodesMap[retcode] + ")";
-        std::cout << s;
-    }
-    return retcode;
-}
-#endif

@@ -26,3 +26,5 @@
 20025 DLL-ul DTWAIN nu a fost găsit sau nu a putut fi încărcat.
 20026 Fișierul twaininfo.txt este corupt sau invalid.
 20027 Nu s-a putut găsi sau deschide fișierul dtwain32.ini sau dtwain64.ini.
+20028 Versiunea DLL DTWAIN nu este validă.
+20029 Nume DLL DTWAIN: %1 | Versiune găsită: %2 | Versiune necesară: %3
