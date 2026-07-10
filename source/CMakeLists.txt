@@ -10,6 +10,11 @@ endif()
 
 project(twainsave-opensource VERSION 1.4.1 LANGUAGES C CXX)
 
+option(USE_DTWAIN_DEBUG_LIB
+       "Build TwainSave to use the DTWAIN debug DLL (advanced)"
+       OFF)
+
+mark_as_advanced(USE_DTWAIN_DEBUG_LIB)
 # -----------------------------------------------------------------------------
 # Boost setup
 # -----------------------------------------------------------------------------
@@ -458,6 +463,10 @@ source_group(
 target_link_directories(twainsave-opensource PRIVATE
     ${TWAIN_BOOST_LIBRARY_DIR}
 )
+
+if(USE_DTWAIN_DEBUG_LIB)
+    target_compile_definitions(twainsave-opensource PRIVATE USE_DTWAIN_DEBUG_LIB)
+endif()
 
 target_compile_definitions(twainsave-opensource PRIVATE
     UNICODE
