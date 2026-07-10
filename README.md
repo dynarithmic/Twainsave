@@ -123,8 +123,15 @@ The default Boost download location is:
 ```text
 C:\BoostDeps
 ```
+### Optional
+#### DTWAIN Library rebuild
+The `dtwain32u.dll` and `dtwain64u.dll` files that are included in the TwainSave installation are satisfactory without having to rebuild those components.  However if desired (usually for in-depth debugging purposes), the `dtwain32u.dll` and `dtwain64u.dll` files can also be rebuilt.  The instructions [here](https://github.com/dynarithmic/twain_library_source#rebuild-source) detail rebuilding of the DTWAIN library.
 
-### Building TwainSave
+Note that the TwainSave source code is compatible with the DTWAIN library created with the DTWAIN source code found in the [main](https://github.com/dynarithmic/twain_library_source) branch of the source repository.  You should always choose the DTWAIN source code in this branch for rebuilding if the DTWAIN libraries will need to be rebuilt.        
+
+Usage of the code in the `development` or other branches in the DTWAIN source repository may yield DTWAIN libraries that could have various incompatibility issues with the current version of TwainSave.
+
+## Building TwainSave
 
 The repository includes CMake presets and batch files that simplify the build process.
 
@@ -209,6 +216,17 @@ twainsave64.exe
 
 The `twainsave.exe` and `twainsave64.exe` files are convenience copies of the main executable and exist to preserve compatibility with existing documentation and command-line examples.
 
+### Running TwainSave after building
+
+Please note that you should always run TwainSave using the version of `dtwain32u.dll` or `dtwain64u.dll` that exists in the original TwainSave `binaries` .zip files.  The reason is that these versions of the DTWAIN DLL may not match the current released versions of the DTWAIN library.
+
+As a visual guide, when building TwainSave, diagnostic messages will be outputted to the console as to the version of DTWAIN that TwainSave will be using.  For example:  
+  
+`Compiling using DTWAIN Version 5.9.3 Build 002 (Release)`
+
+or messages similar to this will appear when rebuilding TwainSave.
+
+
 ### Troubleshooting
 
 #### Boost download fails
@@ -219,6 +237,18 @@ If the automatic Boost download fails:
 2. Re-run the build command.
 3. Ensure the latest version of CMake is installed.
 4. Delete the Boost cache directory if a partially downloaded installer exists:
+
+#### After successfully building TwainSave.exe, the TwainSave program starts up but closes immediately
+1. Verify that the correct version of `dtwain32u.dll` or `dtwain64u.dll` is being loaded at runtime.  This can be accomplished by running TwainSave with the following option:  
+  
+    `twainsave --version`
+
+    This will output the TwainSave version and the version of the DTWAIN DLL being used.  If you have multiple DTWAIN DLL's installed on your system, verify that the DTWAIN DLL used is the correct one that should be used by TwainSave.
+
+2. Verify that the text resources (`twaininfo.txt`, `dtwain32.ini`, for example) are the same as the text resources used in the TwainSave installation and reside in the same directory at the TwainSave executable.
+ 
+
+
 
 ```text
 C:\BoostDeps
