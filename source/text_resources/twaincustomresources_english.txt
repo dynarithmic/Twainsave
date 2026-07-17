@@ -24,7 +24,7 @@
 20023 
 20024 Twainsave broker error
 20025 DTWAIN DLL not found or could not be loaded.
-20026 Corrupted or invalid twaininfo.txt file.
+20026 Missing, corrupted or invalid twaininfo.txt file.
 20027 Could not find or open dtwain32.ini or dtwain64.ini file.
 20028 DTWAIN DLL version is not valid.
 20029 DTWAIN DLL name: %1 | Found version: %2 | Required version: %3

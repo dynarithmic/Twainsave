@@ -25,9 +25,6 @@ OF THIRD PARTY RIGHTS.
 #include <string>
 #include <vector>
 
-#include <windows.h>
-#include <string>
-
 struct VersionNumbers
 {
     std::wstring FileVersion;

@@ -502,6 +502,6 @@ add_custom_command(TARGET twainsave-opensource POST_BUILD
 )
 
 add_custom_command(TARGET twainsave-opensource POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/twainsave.ini "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
+                   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/text_resources/twainsave.ini "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
                    )
 

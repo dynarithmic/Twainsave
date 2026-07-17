@@ -1111,7 +1111,7 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
     defaultIter = varmap.find("details");
     if (!defaultIter->second.defaulted())
     {
-        auto s = generate_details(pSession);
+        auto s = generate_details(pSession, this);
         if (s_options.m_bNoConsole)
         {
             DWORD d;
@@ -1279,6 +1279,7 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
                 break;
                 case DTWAIN_ERR_CRC_CHECK:
                 case DTWAIN_ERR_RESOURCES_BAD_VERSION:
+                case DTWAIN_ERR_RESOURCES_NOT_FOUND:
                     s_options.set_return_code(RETURN_TWAININFO_FILE_ERROR);
                 break;
                 case DTWAIN_ERR_INI32_NOT_FOUND:
@@ -1513,6 +1514,12 @@ int twainsave_app::STFCallback::transferready(twain_source& source)
             return 0;
         }
     }
+    return 1;
+}
+
+int twainsave_app::STFCallback::sourcedetails(twain_source& source)
+{
+    std::cout << "Generating details for source \"" << source.get_source_name() << "\"" << std::endl;
     return 1;
 }
 

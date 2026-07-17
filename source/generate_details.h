@@ -23,8 +23,9 @@ OF THIRD PARTY RIGHTS.
 
 #include <string>
 class dynarithmic::twain::twain_session;
+class twainsave_app;
 
-std::string generate_details(dynarithmic::twain::twain_session* pSession = nullptr);
+std::string generate_details(dynarithmic::twain::twain_session* pSession, twainsave_app* pTheApp);
 std::string generate_dtwainversion_info(dynarithmic::twain::twain_session* pSession = nullptr);
 std::string generate_productnames(dynarithmic::twain::twain_session* pSession = nullptr);
 bool start_twain_session(dynarithmic::twain::twain_session& pSession, bool start_minimal = false);

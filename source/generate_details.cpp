@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include <dynarithmic/twain/twain_session.hpp> // for dynarithmic::twain::twain_session
 #include <dynarithmic/twain/twain_source.hpp>
 #include <dynarithmic/twain/types/twain_callback.hpp>
@@ -7,14 +8,17 @@
 #include <vector>
 #include <boost/algorithm/string/join.hpp>
 #include "generate_details.h"
+#include "twainsave_app.h"
 
 using namespace dynarithmic::twain;
 
-std::string generate_details(dynarithmic::twain::twain_session* pSession)
+std::string generate_details(dynarithmic::twain::twain_session* pSession, twainsave_app* pTheApp)
 {
     twain_session ts(startup_mode::none);
     if ( !pSession )
         pSession = &ts;
+    twain_source temp{};
+    pSession->register_callback(temp, pTheApp->get_callback());
     start_twain_session(*pSession);
     return pSession->get_details(details_info());
 }

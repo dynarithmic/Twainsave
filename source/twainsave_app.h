@@ -207,7 +207,8 @@ class twainsave_app
 		        int acquiredone(dynarithmic::twain::twain_source& source) override;
 		        int transferready(dynarithmic::twain::twain_source& source) override;
 		        int filenamechanging(dynarithmic::twain::twain_source& source) override;
-	    };
+                int sourcedetails(dynarithmic::twain::twain_source& source) override;
+        };
 
 		class DerivedLogger : public dynarithmic::twain::twain_logger
 		{
@@ -265,5 +266,6 @@ class twainsave_app
 	    parse_return_type parse_options(int argc, char* argv[]);
         parse_return_type parse_config_options(const std::string& filename);
         void load_language_strings();
+        auto& get_callback() { return m_tsCallback; }
 };
 #endif
