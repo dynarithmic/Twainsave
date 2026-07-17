@@ -28,3 +28,4 @@
 20027 dtwain32.ini- oder dtwain64.ini-Datei konnte nicht gefunden oder geöffnet werden.
 20028 DTWAIN DLL Version ist ungültig.
 20029 DTWAIN-DLL-Name: %1 | Gefundene Version: %2 | Erforderliche Version: %3
+20030 Generiere detaillierte Liste für TWAIN-Quelle %1 ...	

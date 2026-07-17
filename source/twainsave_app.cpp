@@ -1519,7 +1519,10 @@ int twainsave_app::STFCallback::transferready(twain_source& source)
 
 int twainsave_app::STFCallback::sourcedetails(twain_source& source)
 {
-    std::cout << "Generating details for source \"" << source.get_source_name() << "\"" << std::endl;
+    std::string msg = "\"" + source.get_source_name() + "\"";
+    std::string retcode_msg = m_pScannerOpts->m_ReturnCodesMap[RETURN_GENERATEDETAILS_MSG];
+    std::string msg_formatted = dynarithmic::twain::format_percent_args<std::string>(retcode_msg, { msg });
+    std::cout << msg_formatted << std::endl;
     return 1;
 }
 

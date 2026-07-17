@@ -28,3 +28,4 @@
 20027 无法找到或打开 dtwain32.ini 或 dtwain64.ini 文件。
 20028 DTWAIN DLL 版本无效。
 20029 DTWAIN DLL 名称: %1 | 找到的版本: %2 | 所需版本: %3
+20030 正在为 TWAIN 源 %1 生成详细列表 ...

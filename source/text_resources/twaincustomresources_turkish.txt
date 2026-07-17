@@ -28,4 +28,4 @@
 20027 dtwain32.ini veya dtwain64.ini dosyası bulunamadı ya da açılamadı.
 20028 DTWAIN DLL sürümü geçerli değil.
 20029 DTWAIN DLL adı: %1 | Bulunan sürüm: %2 | Gerekli sürüm: %3
-
+20030 TWAIN Kaynağı %1 için ayrıntı listesi oluşturuluyor ...

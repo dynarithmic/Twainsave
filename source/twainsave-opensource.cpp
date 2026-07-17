@@ -43,8 +43,17 @@ static std::string create_version_error_string(const VersionNumbers& verNumbers,
     return outstr;
 }
 
+bool set_console_to_UTF8()
+{
+    const BOOL outputOK = SetConsoleOutputCP(CP_UTF8);
+    const BOOL inputOK = SetConsoleCP(CP_UTF8);
+
+    return outputOK != FALSE && inputOK != FALSE;
+}
+
 int main(int argc, char *argv[])
 {
+    set_console_to_UTF8();
     twainsave_app ts_app;
     ts_app.load_custom_resources_from_ini();
     ts_app.load_resources_from_rc();
