@@ -199,10 +199,12 @@ class twainsave_app
 	    class STFCallback : public dynarithmic::twain::twain_callback
 	    {
             scanner_options* m_pScannerOpts = nullptr;
+            twainsave_app* m_pTheApp = nullptr;
 
 	        public:
                 STFCallback();
                 void setscanneropts(scanner_options* mSS);
+                void setapp(twainsave_app* pApp);
 		        int uiopenfailure(dynarithmic::twain::twain_source& source) override;
 		        int acquiredone(dynarithmic::twain::twain_source& source) override;
 		        int transferready(dynarithmic::twain::twain_source& source) override;
@@ -267,5 +269,6 @@ class twainsave_app
         parse_return_type parse_config_options(const std::string& filename);
         void load_language_strings();
         auto& get_callback() { return m_tsCallback; }
+        std::pair<bool, std::string> get_resource_string(int resourceNum) const;
 };
 #endif

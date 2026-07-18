@@ -534,6 +534,7 @@ scanner_options::scanner_options() : twainsave_return_value(RETURN_OK),
 twainsave_app::twainsave_app() 
 {
     m_tsCallback.setscanneropts(&s_options);
+    m_tsCallback.setapp(this);
 }
 
 twainsave_app::parse_return_type twainsave_app::parse_options(int argc, char* argv[])
@@ -1414,6 +1415,17 @@ void twainsave_app::load_custom_resources_from_ini()
     }
 }
 
+std::pair<bool, std::string> twainsave_app::get_resource_string(int resourceNum) const
+{
+    auto iter = s_options.m_ReturnCodesMap.find(resourceNum);
+    if (iter != s_options.m_ReturnCodesMap.end())
+        return { true, iter->second };
+    auto iter2 = s_options.m_StandardReturnCodesMap.find(resourceNum);
+    if (iter2 != s_options.m_StandardReturnCodesMap.end())
+        return { true, iter2->second };
+    return { false, "Unknown error" };
+}
+
 void twainsave_app::reload_custom_resources()
 {
     for (int curError = DTWAIN_USERRES_START; curError < DTWAIN_USERRES_START + RETURN_CODE_LAST; ++curError)
@@ -1492,6 +1504,11 @@ void twainsave_app::STFCallback::setscanneropts(scanner_options* mSS)
     m_pScannerOpts = mSS;
 }
 
+void twainsave_app::STFCallback::setapp(twainsave_app* pApp)
+{
+    m_pTheApp = pApp;
+}
+
 int twainsave_app::STFCallback::uiopenfailure(twain_source& source)
 {
     m_pScannerOpts->set_return_code(RETURN_TWAIN_UIOPEN_ERROR);
@@ -1520,7 +1537,7 @@ int twainsave_app::STFCallback::transferready(twain_source& source)
 int twainsave_app::STFCallback::sourcedetails(twain_source& source)
 {
     std::string msg = "\"" + source.get_source_name() + "\"";
-    std::string retcode_msg = m_pScannerOpts->m_ReturnCodesMap[RETURN_GENERATEDETAILS_MSG];
+    std::string retcode_msg = m_pTheApp->get_resource_string(RETURN_GENERATEDETAILS_MSG).second;
     std::string msg_formatted = dynarithmic::twain::format_percent_args<std::string>(retcode_msg, { msg });
     std::cout << msg_formatted << std::endl;
     return 1;

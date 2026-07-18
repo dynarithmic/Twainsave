@@ -30,9 +30,9 @@ OF THIRD PARTY RIGHTS.
 #define WIDEN2(x) L##x
 #define WIDEN(x)  WIDEN2(x)
 
-static std::string create_version_error_string(const VersionNumbers& verNumbers, scanner_options& allOptions)
+static std::string create_version_error_string(const VersionNumbers& verNumbers, twainsave_app& theApp)
 {
-    std::string retcode_error = allOptions.m_ReturnCodesMap[RETURN_DTWAINDLL_WRONG_VERSION_MSG];
+    std::string retcode_error = theApp.get_resource_string(RETURN_DTWAINDLL_WRONG_VERSION_MSG).second;
     std::wstring wide_retcode_error;
     std::copy(retcode_error.begin(), retcode_error.end(), std::back_inserter(wide_retcode_error));
     std::wstring ws = dynarithmic::twain::format_percent_args<std::wstring>(wide_retcode_error,
@@ -91,11 +91,7 @@ int main(int argc, char *argv[])
         }
     }
     auto retcode = allOptions.get_return_code();
-    std::string retcode_error = allOptions.m_ReturnCodesMap[retcode];
-    if (retcode_error.empty())
-        retcode_error = allOptions.m_StandardReturnCodesMap[retcode];
-    if (retcode_error.empty())
-        retcode_error = "Unknown error. ";
+    std::string retcode_error = ts_app.get_resource_string(retcode).second;
     if (allOptions.m_bNoConsole && !allOptions.m_bNoPause)
     {
         ShowWindow(GetConsoleWindow(), SW_SHOW);
@@ -106,7 +102,7 @@ int main(int argc, char *argv[])
             s2.clear();
         std::string s3;
         if (retcode == RETURN_DTWAINDLL_WRONG_VERSION)
-            s3 = create_version_error_string(verNumbers, allOptions);
+            s3 = create_version_error_string(verNumbers, ts_app);
         s += " (" + retcode_error + s2 + s3 + ")\nPress any key to continue...";
         DWORD d;
         WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
@@ -122,7 +118,7 @@ int main(int argc, char *argv[])
             s2.clear();
         std::string s3;
         if (retcode == RETURN_DTWAINDLL_WRONG_VERSION)
-            s3 = create_version_error_string(verNumbers, allOptions);
+            s3 = create_version_error_string(verNumbers, ts_app);
         s += " (" + retcode_error + s2 + s3 + ")\nPress any key to continue...";
         std::cout << s;
     }
