@@ -22,7 +22,7 @@ The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opens
 
 5) To get help for **Twainsave**:
     a) issue the **--help** option to list the various options available.  For example:
-    **twainsave --help** or **twainsave64 --help** from the command-line will list the options available.
+    `twainsave --help` or `twainsave64 --help` from the command-line will list the options available.
     
     b) Note that there is also a Windows-based [help file](https://github.com/dynarithmic/Twainsave/tree/master/help) that explains most of these options.  This help file is periodically updated.
     
