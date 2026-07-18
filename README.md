@@ -127,7 +127,7 @@ C:\BoostDeps
 #### DTWAIN Library rebuild
 The `dtwain32u.dll` and `dtwain64u.dll` files that are included in the TwainSave installation are satisfactory without having to rebuild those components.  However if desired (usually for in-depth debugging purposes), the `dtwain32u.dll` and `dtwain64u.dll` files can also be rebuilt.  The instructions [here](https://github.com/dynarithmic/twain_library_source#rebuild-source) detail rebuilding of the DTWAIN library.
 
-Note that the TwainSave source code is compatible with the DTWAIN library created with the DTWAIN source code found in the [main](https://github.com/dynarithmic/twain_library_source) branch of the source repository.  You should always choose the DTWAIN source code in this branch for rebuilding if the DTWAIN libraries will need to be rebuilt.        
+Note that the TwainSave source code in the master branch is compatible with the DTWAIN library created with the DTWAIN source code found in the [main](https://github.com/dynarithmic/twain_library_source) branch of the source repository.  You should choose the DTWAIN source code in this branch for rebuilding if the DTWAIN libraries will need to be rebuilt.        
 
 Usage of the code in the `development` or other branches in the DTWAIN source repository may yield DTWAIN libraries that could have various incompatibility issues with the current version of TwainSave.
 
