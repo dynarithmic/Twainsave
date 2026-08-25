@@ -58,5 +58,6 @@ std::string generate_productnames(dynarithmic::twain::twain_session* pSession)
         vProductNames.push_back("\"" + iter->get_product_name() + "\"");
         ++iter;
     }
+    std::sort(vProductNames.begin(), vProductNames.end());
     return "[\n" + boost::algorithm::join(vProductNames, ",\n") + "\n]\n";
 }

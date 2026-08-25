@@ -467,9 +467,6 @@ HANDLE DLLENTRY_DEF DTWAIN_GetCustomDSData(DTWAIN_SOURCE Source, LPBYTE Data, DW
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetCustomDSData(DTWAIN_SOURCE Source, HANDLE hData, LPCBYTE Data, DWORD dSize, LONG nFlags);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_IsCustomDSDataSupported(DTWAIN_SOURCE Source);
 
-/* Only to be used by static libraries.  This is mapped to DTWAIN_SysInitializexxx() for DLL */
-DTWAIN_HANDLE DLLENTRY_DEF  DTWAIN_SysInitializeLib(HINSTANCE hInstance);
-
 /* Set JPEG Quality for JPEG file transfers */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetJpegValues(DTWAIN_SOURCE Source, LONG Quality, LONG Progressive);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetJpegValues(DTWAIN_SOURCE Source, LPLONG pQuality, LPLONG Progressive);
@@ -1088,10 +1085,15 @@ DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_GetAcquisitionArray(DTWAIN_SOURCE Source);
 /* Destroy all "active" DTWAIN_ARRAYs */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayDestroyAll(VOID_PROTOTYPE);
 
-#include "dtwstrfn.h"
+/* Set the application's major/minor TW_IDENTITY components */
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetMajorMinorVersion(DWORD nMajor, DWORD nMinor);
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetMajorMinorVersion(LPDWORD nMajor, LPDWORD nMinor);
 
 #ifdef __cplusplus
 }
 #endif
+
+#include "dtwstrfn.h"
+
 #endif
 
