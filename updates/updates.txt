@@ -13,6 +13,7 @@ TwainSave version changes
 
   The current list of languages is as follows:
 
+  cantonese
   dutch
   english
   french
