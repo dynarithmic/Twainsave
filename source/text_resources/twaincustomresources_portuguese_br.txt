@@ -1,0 +1,31 @@
+20000 TwainSave executado com sucesso.
+20001 Nome do arquivo não foi especificado. A linha de comando TwainSave está sem a opção --filename.
+20002 Não foi possível iniciar o sistema TWAIN.
+20003 Não foi possível iniciar o dispositivo TWAIN. Se o comando --selectdefault foi usado para abrir o dispositivo TWAIN, o dispositivo padrão (driver TWAIN ou hardware) está com defeito.
+20004 Não foi possível salvar o arquivo com sucesso.
+20005 Argumento(s) de linha de comando inválido(s) ou ilegal(is).
+20006 Usuário cancelou o TwainSave por não selecionar um dispositivo.
+20007 Erro ao iniciar o processo de aquisição do dispositivo.
+20008 O dispositivo não suporta imagens em Preto/Branco, Tons de Cinza, RGB, Paleta, CMY ou CMYK.
+20009 Console não disponível. Use a opção -noconsole.
+20010 TwainSave expirou devido à ausência de papel no alimentador dentro do tempo especificado. Veja --nouiwait e --nouiwaittime para mais informações.
+20011 Interface do usuário do TwainSave não pôde ser ativada.
+20012 TwainSave saiu porque o arquivo já existe. Este código de retorno ocorrerá se --overwritemode 2 for especificado.
+20013 O dispositivo não suporta o tipo de arquivo modo 2 especificado. Veja --filetype para tipos de arquivo modo 2.
+20014 O dispositivo não suporta o modo --uionly.
+20015 Arquivo de comando especificado por -@ não foi encontrado.
+20016 Arquivo de comando especificado por -@ não pôde ser aberto.
+20017 --filetype inválido foi especificado.
+20018 --unitofmeasure inválido foi especificado.
+20019 --papersize inválido foi especificado.
+20020 --color inválido foi especificado.
+20021 --orientation inválido foi especificado.
+20022 --jobcontrol inválido foi especificado.
+20023 
+20024 Erro do corretor Twainsave
+20025 DLL DTWAIN não encontrada ou não pôde ser carregada.
+20026 Arquivo twaininfo.txt corrompido ou inválido.
+20027 Não foi possível encontrar ou abrir o arquivo dtwain32.ini ou dtwain64.ini.
+20028 A versão da DLL DTWAIN não é válida.
+20029 Nome da DLL DTWAIN: %1 | Versão encontrada: %2 | Versão necessária: %3
+20030 Gerando lista de detalhes para a fonte TWAIN %1 ...

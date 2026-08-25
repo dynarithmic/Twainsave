@@ -16,3 +16,16 @@
 20015 Command File specified by -@ was not found
 20016 Command File specified by -@ could not be opened
 20017 Invalid argument for --filetype was given
+20018 Invalid --unitofmeasure specified.
+20019 Invalid --papersize specified.
+20020 Invalid --color specified.
+20021 Invalid --orientation specified.
+20022 Invalid --jobcontrol specified.
+20023 
+20024 Twainsave broker error
+20025 DTWAIN DLL not found or could not be loaded.
+20026 Missing, corrupted or invalid twaininfo.txt file.
+20027 Could not find or open dtwain32.ini or dtwain64.ini file.
+20028 DTWAIN DLL version is not valid.
+20029 DTWAIN DLL name: %1 | Found version: %2 | Required version: %3
+20030 Generating details listing for TWAIN Source %1 ...

@@ -1,0 +1,31 @@
+20000 TwainSave 已成功執行。
+20001 沒有指定檔案名稱。TwainSave 命令列缺少 --filename 選項。
+20002 無法啟動 TWAIN 系統。
+20003 無法啟動 TWAIN 裝置。如果使用 --selectdefault 命令開啟 TWAIN 裝置，則預設裝置（TWAIN 驅動程式或硬件）有問題。
+20004 無法成功儲存檔案。
+20005 命令列參數不正確或不合法。
+20006 使用者因沒有選擇裝置而取消了 TwainSave。
+20007 從裝置開始擷取程序時發生錯誤。
+20008 裝置不支援黑白、灰階、RGB、調色盤、CMY 或 CMYK 圖像。
+20009 控制台不可用。請使用 -noconsole 選項。
+20010 TwainSave 因在指定時間內沒有將紙張放入自動送紙器而逾時。更多資訊請參閱 --nouiwait 和 --nouiwaittime。
+20011 無法啟用 TwainSave 使用者介面。
+20012 因檔案已存在而退出 TwainSave。如果指定了 --overwritemode 2，將會出現此返回代碼。
+20013 裝置不支援指定的模式 2 檔案類型。模式 2 檔案類型請參閱 --filetype。
+20014 裝置不支援 --uionly 模式。
+20015 由 -@ 指定的命令檔案找不到。
+20016 由 -@ 指定的命令檔案無法開啟。
+20017 提供了無效的 --filetype 參數。
+20018 指定了無效的 --unitofmeasure。
+20019 指定了無效的 --papersize。
+20020 指定了無效的 --color。
+20021 指定了無效的 --orientation。
+20022 指定了無效的 --jobcontrol。
+20023 
+20024 Twainsave 代理錯誤
+20025 找不到或無法載入 DTWAIN DLL。
+20026 twaininfo.txt 檔案缺失、已損壞或無效。
+20027 找不到或無法開啟 dtwain32.ini 或 dtwain64.ini 檔案。
+20028 DTWAIN DLL 版本無效。
+20029 DTWAIN DLL 名稱：%1 | 找到的版本：%2 | 要求的版本：%3
+20030 正在為 TWAIN 來源 %1 產生詳細清單 ...

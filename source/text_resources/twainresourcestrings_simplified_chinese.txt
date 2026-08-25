@@ -103,6 +103,9 @@
 1086 DTWAIN_RANGE 的步长为 0
 1087 检测到空或空白名称
 1088 自动进纸器无纸张传感器或未检测到纸张传感器
+1089 DTWAIN DLL 无法加载或不存在
+1090 DTWAIN DLL 版本不正确
+1091 TWAIN 会话当前处于活动状态
 1100 TWAIN 条件代码：无法完成操作。内存不足。  
 1101 TWAIN 条件代码：没有错误  
 1102 TWAIN 条件代码：未知的故障原因  
@@ -235,6 +238,7 @@
 2504 操作不支持  
 2505 无效的 PDF 文本元素
 2506 功能未设置。使用了无效的值。
+2507 当前状态下无法协商能力
 3000 选择源  
 3001 &选择  
 3002 &取消  
@@ -265,6 +269,7 @@
 3027 日志结束
 3028 最后错误
 9700 DTWAIN Twain Library, v{short_version}, {company_name}, {copyright}
+9701 DTWAIN Twain Library, v{short_version}, {company_name}, {copyright_html}
 9999 在调用 Twain DSM 时发生异常错误。可能是 Twain 会话损坏？
 10000 [用户消息]
 10001 关闭 Twain DSM 时出错  

@@ -1,0 +1,157 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "vs2019-x32",
+      "displayName": "TwainSave VS2019 x32",
+      "generator": "Visual Studio 16 2019",
+      "architecture": "Win32",
+      "binaryDir": "${sourceDir}/build-vs2019-x32",
+      "cacheVariables": {
+        "TWAIN_AUTO_DOWNLOAD_BOOST": "ON",
+        "TWAIN_BOOST_CACHE_ROOT": "$env{SystemDrive}/BoostDeps",
+        "TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL": "ON",
+        "TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL": "OFF",
+        "TWAIN_EXISTING_BOOST_ROOT": "",
+        "CMAKE_CONFIGURATION_TYPES": "MinSizeRel;Debug"
+      }
+    },
+    {
+      "name": "vs2019-x64",
+      "displayName": "TwainSave VS2019 x64",
+      "generator": "Visual Studio 16 2019",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build-vs2019-x64",
+      "cacheVariables": {
+        "TWAIN_AUTO_DOWNLOAD_BOOST": "ON",
+        "TWAIN_BOOST_CACHE_ROOT": "$env{SystemDrive}/BoostDeps",
+        "TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL": "ON",
+        "TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL": "OFF",
+        "TWAIN_EXISTING_BOOST_ROOT": "",
+        "CMAKE_CONFIGURATION_TYPES": "MinSizeRel;Debug"
+      }
+    },
+    {
+      "name": "vs2022-x32",
+      "displayName": "TwainSave VS2022 x32",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "Win32",
+      "binaryDir": "${sourceDir}/build-vs2022-x32",
+      "cacheVariables": {
+        "TWAIN_AUTO_DOWNLOAD_BOOST": "ON",
+        "TWAIN_BOOST_CACHE_ROOT": "$env{SystemDrive}/BoostDeps",
+        "TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL": "ON",
+        "TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL": "OFF",
+        "TWAIN_EXISTING_BOOST_ROOT": "",
+        "CMAKE_CONFIGURATION_TYPES": "MinSizeRel;Debug"
+      }
+    },
+    {
+      "name": "vs2022-x64",
+      "displayName": "TwainSave VS2022 x64",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build-vs2022-x64",
+      "cacheVariables": {
+        "TWAIN_AUTO_DOWNLOAD_BOOST": "ON",
+        "TWAIN_BOOST_CACHE_ROOT": "$env{SystemDrive}/BoostDeps",
+        "TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL": "ON",
+        "TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL": "OFF",
+        "TWAIN_EXISTING_BOOST_ROOT": "",
+        "CMAKE_CONFIGURATION_TYPES": "MinSizeRel;Debug"
+      }
+    },
+    {
+      "name": "vs2026-x32",
+      "displayName": "TwainSave VS2026 x32",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "Win32",
+      "binaryDir": "${sourceDir}/build-vs2026-x32",
+      "cacheVariables": {
+        "TWAIN_AUTO_DOWNLOAD_BOOST": "ON",
+        "TWAIN_BOOST_CACHE_ROOT": "$env{SystemDrive}/BoostDeps",
+        "TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL": "ON",
+        "TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL": "OFF",
+        "TWAIN_EXISTING_BOOST_ROOT": "",
+        "CMAKE_CONFIGURATION_TYPES": "MinSizeRel;Debug"
+      }
+    },
+    {
+      "name": "vs2026-x64",
+      "displayName": "TwainSave VS2026 x64",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build-vs2026-x64",
+      "cacheVariables": {
+        "TWAIN_AUTO_DOWNLOAD_BOOST": "ON",
+        "TWAIN_BOOST_CACHE_ROOT": "$env{SystemDrive}/BoostDeps",
+        "TWAIN_DELETE_BOOST_INSTALLER_AFTER_INSTALL": "ON",
+        "TWAIN_DELETE_BOOST_INSTALL_LOG_AFTER_INSTALL": "OFF",
+        "TWAIN_EXISTING_BOOST_ROOT": "",
+        "CMAKE_CONFIGURATION_TYPES": "MinSizeRel;Debug"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "vs2019-x32-release",
+      "configurePreset": "vs2019-x32",
+      "configuration": "MinSizeRel"
+    },
+    {
+      "name": "vs2019-x32-debug",
+      "configurePreset": "vs2019-x32",
+      "configuration": "Debug"
+    },
+    {
+      "name": "vs2019-x64-release",
+      "configurePreset": "vs2019-x64",
+      "configuration": "MinSizeRel"
+    },
+    {
+      "name": "vs2019-x64-debug",
+      "configurePreset": "vs2019-x64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "vs2022-x32-release",
+      "configurePreset": "vs2022-x32",
+      "configuration": "MinSizeRel"
+    },
+    {
+      "name": "vs2022-x32-debug",
+      "configurePreset": "vs2022-x32",
+      "configuration": "Debug"
+    },
+    {
+      "name": "vs2022-x64-release",
+      "configurePreset": "vs2022-x64",
+      "configuration": "MinSizeRel"
+    },
+    {
+      "name": "vs2022-x64-debug",
+      "configurePreset": "vs2022-x64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "vs2026-x32-release",
+      "configurePreset": "vs2026-x32",
+      "configuration": "MinSizeRel"
+    },
+    {
+      "name": "vs2026-x32-debug",
+      "configurePreset": "vs2026-x32",
+      "configuration": "Debug"
+    },
+    {
+      "name": "vs2026-x64-release",
+      "configurePreset": "vs2026-x64",
+      "configuration": "MinSizeRel"
+    },
+    {
+      "name": "vs2026-x64-debug",
+      "configurePreset": "vs2026-x64",
+      "configuration": "Debug"
+    }
+  ]
+}

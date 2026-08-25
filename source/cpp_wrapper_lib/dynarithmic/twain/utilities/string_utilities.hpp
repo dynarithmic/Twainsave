@@ -24,6 +24,10 @@ OF THIRD PARTY RIGHTS.
 #include <string>
 #include <sstream>
 #include <numeric>
+#include <iterator>
+#include <type_traits>
+#include <initializer_list>
+#include <cstddef>
 
 #ifdef _MSC_VER
     #pragma warning( push )  // Stores the current warning state for every warning.
@@ -34,26 +38,191 @@ namespace dynarithmic
 {
     namespace twain
     {
-        std::string& ltrim(std::string& str);
-        std::string& rtrim(std::string& str);
-        std::string ltrim_copy(std::string str);
-        std::string rtrim_copy(std::string str);
-        std::string trim_copy(std::string str);
-        std::string& trim(std::string& str);
-
-        template <typename Container>
-        std::string join(const Container& ct, std::string separator)
+        template <typename CharT>
+        class is_any_of_pred
         {
-            return std::accumulate(ct.begin(), ct.end(), std::string(),
-                [&](const auto& str, typename Container::value_type val)
+            public:
+                using string_type = std::basic_string<CharT>;
+
+                explicit is_any_of_pred(string_type chars)
+                    : chars_(std::move(chars)) {
+                }
+
+                bool operator()(CharT ch) const
                 {
-                    std::ostringstream strm;
-                    if (!str.empty())
-                        strm << str << separator << val;
-                    else
-                        strm << val;
-                    return strm.str();
-                });
+                    return chars_.find(ch) != string_type::npos;
+                }
+
+            private:
+                string_type chars_;
+        };
+
+        template <typename CharT>
+        static auto is_any_of(const CharT* chars)
+        {
+            return is_any_of_pred<CharT>(std::basic_string<CharT>(chars));
+        }
+
+        template <typename StringType, typename Pred>
+        static StringType& ltrim_if(StringType& str, Pred pred)
+        {
+            auto it2 = std::find_if_not(str.begin(), str.end(), pred);
+            str.erase(str.begin(), it2);
+            return str;
+        }
+
+        template <typename StringType, typename Pred>
+        static StringType& rtrim_if(StringType& str, Pred pred)
+        {
+            auto it1 = std::find_if_not(str.rbegin(), str.rend(), pred);
+            str.erase(it1.base(), str.end());
+            return str;
+        }
+
+        template <typename StringType, typename Pred>
+        static StringType ltrim_copy_if(StringType str, Pred pred)
+        {
+            return ltrim_if(str, pred);
+        }
+
+        template <typename StringType, typename Pred>
+        static StringType rtrim_copy(StringType str, Pred pred)
+        {
+            return ltrim_if(str, pred);
+        }
+
+        template <typename StringType, typename Pred>
+        static StringType trim_copy_if(StringType str, Pred pred)
+        {
+            return ltrim_if(rtrim_if(str, pred), pred);
+        }
+
+        template <typename StringType, typename Pred>
+        static StringType& trim_if(StringType& str, Pred pred)
+        {
+            return ltrim_if(rtrim_if(str, pred), pred);
+        }
+
+        template <typename StringType>
+        static decltype(auto) ltrim(StringType&& str)
+        {
+            if constexpr (std::is_same_v <StringType, std::wstring>)
+            {
+                return ltrim_if(str, [](unsigned int ch) { return iswspace(ch); });
+            }
+            else
+            {
+                return ltrim_if(str, [](char ch) { return isspace(ch); });
+            }
+        }
+
+        template <typename StringType>
+        static decltype(auto) rtrim(StringType&& str)
+        {
+            if constexpr (std::is_same_v <StringType, std::wstring>)
+            {
+                return rtrim_if(str, [](unsigned int ch) { return iswspace(ch); });
+            }
+            else
+            {
+                return rtrim_if(str, [](char ch) { return isspace(ch); });
+            }
+        }
+
+        template <typename StringType>
+        static decltype(auto) trim(StringType&& str)
+        {
+            return ltrim_copy(rtrim_copy(str));
+        }
+
+        template <typename StringType>
+        static StringType ltrim_copy(StringType str)
+        {
+            return ltrim(str);
+        }
+
+        template <typename StringType>
+        static StringType rtrim_copy(StringType str)
+        {
+            return rtrim(str);
+        }
+
+        template <typename StringType>
+        static StringType trim_copy(StringType str)
+        {
+            return ltrim_copy(rtrim_copy(str));
+        }
+
+        template <typename StringType, typename Container>
+        StringType join(const Container& c, const StringType& separator)
+        {
+            using CharT = typename StringType::value_type;
+            using Stream = std::basic_ostringstream<CharT>;
+
+            Stream os;
+
+            auto it = std::begin(c);
+            const auto last = std::end(c);
+
+            if (it != last)
+            {
+                os << *it;
+                ++it;
+            }
+
+            while (it != last)
+            {
+                os << separator;
+                os << *it;
+                ++it;
+            }
+
+            return os.str();
+        }
+
+        template <typename StringType, typename Container>
+        StringType join(const Container& c, const typename StringType::value_type* separator)
+        {
+            return join<StringType>(c, StringType(separator));
+        }
+
+        template <typename StringType>
+        StringType format_percent_args(const StringType& fmt, std::initializer_list<StringType> args)
+        {
+            using char_type = typename StringType::value_type;
+
+            std::vector<StringType> values(args);
+
+            StringType result;
+            result.reserve(fmt.size());
+
+            for (std::size_t i = 0; i < fmt.size(); ++i)
+            {
+                if (fmt[i] == char_type('%') && i + 1 < fmt.size())
+                {
+                    std::size_t j = i + 1;
+                    std::size_t index = 0;
+
+                    while (j < fmt.size() &&
+                        fmt[j] >= char_type('0') &&
+                        fmt[j] <= char_type('9'))
+                    {
+                        index = (index * 10) + static_cast<std::size_t>(fmt[j] - char_type('0'));
+                        ++j;
+                    }
+
+                    if (index >= 1 && index <= values.size())
+                    {
+                        result += values[index - 1];
+                        i = j - 1;
+                        continue;
+                    }
+                }
+
+                result += fmt[i];
+            }
+
+            return result;
         }
     }
 }
