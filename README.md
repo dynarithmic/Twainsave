@@ -20,7 +20,7 @@ To get started,
 
 The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
-5) To get help for **Twainsave**:
+5) To get help for **Twainsave**:<br>
     a) issue the **--help** option to list the various options available.  For example:<br>
     `twainsave --help`<br>
     or<br>
@@ -33,7 +33,7 @@ The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opens
     c) There is also [online help](https://www.dynarithmic.com/onlinehelp5/twainsave_opensource/Introduction.html).  Note that the online help is also periodically updated.
 
 ----
-The current open source TwainSave version is **1.4.0**.
+The current open source TwainSave version is **1.4.1**.
 
 ----
 
