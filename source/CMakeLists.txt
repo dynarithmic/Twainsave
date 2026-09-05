@@ -282,11 +282,8 @@ else()
 endif()
 
 set(TEXT_RESOURCE_FILES
-  ${PROJECT_SOURCE_DIR}/text_resources/dtwain32.ini
-  ${PROJECT_SOURCE_DIR}/text_resources/dtwain64.ini
-  ${PROJECT_SOURCE_DIR}/text_resources/twaininfo.txt
-  ${PROJECT_SOURCE_DIR}/text_resources/twainlanguage.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twainsave.ini
+  ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_cantonese.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_dutch.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_english.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_french.txt
@@ -303,6 +300,7 @@ set(TEXT_RESOURCE_FILES
   ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_spanish.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_traditional_chinese.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twainresourcestrings_turkish.txt
+  ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_cantonese.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_dutch.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_english.txt
   ${PROJECT_SOURCE_DIR}/text_resources/twaincustomresources_french.txt
@@ -337,12 +335,12 @@ set(HEADER_FILES ${PROJECT_SOURCE_DIR}/c_cpp_includes/
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/dtwtype.h
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/twain.h
         ${PROJECT_SOURCE_DIR}/c_cpp_includes/winconst.h
-        ${PROJECT_SOURCE_DIR}/twainsave_broker.h
-        ${PROJECT_SOURCE_DIR}/commandline.h
-        ${PROJECT_SOURCE_DIR}/twainsave_app.h
-        ${PROJECT_SOURCE_DIR}/twainsave.h
-        ${PROJECT_SOURCE_DIR}/twainsave_verinfo.h
-        ${PROJECT_SOURCE_DIR}/get_dll_version.h
+        ${PROJECT_SOURCE_DIR}/include/twainsave_broker.h
+        ${PROJECT_SOURCE_DIR}/include/commandline.h
+        ${PROJECT_SOURCE_DIR}/include/twainsave_app.h
+        ${PROJECT_SOURCE_DIR}/include/twainsave.h
+        ${PROJECT_SOURCE_DIR}/include/twainsave_verinfo.h
+        ${PROJECT_SOURCE_DIR}/include/get_dll_version.h
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/acquire_characteristics.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/capability_interface.hpp
         ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/dynarithmic/twain/compiler_details.hpp
@@ -435,20 +433,21 @@ add_executable(twainsave-opensource
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_callback.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_session.cpp
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib/twain_source.cpp
-    ${PROJECT_SOURCE_DIR}/generate_details.cpp
-    ${PROJECT_SOURCE_DIR}/stdafx.cpp
-    ${PROJECT_SOURCE_DIR}/twainsave-opensource.cpp
-    ${PROJECT_SOURCE_DIR}/twainsave_app.cpp
-    ${PROJECT_SOURCE_DIR}/twainsave_broker.cpp
-    ${PROJECT_SOURCE_DIR}/dtwimpl.cpp
-    ${PROJECT_SOURCE_DIR}/commandline.cpp
-    ${PROJECT_SOURCE_DIR}/get_dll_version.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/generate_details.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/stdafx.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/twainsave-opensource.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/twainsave_app.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/twainsave_broker.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/dtwimpl.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/commandline.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/get_dll_version.cpp
     ${HEADER_FILES}
 )
 
 target_include_directories(twainsave-opensource PRIVATE
     ${PROJECT_SOURCE_DIR}/cpp_wrapper_lib
     ${PROJECT_SOURCE_DIR}/c_cpp_includes
+    ${PROJECT_SOURCE_DIR}/include
     ${TWAIN_BOOST_INCLUDE_DIR}
 )
 
@@ -475,7 +474,7 @@ target_compile_definitions(twainsave-opensource PRIVATE
 )
 
 set_property(TARGET twainsave-opensource PROPERTY CXX_STANDARD 17)
-target_sources(twainsave-opensource PRIVATE ${PROJECT_SOURCE_DIR}/twainsave-opensource.rc)
+target_sources(twainsave-opensource PRIVATE ${PROJECT_SOURCE_DIR}/rc/twainsave-opensource.rc)
 if(MSVC)
     target_compile_options(twainsave-opensource PRIVATE /Zc:__cplusplus)
 endif()
