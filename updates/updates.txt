@@ -1,5 +1,10 @@
 TwainSave version changes
 
+1.5.0
+
+The twainsave.ini, dtwain32.ini, and dtwain64.ini files are no longer required to run TwainSave.
+
+
 1.4.1
 
 - Adjust --version option to show DTWAIN DLL version being used
