@@ -33,7 +33,7 @@ The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opens
     c) There is also [online help](https://www.dynarithmic.com/onlinehelp5/twainsave_opensource/Introduction.html).  Note that the online help is also periodically updated.
 
 ----
-The current open source TwainSave version is **1.4.1**.
+The current open source TwainSave version is **1.5.0**.
 
 ----
 
