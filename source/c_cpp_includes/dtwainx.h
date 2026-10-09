@@ -52,6 +52,8 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_GetVersion(LPLONG lpMajor, LPLONG lpMino
 /* DTWAIN Error message handling */
 LONG           DLLENTRY_DEF      DTWAIN_GetLastError(VOID_PROTOTYPE);
 LONG           DLLENTRY_DEF      DTWAIN_SetLastError(LONG nError);
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_GetLastTwainError(LPDWORD rcError, LPDWORD ccError);
+
 
 /* Modal / Modeless TWAIN message operation */
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SetTwainMode(LONG lAcquireMode);
@@ -117,6 +119,8 @@ DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_SetCapValuesEx2(DTWAIN_SOURCE Source,LON
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_GetCapValues(DTWAIN_SOURCE Source,LONG  lCap,LONG  lGetType,LPDTWAIN_ARRAY pArray);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_GetCapValuesEx(DTWAIN_SOURCE Source,LONG  lCap,LONG  lGetType,LONG  lContainerType,LPDTWAIN_ARRAY pArray);
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_GetCapValuesEx2(DTWAIN_SOURCE Source,LONG lCap,LONG lGetType,LONG lContainerType,LONG nDataType,LPDTWAIN_ARRAY pArray );
+
+DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_GetLastCapEnumIndices(DTWAIN_SOURCE Source, LPLONG pCurrentIndex, LPLONG pDefaultIndex);
 
 DTWAIN_BOOL    DLLENTRY_DEF      DTWAIN_EnumSupportedCaps(DTWAIN_SOURCE Source,LPDTWAIN_ARRAY pArray );
 DTWAIN_ARRAY   DLLENTRY_DEF      DTWAIN_EnumSupportedCapsEx(DTWAIN_SOURCE Source);
@@ -495,9 +499,6 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFTextElementFloat(DTWAIN_PDFTEXTELEMENT Tex
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetPDFTextElementLong(DTWAIN_PDFTEXTELEMENT TextElement, LONG val1, LONG val2, LONG Flags);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ResetPDFTextElement(DTWAIN_PDFTEXTELEMENT TextElement);
 DTWAIN_PDFTEXTELEMENT DLLENTRY_DEF DTWAIN_CreatePDFTextElementCopy(DTWAIN_PDFTEXTELEMENT TextElement);
-
-
-
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetPDFTextElementFloat(DTWAIN_PDFTEXTELEMENT TextElement, LPDTWAIN_FLOAT val1, LPDTWAIN_FLOAT val2, LONG Flags);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetPDFTextElementLong(DTWAIN_PDFTEXTELEMENT TextElement, LPLONG val1, LPLONG val2, LONG Flags);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ClearPDFTextElements(DTWAIN_SOURCE Source);
@@ -590,12 +591,6 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_InitExtImageInfo(DTWAIN_SOURCE Source);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_EnumExtImageInfoTypes(DTWAIN_SOURCE Source, LPDTWAIN_ARRAY pArray);
 DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_EnumExtImageInfoTypesEx(DTWAIN_SOURCE Source);
 
-
-/* This function actually initiates the querying of the ext image information.  This function
-   will query the TWAIN Source.  If your TWAIN Source has bugs, this will be where any problem
-   will exist */
-DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetExtImageInfo(DTWAIN_SOURCE Source);
-
 /* This returns the data that the Source returned when the item is queried.  */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetExtImageInfoData(DTWAIN_SOURCE Source, LONG nWhich, LPDTWAIN_ARRAY Data);
 DTWAIN_ARRAY DLLENTRY_DEF DTWAIN_GetExtImageInfoDataEx(DTWAIN_SOURCE Source, LONG nWhich);
@@ -608,7 +603,7 @@ data */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetExtImageInfoItem(DTWAIN_SOURCE Source, LONG nWhich, LPLONG InfoID, LPLONG NumItems, LPLONG Type);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetExtImageInfoItemEx(DTWAIN_SOURCE Source, LONG nWhich, LPLONG InfoID, LPLONG NumItems, LPLONG Type, LPLONG ReturnCode);
 
-/* Uninitializes the Extended Inmage information interface.  This also must be called  */
+/* Uninitializes the Extended Image information interface.  This also must be called  */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_FreeExtImageInfo(DTWAIN_SOURCE Source);
 
 /* Function to control auto-generation of image files produced by DTWAIN */
@@ -1076,6 +1071,16 @@ DTWAIN_BOOL DLLENTRY_DEF DTWAIN_ArrayDestroyAll(VOID_PROTOTYPE);
 /* Set the application's major/minor TW_IDENTITY components */
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetMajorMinorVersion(DWORD nMajor, DWORD nMinor);
 DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetMajorMinorVersion(LPDWORD nMajor, LPDWORD nMinor);
+
+/* Get the pending image transfer count */
+LONG DLLENTRY_DEF DTWAIN_GetPendingXferCount(DTWAIN_SOURCE source);
+
+/* Set the file save type (only available for single page file types) */
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_SetSaveFileType(DTWAIN_SOURCE Source, LONG FileType);
+LONG DLLENTRY_DEF DTWAIN_GetSaveFileType(DTWAIN_SOURCE Source);
+
+/* Get document info (document number, page number, frame number */
+DTWAIN_BOOL DLLENTRY_DEF DTWAIN_GetImageLayoutInfo(DTWAIN_SOURCE Source, LONG lGetType, LPLONG DocumentNumber, LPLONG PageNumber, LPLONG FrameNumber);
 
 #ifdef __cplusplus
 }
