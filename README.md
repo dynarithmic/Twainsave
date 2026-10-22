@@ -79,8 +79,12 @@ will write the details to the file **details.log**
 
        would be a randomly generated pdf file.
 
-7) The **--filetype** command now supports SVG and SVGZ files being generated.  The new types are **svg** and **svgz** respectively.
+7) The **--filetype** command now supports four additional image formats: **SVG**, **SVGZ**, **JPEG-XL**, and **JPEG-XR**. The corresponding command-line options are:
 
+- **SVG**: `--filetype svg`
+- **SVGZ**: `--filetype svgz`
+- **JPEG-XL**: `--filetype jpegxl`
+- **JPEG-XR**: `--filetype jpegxr`
 
  
 ----------
