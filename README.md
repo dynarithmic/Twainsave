@@ -83,8 +83,8 @@ will write the details to the file **details.log**
 
 - **SVG**: `--filetype svg`
 - **SVGZ**: `--filetype svgz`
-- **JPEG-XL**: `--filetype jpegxl`
-- **JPEG-XR**: `--filetype jpegxr`
+- **JPEG-XL**: `--filetype jxl`
+- **JPEG-XR**: `--filetype jxr`
 
  
 ----------
