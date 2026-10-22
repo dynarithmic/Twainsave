@@ -15,10 +15,7 @@ To get started,
 
 3) For 64-bit TwainSave, unzip the [64-bit binaries file](https://github.com/dynarithmic/Twainsave/releases/latest/download/twainsave-binaries-x64.zip) to another empty folder.  You can also set a PATH to this folder, but be aware to run **twainsave64.exe** and not simply **twainsave.exe** if you have set a path to both the 32-bit and 64-bit folders.
 
-4) If when running TwainSave, you receive an error stating that **VCRUNTIME140.dll and MSVCP140.dll are missing**, you will need to install the <a href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170" target="_blank">Visual C++ Redistributables</a> for <a href="https://aka.ms/vs/17/release/vc_redist.x86.exe" target="_blank">X86</a> if you are running the 32-bit TwainSave, and 
-<a href="https://aka.ms/vs/17/release/vc_redist.x64.exe" target="_blank">X64</a> if you will be running the 64-bit version of TwainSave.
-
-The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
+4) The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opensource.exe**, likewise the 64-bit **twainsave64.exe** is exactly the same executable as the 64 bit **twainsave-opensource.exe**.  The reason for the similar files is that the original help documentation referred to **twainsave.exe** and **twainsave64.exe** and not **twainsave-opensource.exe**.  
 
 5) To get help for **Twainsave**:<br>
     a) issue the **--help** option to list the various options available.  For example:<br>
@@ -33,7 +30,14 @@ The 32-bit **twainsave.exe** is exactly the same as the 32-bit **twainsave-opens
     c) There is also [online help](https://www.dynarithmic.com/onlinehelp5/twainsave_opensource/Introduction.html).  Note that the online help is also periodically updated.
 
 ----
-The current open source TwainSave version is **1.5.0**.
+
+The TwainSave binary distribution includes the Microsoft Visual C++ runtime components required by its image-format libraries, including JPEG XL.
+No separate Visual C++ Redistributable installation is normally necessary when using the complete TwainSave binary distribution.  
+
+If you build TwainSave from source or distribute only selected files, you may need to install the latest supported [Microsoft Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) for the appropriate architecture ([x86](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [x64](https://aka.ms/vs/17/release/vc_redist.x64.exe)).  For best compatibility, keep the supplied runtime DLLs in the same directory as the TwainSave executable.  
+
+----
+The current open source TwainSave version is **1.6.0**.
 
 ----
 
