@@ -65,6 +65,6 @@ OF THIRD PARTY RIGHTS.
 #define TWAINSAVE_DEFAULT_TITLE "TwainSave - OpenSource"
 #define TWAINSAVE_INI_FILE "twainsave.ini"
 
-void WriteUnicodeConsole(const std::wstring& text);
+void WriteUnicodeConsole(const std::wstring& text, bool bShowConsole);
 
 #endif

@@ -240,10 +240,10 @@ class twainsave_app
 
         STFCallback m_tsCallback;
         DerivedLogger m_logger;
-        void set_blank_page_options();
-        void set_scale_options();
+        void set_blank_page_options() const;
+        void set_scale_options() const;
         bool set_areaofinterest_options();
-        void set_pdf_options();
+        void set_pdf_options() const;
         bool check_device_options(bool doOptionCheck = true);
         bool set_device_options();
 

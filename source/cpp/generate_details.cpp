@@ -23,7 +23,7 @@ std::string generate_details(dynarithmic::twain::twain_session* pSession, twains
     return pSession->get_details(details_info());
 }
 
-std::string generate_dtwainversion_info(dynarithmic::twain::twain_session* pSession)
+std::wstring generate_dtwainversion_info(twain_session* pSession)
 {
 	twain_session ts(startup_mode::none);
 	if (!pSession)
@@ -37,8 +37,8 @@ std::string generate_dtwainversion_info(dynarithmic::twain::twain_session* pSess
     // Get the DTWAIN version loaded
     if (started || (!started && iter == all_errors.end()))
     {
-        char szShortVersion[256] = {};
-        API_INSTANCE DTWAIN_GetShortVersionStringA(szShortVersion, 256);
+        wchar_t szShortVersion[256] = {};
+        API_INSTANCE DTWAIN_GetShortVersionStringW(szShortVersion, 256);
         return szShortVersion;
     }
     return {};

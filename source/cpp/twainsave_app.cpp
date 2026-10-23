@@ -28,7 +28,6 @@ OF THIRD PARTY RIGHTS.
 #include <dynarithmic/twain/types/eternal_map/include/mapbox/eternal.hpp>
 #include <dynarithmic/twain/utilities/string_utilities.hpp>
 #include <string>
-#include <iostream>
 #include <utility>
 #include <iomanip>
 #include <numeric>
@@ -38,12 +37,10 @@ OF THIRD PARTY RIGHTS.
 #include <unordered_map>
 #include <algorithm>
 #include <fstream>
-#include <iostream>
 #include <array>
 #include "..\simpleini\SimpleIni.h"
 #include "twainsave_verinfo.h"
 #include "twainsave.h"
-#include "twainsave_broker.h"
 #include "twainsave_opensource.h"
 #include "commandline.h"
 #include "generate_details.h"
@@ -219,7 +216,17 @@ MAPBOX_ETERNAL_CONSTEXPR const auto g_PDFEncryptMapOff = mapbox::eternal::map<st
     INIT_TYPE(none, pdf_options::pdf_permission, all)
     });
 
+static std::set<std::string> s_SetConsoleOn = {"details", "optioncheck", "devicelist", "help", "version"};
+
 using namespace dynarithmic::twain;
+
+static std::wstring MakeWide(const std::string& input)
+{
+    std::wstring out;
+    for (auto ch : input)
+        out.push_back(ch);
+    return out;
+}
 
 template <typename SelectType>
 twain_source select_the_source(twain_session& tsession, SelectType s)
@@ -248,36 +255,38 @@ static bool constexpr is_booltype()
 template <typename T, bool isRange = false>
 static void options_writer(twain_source& theSource, std::string entry, const std::vector<T>& testArray, T value, bool valuefound)
 {
-
+    std::ostringstream strmOut;
     if constexpr (is_stringtype<T>())
-        std::cout << (valuefound ? "Success!  " : "Sorry : ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
+        strmOut << (valuefound ? "Success!  " : "Sorry : ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
         << " support the value " << std::quoted(value) << " that you are using for --" << entry << "\n";
     else
-        std::cout << (valuefound ? "Success!  " : "Sorry : ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
+        strmOut << (valuefound ? "Success!  " : "Sorry : ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (valuefound ? " " : " not ")
         << " support the value " << value << " that you are using for --" << entry << "\n";
     if (!valuefound)
     {
-        std::cout << "\nThe allowable values for --" << entry << " are as follows";
+        strmOut << "\nThe allowable values for --" << entry << " are as follows";
         if constexpr (isRange && is_rangeable<T>())
         {
-            std::cout << " (as a range):\n";
-            dynarithmic::twain::twain_range<double> testRangeX(testArray);
-            std::cout << "Minimum Value: " << testRangeX.get_min() << "\n";
-            std::cout << "Maximum Value: " << testRangeX.get_max() << "\n";
-            std::cout << "Step Value: " << testRangeX.get_step() << "\n";
+            strmOut << " (as a range):\n";
+            twain_range<double> testRangeX(testArray);
+            strmOut << "Minimum Value: " << testRangeX.get_min() << "\n";
+            strmOut << "Maximum Value: " << testRangeX.get_max() << "\n";
+            strmOut << "Step Value: " << testRangeX.get_step() << "\n";
         }
         else
         {
-            std::cout << ":\n";
+            strmOut << ":\n";
             for (auto& v : testArray)
             {
                 if constexpr (is_stringtype<T>())
-                    std::cout << std::quoted(v) << "\n";
+                    strmOut << std::quoted(v) << "\n";
                 else
-                    std::cout << v << "\n";
+                    strmOut << v << "\n";
             }
         }
     }
+    std::wstring outWide = MakeWide(strmOut.str());
+    WriteUnicodeConsole(outWide, true);
 }
 
 template <typename T>
@@ -285,24 +294,27 @@ struct RangeCharacteristicTester
 {
     static void test(twain_source& theSource, std::string entry, T value, int capvalue = 0)
     {
+        std::ostringstream strmOut;
         // now test if the device can actually use the value set
         std::vector<T> testArray;
         if constexpr (is_stringtype<T>())
-            std::cout << "Testing if " << std::quoted(value) << " can be used...\n";
+            strmOut << "Testing if " << std::quoted(value) << " can be used...\n";
         else
-            std::cout << "Testing if " << value << " can be used...\n";
+            strmOut << "Testing if " << value << " can be used...\n";
 
         // Get all the values supported
         testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
 
         // Test if the returned array suggests that the values are in a range
-        dynarithmic::twain::twain_range<T> testRangeX(testArray);
+        twain_range<T> testRangeX(testArray);
         if (testRangeX.is_valid())
             // Handle this as a range and test if value is in the range's domain
             options_writer<T, true>(theSource, entry, testArray, value, testRangeX.value_exists(value));
         else
             // Not a range, so the values in the array are discrete values that can be tested with value
             options_writer(theSource, entry, testArray, value, std::find(testArray.begin(), testArray.end(), value) != testArray.end());
+        std::wstring sOut = MakeWide(strmOut.str());
+        WriteUnicodeConsole(sOut, true);
     }
 };
 
@@ -313,7 +325,10 @@ struct GenericCharacteristicTester
     {
         // now test if the device can actually use the value set
         std::vector<T> testArray;
-        std::cout << "Testing if " << value << " can be used...\n";
+        std::ostringstream strmOut;
+        strmOut << "Testing if " << value << " can be used...\n";
+        std::wstring sOut = MakeWide(strmOut.str());
+        WriteUnicodeConsole(sOut, true);
         testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
         options_writer(theSource, entry, testArray, value, std::find(testArray.begin(), testArray.end(), value) != testArray.end());
     }
@@ -322,11 +337,14 @@ struct GenericCharacteristicTester
 template <typename K, typename V, typename mapType = std::map<K, V>>
 bool MapCharacteristicTester(twain_source& theSource, std::string entry, mapType& testMap, const K& value, int capvalue)
 {
+    std::ostringstream strmOut;
     std::vector<V> testArray;
     if constexpr (is_stringtype<K>())
-        std::cout << "Testing if " << std::quoted(value) << " can be used...\n";
+        strmOut << "Testing if " << std::quoted(value) << " can be used...\n";
     else
-        std::cout << "Testing if " << value << " can be used...\n";
+        strmOut << "Testing if " << value << " can be used...\n";
+    std::wstring sOut = MakeWide(strmOut.str());
+    WriteUnicodeConsole(sOut, true);
     auto iterForMapKey = testMap.find(value);
     testArray = theSource.get_capability_interface().get_cap_values<decltype(testArray)>(capvalue, capability_interface::get());
 
@@ -385,6 +403,16 @@ struct sAdditionalTest
     bool testCapOnly = false;
 };
 
+template <typename T, typename ValueTester = DummyCharacteristicTester<T>>
+std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // TWAIN source
+    const T& value, // value to test
+    const po::variables_map& varmap,
+    const std::string& entry,
+    bool bSkipEntryCheck,
+    int capvalue,
+    const sAdditionalTest& additionalTest = { false, false, false });
+
+
 template <typename K, typename V, typename mapType = std::map<K, V>>
 void test_mapped_values(twain_source& mysource, const po::variables_map& varmap, bool doOptionCheck,
     std::map<std::string, bool>& mapOptions, mapType& mapUserOptions,
@@ -408,17 +436,21 @@ void test_mapped_values(twain_source& mysource, const po::variables_map& varmap,
     else
         mapOptions.insert({ entry, false });
     if (!doOptionCheck)
-        std::cout << std::string(120, '-') << "\n";
+    {
+        std::ostringstream strmOut;
+        strmOut << std::string(120, '-') << "\n";
+        WriteUnicodeConsole(MakeWide(strmOut.str()), true);
+    }
 }
 
-template <typename T, typename ValueTester = DummyCharacteristicTester<T>>
+template <typename T, typename ValueTester>
 std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // TWAIN source
     const T& value, // value to test
     const po::variables_map& varmap,
     const std::string& entry,
     bool bSkipEntryCheck,
     int capvalue,
-    const sAdditionalTest& additionalTest = { false, false, false })
+    const sAdditionalTest& additionalTest)
 {
     bool issupported = false;
     auto iter = varmap.find(entry);
@@ -426,10 +458,11 @@ std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // T
     {
         if (bSkipEntryCheck || !iter->second.defaulted())
         {
+            std::ostringstream strmOut;
             if (capvalue)
             {
                 if (!bSkipEntryCheck)
-                    std::cout << "Checking if device supports --" << entry << " ...\n";
+                    strmOut << "Checking if device supports --" << entry << " ...\n";
                 // test if the source supports what we're supposed to be setting later
                 issupported = theSource.get_capability_interface().is_cap_supported(capvalue);
 
@@ -439,27 +472,29 @@ std::pair<std::string, bool> test_twainsave_option(twain_source& theSource, // T
                     if (!additionalTest.testCapOnly)
                         issupported = BoolCharacteristicTester::test(theSource, capvalue);
                     if (!bSkipEntryCheck)
-                        std::cout << (issupported ? "Success!  " : "Sorry: ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
+                        strmOut << (issupported ? "Success!  " : "Sorry: ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
                         << "support the \"--" << entry << "\" option\n";
                 }
                 else
-                    // Test for the value only if we are not doing map testing
-                    if (!bSkipEntryCheck && !additionalTest.testMapValue)
-                    {
-                        std::cout << (issupported ? "Success!  " : "Sorry: ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
-                            << "support the \"--" << entry << "\" option\n";
-                        if (issupported)
-                            ValueTester::test(theSource, entry, value, capvalue);
-                    }
+                // Test for the value only if we are not doing map testing
+                if (!bSkipEntryCheck && !additionalTest.testMapValue)
+                {
+                    strmOut << (issupported ? "Success!  " : "Sorry: ") << "The TWAIN device \"" << theSource.get_source_info().get_product_name() << "\" does" << (issupported ? " " : " not ")
+                        << "support the \"--" << entry << "\" option\n";
+                    if (issupported)
+                        ValueTester::test(theSource, entry, value, capvalue);
+                }
             }
             if (!bSkipEntryCheck && !additionalTest.testMapValue)
-                std::cout << std::string(120, '-') << "\n";
+                strmOut << std::string(120, '-') << "\n";
+            std::wstring sOut = MakeWide(strmOut.str());
+            WriteUnicodeConsole(sOut, true);
         }
     }
     return { entry, issupported };
 }
 
-std::string resolve_extension(std::string filetype)
+static std::string resolve_extension(std::string filetype)
 {
     if (boost::starts_with(filetype, "tif"))
         return "tif";
@@ -475,14 +510,14 @@ std::string resolve_extension(std::string filetype)
     return filetype;
 }
 
-std::string GetTwainSaveExecutionPath()
+static std::string GetTwainSaveExecutionPath()
 {
     const auto symlocation = boost::dll::symbol_location(TWAINSAVE_VERINFO_ORIGINALFILENAME);
     return symlocation.parent_path().string();
 }
 
 
-int NumDigits(int x)
+static int NumDigits(int x)
 {
     x = abs(x);
     return (x < 10 ? 1 :
@@ -497,37 +532,97 @@ int NumDigits(int x)
                         10)))))))));
 }
 
-scanner_options::scanner_options() : twainsave_return_value(RETURN_OK),
-                                        m_nOverwriteCount(1),
-                                        m_nOverwriteWidth(1),
-    m_MapMode2Map{ {"bmp1_mode2",{dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::none}},
-                {"bmp2_mode2",{ dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::rle4}},
-                {"bmp3_mode2",{ dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::rle8}},
-                {"bmp4_mode2",{ dynarithmic::twain::filetype_value::bmp_source_mode, dynarithmic::twain::compression_value::bitfields}},
-                {"dejavu_mode2",{ dynarithmic::twain::filetype_value::dejavu_source_mode, dynarithmic::twain::compression_value::none}},
-                { "exif_mode2",{ dynarithmic::twain::filetype_value::exif_source_mode, dynarithmic::twain::compression_value::none }},
-                { "fpx_mode2",{ dynarithmic::twain::filetype_value::fpx_source_mode, dynarithmic::twain::compression_value::none }},
-                { "jfif_mode2",{ dynarithmic::twain::filetype_value::jfif_source_mode, dynarithmic::twain::compression_value::jpeg }},
-                { "jpeg_mode2",{ dynarithmic::twain::filetype_value::jpeg, dynarithmic::twain::compression_value::none }},
-                { "jp2_mode2",{ dynarithmic::twain::filetype_value::jp2_source_mode, dynarithmic::twain::compression_value::jpeg2000 }},
-                { "jpx_mode2",{ dynarithmic::twain::filetype_value::jpx_source_mode, dynarithmic::twain::compression_value::none }},
-                { "pdf_mode2",{ dynarithmic::twain::filetype_value::pdf_source_mode, dynarithmic::twain::compression_value::none } },
-                { "pdfa1_mode2",{ dynarithmic::twain::filetype_value::pdfa_source_mode, dynarithmic::twain::compression_value::none } },
-                { "pdfa2_mode2",{ dynarithmic::twain::filetype_value::pdfa2_source_mode, dynarithmic::twain::compression_value::none } },
-                { "pict_mode2",{ dynarithmic::twain::filetype_value::pict_source_mode, dynarithmic::twain::compression_value::none } },
-                { "png_mode2",{ dynarithmic::twain::filetype_value::png_source_mode, dynarithmic::twain::compression_value::png } },
-                { "spiff1_mode2",{ dynarithmic::twain::filetype_value::spiff_source_mode, dynarithmic::twain::compression_value::jpeg } },
-                { "spiff2_mode2",{ dynarithmic::twain::filetype_value::spiff_source_mode, dynarithmic::twain::compression_value::jbig } },
-                { "tiff1_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::none } },
-                { "tiff2_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::group31D } },
-                { "tiff3_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::group31DEOL } },
-                { "tiff4_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::group32D } },
-                { "tiff5_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::group4} },
-                { "tiff6_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::jpeg } },
-                { "tiff7_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::lzw } },
-                { "tiff8_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::jbig } },
-                { "tiff9_mode2",{ dynarithmic::twain::filetype_value::tiff_source_mode, dynarithmic::twain::compression_value::zip } },
-                { "xbm_mode2",{ dynarithmic::twain::filetype_value::xbm_source_mode, dynarithmic::twain::compression_value::none} } }
+scanner_options::scanner_options() : m_bUseADFOrFlatbed(false), m_bCreateDir(false), m_bAutobrightMode(false),
+                                     m_brightness(0), m_dContrast(0),
+                                     m_dGamma(0),
+                                     m_bitsPerPixel(0),
+                                     m_bStartBroker(false), m_color(0),
+                                     m_nPrinter(0),
+                                     m_bUseDuplex(false),
+                                     m_bDeskew(false),
+                                     m_bShowDetails(false),
+                                     m_bShowHelp(false),
+                                     m_bAutoRotateMode(false),
+                                     m_Orientation(0), m_bNoUI(false),
+                                     m_dHighlight(0),
+                                     m_dThreshold(0), m_dRotation(0),
+                                     m_bShowIndicator(false),
+                                     m_bShowUIOnly(false),
+                                     m_dShadow(0),
+                                     m_bNoBlankPages(false), m_bNoConsole(false),
+                                     m_bNoPause(false),
+                                     m_dResolution(0),
+                                     m_dBlankThreshold(0),
+                                     m_bNegateImage(false),
+                                     m_bSelectByDialog(false),
+                                     m_bSelectDefault(false),
+                                     m_bUIPerm(false),
+                                     m_nOverwriteMode(0), m_nOverwriteMax(0),
+                                     m_bOverscanMode(false),
+                                     m_bOptionCheck(false), m_NumPages(0),
+                                     m_bNoUIWait(false),
+                                     m_NoUIWaitTime(0),
+                                     m_bSaveOnCancel(false),
+                                     m_bShowVersion(false),
+                                     m_bMultiPage(false),
+                                     m_bMultiPage2(false),
+                                     m_bShowProductNames(false),
+                                     m_bUseDSM2(false),
+                                     m_DSMSearchOrder(0),
+                                     m_bUseFileInc(false), m_FileIncrement(0),
+                                     m_nTransferMode(0),
+                                     m_nDiagnose(0),
+                                     m_bUseTransparencyUnit(false),
+                                     m_nJobControl(0), m_nJpegQuality(0),
+                                     twainsave_return_value(RETURN_OK),
+                                     m_bUseVerbose(false),
+                                     m_nOverwriteCount(1),
+                                     m_nOverwriteWidth(1),
+                                     m_MapMode2Map{
+                                         {"bmp1_mode2", {filetype_value::bmp_source_mode, compression_value::none}},
+                                         {"bmp2_mode2", {filetype_value::bmp_source_mode, compression_value::rle4}},
+                                         {"bmp3_mode2", {filetype_value::bmp_source_mode, compression_value::rle8}},
+                                         {
+                                             "bmp4_mode2",
+                                             {filetype_value::bmp_source_mode, compression_value::bitfields}
+                                         },
+                                         {
+                                             "dejavu_mode2",
+                                             {filetype_value::dejavu_source_mode, compression_value::none}
+                                         },
+                                         {"exif_mode2", {filetype_value::exif_source_mode, compression_value::none}},
+                                         {"fpx_mode2", {filetype_value::fpx_source_mode, compression_value::none}},
+                                         {"jfif_mode2", {filetype_value::jfif_source_mode, compression_value::jpeg}},
+                                         {"jpeg_mode2", {filetype_value::jpeg, compression_value::none}},
+                                         {"jp2_mode2", {filetype_value::jp2_source_mode, compression_value::jpeg2000}},
+                                         {"jpx_mode2", {filetype_value::jpx_source_mode, compression_value::none}},
+                                         {"pdf_mode2", {filetype_value::pdf_source_mode, compression_value::none}},
+                                         {"pdfa1_mode2", {filetype_value::pdfa_source_mode, compression_value::none}},
+                                         {"pdfa2_mode2", {filetype_value::pdfa2_source_mode, compression_value::none}},
+                                         {"pict_mode2", {filetype_value::pict_source_mode, compression_value::none}},
+                                         {"png_mode2", {filetype_value::png_source_mode, compression_value::png}},
+                                         {"spiff1_mode2", {filetype_value::spiff_source_mode, compression_value::jpeg}},
+                                         {"spiff2_mode2", {filetype_value::spiff_source_mode, compression_value::jbig}},
+                                         {"tiff1_mode2", {filetype_value::tiff_source_mode, compression_value::none}},
+                                         {
+                                             "tiff2_mode2",
+                                             {filetype_value::tiff_source_mode, compression_value::group31D}
+                                         },
+                                         {
+                                             "tiff3_mode2",
+                                             {filetype_value::tiff_source_mode, compression_value::group31DEOL}
+                                         },
+                                         {
+                                             "tiff4_mode2",
+                                             {filetype_value::tiff_source_mode, compression_value::group32D}
+                                         },
+                                         {"tiff5_mode2", {filetype_value::tiff_source_mode, compression_value::group4}},
+                                         {"tiff6_mode2", {filetype_value::tiff_source_mode, compression_value::jpeg}},
+                                         {"tiff7_mode2", {filetype_value::tiff_source_mode, compression_value::lzw}},
+                                         {"tiff8_mode2", {filetype_value::tiff_source_mode, compression_value::jbig}},
+                                         {"tiff9_mode2", {filetype_value::tiff_source_mode, compression_value::zip}},
+                                         {"xbm_mode2", {filetype_value::xbm_source_mode, compression_value::none}}
+                                     }
 {
     m_errorLevels[0] = DTWAIN_LOG_USEFILE | DTWAIN_LOG_CALLSTACK;
     m_errorLevels[1] = m_errorLevels[0] | DTWAIN_LOG_DECODE_DEST | DTWAIN_LOG_DECODE_SOURCE;
@@ -547,7 +642,7 @@ twainsave_app::parse_return_type twainsave_app::parse_options(int argc, char* ar
     default_name = boost::uuids::to_string(uuid);
     descript_name = default_name;
     std::replace_if(descript_name.begin(), descript_name.end(), [&](char ch) { return ch != '-'; }, 'x');
-    po::command_line_style::style_t style = po::command_line_style::style_t(po::command_line_style::unix_style);
+    po::command_line_style::style_t style = po::command_line_style::unix_style;
     desc2 = std::make_unique<po::options_description>();
     try
     {
@@ -672,7 +767,7 @@ twainsave_app::parse_return_type twainsave_app::parse_config_options(const std::
     return parse_options(static_cast<int>(args.size()), args.data());
 }
 
-void twainsave_app::set_blank_page_options()
+void twainsave_app::set_blank_page_options() const
 {
     auto& varmap = m_parse_return_type.second;
     if (!varmap["noblankpages"].defaulted())
@@ -692,7 +787,7 @@ void twainsave_app::set_blank_page_options()
     }
 }
 
-void twainsave_app::set_scale_options()
+void twainsave_app::set_scale_options() const
 {
     auto& varmap = m_parse_return_type.second;
     if (!varmap["scale"].defaulted())
@@ -728,7 +823,7 @@ bool twainsave_app::set_areaofinterest_options()
         }
         if (area_values.size() == 4)
         {
-            dynarithmic::twain::twain_frame<double> tf(area_values[0], area_values[1], area_values[2], area_values[3]);
+            twain_frame<double> tf(area_values[0], area_values[1], area_values[2], area_values[3]);
             ac.get_pages_options().set_frame(tf);
         }
         else
@@ -740,7 +835,7 @@ bool twainsave_app::set_areaofinterest_options()
     return true;
 }
 
-void twainsave_app::set_pdf_options()
+void twainsave_app::set_pdf_options() const
 {
     auto& varmap = m_parse_return_type.second;
     if (boost::any_cast<std::string>(varmap["filetype"].value()) == "pdf")
@@ -765,34 +860,34 @@ void twainsave_app::set_pdf_options()
         {
             uint32_t width, height;
             strm >> width >> height;
-            pagesizeopts.set_custom_size(width, height).set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::custom);
+            pagesizeopts.set_custom_size(width, height).set_custom_option(pdf_options::pdf_paper_size_custom::custom);
         }
         else
             if (word == "variable")
-                pagesizeopts.set_custom_option(dynarithmic::twain::pdf_options::pdf_paper_size_custom::variable);
+                pagesizeopts.set_custom_option(pdf_options::pdf_paper_size_custom::variable);
             else
                 pagesizeopts.set_page_size(g_PaperSizeMap.at(pdf_commands.m_strPaperSize));
 
         // get PDF scale options
         {
             auto& pagescaleopts = pdfopts.get_page_scale_options();
-            std::istringstream strm(pdf_commands.m_strPaperSize);
-            std::string word;
-            strm >> word;
+            std::istringstream strmIn(pdf_commands.m_strPaperSize);
+            std::string wordIn;
+            strmIn >> wordIn;
 
-            if (word == "custom")
+            if (wordIn == "custom")
             {
                 double xscale, yscale;
-                strm >> xscale >> yscale;
+                strmIn >> xscale >> yscale;
                 pagescaleopts.set_custom_scale(xscale, yscale);
-                pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::custom);
+                pagescaleopts.set_page_scale(pdf_options::pdf_page_scale::custom);
             }
             else
-                if (word == "fitpage")
-                    pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::fitpage);
-                else
-                    if (word == "noscale")
-                        pagescaleopts.set_page_scale(dynarithmic::twain::pdf_options::pdf_page_scale::none);
+            if (wordIn == "fitpage")
+                pagescaleopts.set_page_scale(pdf_options::pdf_page_scale::fitpage);
+            else
+            if (wordIn == "noscale")
+                pagescaleopts.set_page_scale(pdf_options::pdf_page_scale::none);
         }
         // encryption
         bool encryption_on = boost::any_cast<bool>(varmap["pdfencrypt"].value());
@@ -829,7 +924,7 @@ void twainsave_app::set_pdf_options()
             std::vector<std::string>::size_type i;
 
             // set of our permissions
-            std::set<dynarithmic::twain::pdf_options::pdf_permission> permissionContainer;
+            std::set<pdf_options::pdf_permission> permissionContainer;
             for (i = 0; i < sAllPermissions.size(); ++i)
             {
                 if (sAllPermissions[i] == "none")
@@ -897,7 +992,6 @@ bool twainsave_app::set_device_options()
         auto& fOptions = ac.get_file_transfer_options();
         if (type1)
         {
-            auto multipage_type = file_type_info::get_multipage_type(iterFileType->second);
             fOptions.set_type(iterFileType->second);
             s_options.m_dtwain_filetype = iterFileType->second;
             ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
@@ -1050,22 +1144,22 @@ bool twainsave_app::check_device_options(bool doOptionCheck)
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(*g_source, s_options.m_brightness, varmap, "brightness", doOptionCheck, ICAP_BRIGHTNESS));
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(*g_source, s_options.m_dContrast, varmap, "contrast", doOptionCheck, ICAP_CONTRAST));
         mapOptions.insert(test_twainsave_option<double, RangeCharacteristicTester<double>>(*g_source, s_options.m_dShadow, varmap, "shadow", doOptionCheck, ICAP_SHADOW));
-        mapOptions.insert(test_twainsave_option(*g_source, s_options.m_strImprinter.empty() ? false : true, varmap, "imprinterstring", doOptionCheck, CAP_PRINTER));
+        mapOptions.insert(test_twainsave_option(*g_source, !(s_options.m_strImprinter.empty()), varmap, "imprinterstring", doOptionCheck, CAP_PRINTER));
         mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(*g_source, s_options.m_nPrinter, varmap, "imprinter", doOptionCheck, CAP_PRINTER));
         mapOptions.insert(test_twainsave_option<TW_UINT16, GenericCharacteristicTester<TW_UINT16>>(*g_source, s_options.m_color, varmap, "color", doOptionCheck, ICAP_PIXELTYPE));
 
         // These need to be tested using a map, since the values entered by the user will be strings that are associated with
         // a TWAIN value.
-        test_mapped_values<stringview, dynarithmic::twain::units_value::value_type, decltype(g_MeasureUnitMap)>(*g_source, varmap, doOptionCheck, mapOptions,
+        test_mapped_values<stringview, units_value::value_type, decltype(g_MeasureUnitMap)>(*g_source, varmap, doOptionCheck, mapOptions,
             g_MeasureUnitMap, "unitofmeasure", s_options.m_strUnitOfMeasure, ICAP_UNITS);
 
-        test_mapped_values<stringview, dynarithmic::twain::papersize_value::value_type, decltype(g_PaperSizeMap)>
+        test_mapped_values<stringview, papersize_value::value_type, decltype(g_PaperSizeMap)>
             (*g_source, varmap, doOptionCheck, mapOptions, g_PaperSizeMap, "papersize", s_options.m_strPaperSize, ICAP_SUPPORTEDSIZES);
 
-        test_mapped_values<int, dynarithmic::twain::orientation_value::value_type, decltype(g_OrientationTypeMap)>(*g_source, varmap, doOptionCheck, mapOptions,
+        test_mapped_values<int, orientation_value::value_type, decltype(g_OrientationTypeMap)>(*g_source, varmap, doOptionCheck, mapOptions,
             g_OrientationTypeMap, "orientation", s_options.m_Orientation, ICAP_ORIENTATION);
 
-        test_mapped_values<int, dynarithmic::twain::jobcontrol_value::value_type, decltype(g_JobControlMap)>(*g_source, varmap, doOptionCheck, mapOptions,
+        test_mapped_values<int, jobcontrol_value::value_type, decltype(g_JobControlMap)>(*g_source, varmap, doOptionCheck, mapOptions,
             g_JobControlMap, "jobcontrol", s_options.m_nJobControl, CAP_JOBCONTROL);
 
         if (doOptionCheck)
@@ -1079,11 +1173,14 @@ bool twainsave_app::check_device_options(bool doOptionCheck)
                 vOptionCheck.push_back(pr);
 
             auto iter = std::stable_partition(vOptionCheck.begin(), vOptionCheck.end(), [&](auto& pr) { return pr.second; });
-            std::cout << "For device: \"" << g_source->get_source_info().get_product_name() << "\", the following device-dependent option list was generated : \n\n";
-            std::cout << "Supported option(s):\n";
-            std::for_each(vOptionCheck.begin(), iter, [&](auto& pr) { std::cout << "--" << pr.first << "\n"; });
-            std::cout << "\nUnsupported option(s):\n";
-            std::for_each(iter, vOptionCheck.end(), [&](auto& pr) { std::cout << "--" << pr.first << "\n"; });
+            std::ostringstream strmOut;
+            strmOut << "For device: \"" << g_source->get_source_info().get_product_name() << "\", the following device-dependent option list was generated : \n\n";
+            strmOut << "Supported option(s):\n";
+            std::for_each(vOptionCheck.begin(), iter, [&](auto& pr) { strmOut << "--" << pr.first << "\n"; });
+            strmOut << "\nUnsupported option(s):\n";
+            std::for_each(iter, vOptionCheck.end(), [&](auto& pr) { strmOut << "--" << pr.first << "\n"; });
+            std::wstring sOut = MakeWide(strmOut.str());
+            WriteUnicodeConsole(sOut, true);
             s_options.set_return_code(RETURN_OK);
             return false;
         }
@@ -1092,17 +1189,34 @@ bool twainsave_app::check_device_options(bool doOptionCheck)
 }
 
 
-int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSession)
+int twainsave_app::start_acquisitions(twain_session* pSession)
 {
     auto& varmap = m_parse_return_type.second;
-    if (s_options.m_bNoConsole)
+    bool alwaysShowConsole = false;
+    for (auto &curOption : s_SetConsoleOn)
+    {
+        auto defaultIter = varmap.find(curOption);
+        if (!defaultIter->second.defaulted())
+        {
+            alwaysShowConsole = true;
+            s_options.m_bNoConsole = false;
+            break;
+        }
+    }
+
+    if (s_options.m_bNoConsole && !alwaysShowConsole)
         ShowWindow(GetConsoleWindow(), SW_HIDE);
     auto defaultIter = varmap.find("version");
     if (!defaultIter->second.defaulted())
     {
-        std::cout << TWAINSAVE_VERINFO_ORIGINALFILENAME << " " << TWAINSAVE_FULL_VERSION << "\n";
-        std::string dtwain_version = generate_dtwainversion_info(pSession);
-        std::cout << "DTWAIN DLL version: " << dtwain_version << "\n";
+        std::wstring sOut = WIDEN(TWAINSAVE_VERINFO_ORIGINALFILENAME);
+        sOut += WIDEN(" ");
+        sOut += WIDEN(TWAINSAVE_FULL_VERSION);
+        sOut += WIDEN("\n");
+        WriteUnicodeConsole(sOut, true);
+        std::wstring dtwain_version = generate_dtwainversion_info(pSession);
+        sOut = WIDEN("DTWAIN DLL version: ") + dtwain_version + WIDEN("\n");
+        WriteUnicodeConsole(sOut, true);
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
@@ -1110,7 +1224,9 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
     defaultIter = varmap.find("help");
     if (!defaultIter->second.defaulted())
     {
-        std::cout << *desc2;
+        std::ostringstream strmOut;
+        strmOut << *desc2;
+        WriteUnicodeConsole(MakeWide(strmOut.str()), true);
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
@@ -1118,14 +1234,9 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
     defaultIter = varmap.find("details");
     if (!defaultIter->second.defaulted())
     {
-        auto s = generate_details(pSession, this);
-        if (s_options.m_bNoConsole)
-        {
-            DWORD d;
-            WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
-        }
-        else
-            std::cout << s;
+        std::ostringstream strmOut;
+        strmOut << generate_details(pSession, this);
+        WriteUnicodeConsole(MakeWide(strmOut.str()), true);
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
@@ -1133,14 +1244,9 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
     defaultIter = varmap.find("devicelist");
     if (!defaultIter->second.defaulted())
     {
-        auto s = generate_productnames(pSession);
-        if (s_options.m_bNoConsole)
-        {
-            DWORD d;
-            WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
-        }
-        else
-            std::cout << s;
+        std::ostringstream strmOut;
+        strmOut << generate_productnames(pSession);
+        WriteUnicodeConsole(MakeWide(strmOut.str()), true);
         s_options.set_return_code(RETURN_OK);
         return RETURN_OK;
     }
@@ -1163,7 +1269,6 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
     iter = varmap.find("diagnose");
     if (!iter->second.defaulted())
     {
-        bool logging_enabled = (iter != varmap.end());
         if (iter != varmap.end())
         {
             // create a logger and set the twain session to use the logger
@@ -1176,7 +1281,15 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
                 if (s_options.m_DiagnoseLog == "*")
                     logdetails.set_destination(DerivedLogger::logger_destination::todebug);
                 else
-                    logdetails.set_filename(s_options.m_DiagnoseLog);
+                {
+                    if (s_options.m_DiagnoseLog == "$console")
+                    {
+                        logdetails.set_destination(DerivedLogger::logger_destination::toconsole);
+                        logdetails.set_filename({});
+                    }
+                    else
+                        logdetails.set_filename(s_options.m_DiagnoseLog);
+                }
             }
             else
             {
@@ -1225,7 +1338,8 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
                 auto dllExists = API_INSTANCE DTWAIN_IsFileTypeSupported(DTWAIN_JPEGXL);
                 if (!dllExists)
                 {
-                    s_options.m_strDTWAINError = sessionToUse->get_resource_string_wide(sessionToUse->get_last_error());
+                    s_options.m_strDTWAINError = twain_session::get_resource_string_wide(
+                        twain_session::get_last_error());
                     sessionToUse->stop();
                     s_options.set_return_code(RETURN_JPEGXL_LIBRARY_ERROR);
                     return RETURN_JPEGXL_LIBRARY_ERROR;
@@ -1347,10 +1461,10 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
             auto acq_return = g_source->acquire();
 
             // Get the return status of the acquisition
-            if (acq_return.first == dynarithmic::twain::twain_source::acquire_timeout)
+            if (acq_return.first == twain_source::acquire_timeout)
                 s_options.set_return_code(RETURN_TIMEOUT_REACHED);
             else
-                if (acq_return.first == dynarithmic::twain::twain_source::acquire_canceled || acq_return.first == dynarithmic::twain::twain_source::acquire_ok)
+                if (acq_return.first == twain_source::acquire_canceled || acq_return.first == twain_source::acquire_ok)
                     s_options.set_return_code(RETURN_OK);
                 else
                     s_options.set_return_code(RETURN_FILESAVE_ERROR);
@@ -1390,7 +1504,7 @@ void twainsave_app::load_resources_from_rc()
     // Load the error strings
     for (int curError = 0; curError < RETURN_CODE_LAST; ++curError)
     {
-        if (::LoadStringW(hMod, curError, szBuffer, DTWAIN_USERRES_MAXSIZE))
+        if (LoadStringW(hMod, curError, szBuffer, DTWAIN_USERRES_MAXSIZE))
             s_options.m_StandardReturnCodesMap[curError] = szBuffer;
     }
 }
@@ -1436,6 +1550,7 @@ void twainsave_app::load_custom_resources_from_ini()
         auto errorValue = customProfile.GetValue("Error Messages", errorKey.c_str(), "");
         if (errorValue)
         {
+            s_options.m_ReturnCodesMap[curError] = MakeWide(errorValue);
             std::string sErrorValue = errorValue;
             std::wstring wError;
             for (auto ch : sErrorValue)
@@ -1467,7 +1582,7 @@ void twainsave_app::reload_custom_resources()
     }
 }
 
-std::wstring UTF8ToWide(const std::string& utf8)
+static std::wstring UTF8ToWide(const std::string& utf8)
 {
     if (utf8.empty())
         return {};
@@ -1533,7 +1648,7 @@ void twainsave_app::load_language_strings()
     }
 }
 
-bool start_twain_session(dynarithmic::twain::twain_session& pSession, bool start_minimal /* = false */)
+bool start_twain_session(twain_session& pSession, bool start_minimal /* = false */)
 {
     pSession.init_noblocking(true);
     bool bStarted = false;
@@ -1571,7 +1686,8 @@ static std::string GetNewFileName(const std::string& fullpath, int inc, int maxW
 }
 
 
-twainsave_app::STFCallback::STFCallback() {}
+twainsave_app::STFCallback::STFCallback() = default;
+
 void twainsave_app::STFCallback::setscanneropts(scanner_options* mSS)
 {
     m_pScannerOpts = mSS;
@@ -1607,20 +1723,13 @@ int twainsave_app::STFCallback::transferready(twain_source& source)
     return 1;
 }
 
-std::wstring MakeWide(const std::string& input)
-{
-    std::wstring out;
-    for (auto ch : input)
-        out.push_back(ch);
-    return out;
-}
-
 int twainsave_app::STFCallback::sourcedetails(twain_source& source)
 {
     std::wstring msg = WIDEN("\"") + MakeWide(source.get_source_name()) + WIDEN("\"");
     std::wstring retcode_msg = m_pTheApp->get_resource_string(RETURN_GENERATEDETAILS_MSG).second;
     std::wstring msg_formatted = dynarithmic::twain::format_percent_args<std::wstring>(retcode_msg, { msg });
-    WriteUnicodeConsole(msg_formatted);
+    msg_formatted += WIDEN("\n");
+    WriteUnicodeConsole(msg_formatted, true);
     return 1;
 }
 
@@ -1636,7 +1745,7 @@ int twainsave_app::STFCallback::filenamechanging(twain_source& source)
             {
                 if (filesys::exists(newName))
                 {
-                    newName = ::GetNewFileName(m_pScannerOpts->m_filename,
+                    newName = GetNewFileName(m_pScannerOpts->m_filename,
                         m_pScannerOpts->m_nOverwriteCount,
                         m_pScannerOpts->m_nOverwriteWidth);
                     ++m_pScannerOpts->m_nOverwriteCount;
@@ -1669,7 +1778,7 @@ twainsave_app::DerivedLogger& twainsave_app::DerivedLogger::set_filename(std::st
 
 bool twainsave_app::DerivedLogger::enable()
 {
-    if (m_destination == logger_destination::tofile)
+    if (m_destination == tofile)
         m_file = std::make_unique<std::ofstream>(m_filename);
     twain_logger::enable();
     return true;
@@ -1679,18 +1788,19 @@ void twainsave_app::DerivedLogger::log(const char* msg)
 {
     switch (m_destination)
     {
-        case logger_destination::todebug:
+        case todebug:
         {
             std::string msgTotal = msg;
             msgTotal.push_back('\n');
             OutputDebugStringA(msgTotal.c_str());
         }
         break;
-        case logger_destination::tofile:
+        case tofile:
             *m_file << msg << "\n";
         break;
-        case logger_destination::toconsole:
-            std::cout << msg << "\n";
+        case toconsole:
+            std::string sMsg = msg + std::string("\n");
+            WriteUnicodeConsole(MakeWide(sMsg), true);
         break;
     }
 }

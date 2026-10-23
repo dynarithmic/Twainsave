@@ -21,7 +21,6 @@ OF THIRD PARTY RIGHTS.
 
 #include "stdafx.h"
 #define NOMINMAX
-#include "twainsave_verinfo.h"
 #include "twainsave.h"
 #include "twainsave_broker.h"
 #include "twainsave_opensource.h"
@@ -46,13 +45,17 @@ bool set_console_to_UTF8()
     return outputOK != FALSE && inputOK != FALSE;
 }
 
-void WriteUnicodeConsole(const std::wstring& text)
+void WriteUnicodeConsole(const std::wstring& text, bool bShowConsole)
 {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
     if (hConsole == INVALID_HANDLE_VALUE || hConsole == nullptr)
         return;
 
+    if ( bShowConsole )
+    {
+        ShowWindow(GetConsoleWindow(), SW_SHOW);
+    }
     DWORD written = 0;
 
     WriteConsoleW(
@@ -110,8 +113,6 @@ int main(int argc, char *argv[])
         retcode_wide_error = allOptions.m_strDTWAINError;
     if (allOptions.m_bNoConsole && !allOptions.m_bNoPause)
     {
-        ShowWindow(GetConsoleWindow(), SW_SHOW);
-
         // display a pause message
         std::wstring s = WIDEN("TwainSave returned code: ") + std::to_wstring(retcode);
         std::wstring s2 = WIDEN(": ") + std::wstring(WIDEN(DTWAIN_DLLNAME));
@@ -126,14 +127,13 @@ int main(int argc, char *argv[])
             actual_error = retcode_wide_error;
         }
         s += WIDEN(" (") + actual_error + s2 + s3 + WIDEN(")\nPress any key to continue...");
-        WriteUnicodeConsole(s);
+        WriteUnicodeConsole(s, true);
         DWORD d;
         char buffer[10];
         ReadConsoleA(GetStdHandle(STD_INPUT_HANDLE), buffer, 1, &d, NULL);
     }
     else
     {
-		ShowWindow(GetConsoleWindow(), SW_SHOW);
         std::wstring s = L"TwainSave returned code: " + std::to_wstring(retcode);
         std::wstring s2 = L": ";
         s2 += WIDEN(DTWAIN_DLLNAME);
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
             actual_error = retcode_wide_error;
         }
         s += WIDEN(" (") + actual_error + s2 + s3 + WIDEN(")\nPress any key to continue...");
-        WriteUnicodeConsole(s);
+        WriteUnicodeConsole(s, true);
     }
     return retcode;
 }
