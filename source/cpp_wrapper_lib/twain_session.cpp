@@ -462,6 +462,13 @@ namespace dynarithmic
             return sz;
         }
 
+        std::wstring twain_session::get_resource_string_wide(int32_t resource_id)
+        {
+            wchar_t sz[DTWAIN_USERRES_MAXSIZE + 1] = {};
+            API_INSTANCE DTWAIN_GetResourceStringW(resource_id, sz, DTWAIN_USERRES_MAXSIZE);
+            return sz;
+        }
+
         /// Returns the last error encountered by the underlying DTWAIN library
         /// 
         /// @returns An error number that represents the last error

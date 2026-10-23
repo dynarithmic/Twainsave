@@ -58,6 +58,8 @@ struct scanner_options
     std::string m_filetype;
     std::string m_filename;
     std::string m_area;
+    int m_dtwain_filetype = {};
+    std::wstring m_strDTWAINError;
     bool m_bUseADF{};
     bool m_bUseADFOrFlatbed;
     bool m_bCreateDir;
@@ -126,8 +128,8 @@ struct scanner_options
     int m_nOverwriteWidth;
     std::string m_strLanguage;
     std::unordered_map<stringview, std::pair<dynarithmic::twain::filetype_value::value_type, dynarithmic::twain::compression_value::value_type>> m_MapMode2Map;
-    std::map<int, std::string> m_ReturnCodesMap;
-    std::map<int, std::string> m_StandardReturnCodesMap;
+    std::map<int, std::wstring> m_ReturnCodesMap;
+    std::map<int, std::wstring> m_StandardReturnCodesMap;
     int twainsave_return_value;
     std::string m_strConfigFile;
     struct TwainDialogConfig
@@ -269,6 +271,6 @@ class twainsave_app
         parse_return_type parse_config_options(const std::string& filename);
         void load_language_strings();
         auto& get_callback() { return m_tsCallback; }
-        std::pair<bool, std::string> get_resource_string(int resourceNum) const;
+        std::pair<bool, std::wstring> get_resource_string(int resourceNum) const;
 };
 #endif

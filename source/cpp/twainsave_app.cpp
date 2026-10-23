@@ -49,6 +49,9 @@ OF THIRD PARTY RIGHTS.
 #include "generate_details.h"
 #include "get_dll_version.h"
 
+#define WIDEN2(x) L##x
+#define WIDEN(x)  WIDEN2(x)
+
 #define INIT_TYPE(x, thetype, y) {#x, dynarithmic::twain::##thetype::##y}
 #define INIT_TYPE_2(x, thetype, y) {x, dynarithmic::twain::##thetype::##y}
 
@@ -70,8 +73,9 @@ MAPBOX_ETERNAL_CONSTEXPR const auto g_FileTypeMap = mapbox::eternal::map<stringv
     INIT_TYPE(wbmp, filetype_value,wirelessbmp),
     INIT_TYPE(wmf, filetype_value,windowsmetafile),
     INIT_TYPE(jpeg, filetype_value,jpeg),
+    INIT_TYPE(jxl, filetype_value,jpegxl),
     INIT_TYPE(jp2, filetype_value,jpeg2k),
-    INIT_TYPE(jpegxr, filetype_value,jpegxr),
+    INIT_TYPE(jxr, filetype_value,jpegxr),
     INIT_TYPE(tif1, filetype_value,tiffnocompress),
     INIT_TYPE(tif2, filetype_value,tiffpackbits),
     INIT_TYPE(tif3, filetype_value, tiffgroup3),
@@ -895,11 +899,13 @@ bool twainsave_app::set_device_options()
         {
             auto multipage_type = file_type_info::get_multipage_type(iterFileType->second);
             fOptions.set_type(iterFileType->second);
+            s_options.m_dtwain_filetype = iterFileType->second;
             ac.get_general_options().set_transfer_type(s_options.m_nTransferMode == 0 ? transfer_type::file_using_native : transfer_type::file_using_buffered);
         }
         else
         {
             fOptions.set_type(iterMode2->second.first);
+            s_options.m_dtwain_filetype = iterFileType->second;
             ac.get_general_options().set_transfer_type(transfer_type::file_using_source);
         }
 
@@ -1210,6 +1216,23 @@ int twainsave_app::start_acquisitions(dynarithmic::twain::twain_session* pSessio
                 sessionToUse->set_language_resource(s_options.m_DialogConfig.m_language);
         }
 
+        auto iterFileType = varmap.find("filetype");
+        if (iterFileType != varmap.end())
+        {
+            auto fileString = boost::any_cast<std::string>(iterFileType->second.value());
+            if (fileString == "jxl")
+            {
+                auto dllExists = API_INSTANCE DTWAIN_IsFileTypeSupported(DTWAIN_JPEGXL);
+                if (!dllExists)
+                {
+                    s_options.m_strDTWAINError = sessionToUse->get_resource_string_wide(sessionToUse->get_last_error());
+                    sessionToUse->stop();
+                    s_options.set_return_code(RETURN_JPEGXL_LIBRARY_ERROR);
+                    return RETURN_JPEGXL_LIBRARY_ERROR;
+                }
+            }
+        }
+
         if (!s_options.m_strSelectName.empty())
             g_source = std::make_unique<twain_source>(sessionToUse->select_source(select_byname(s_options.m_strSelectName), false));
         else
@@ -1359,7 +1382,7 @@ std::pair<bool, int> twainsave_app::check_dtwaindll_version(VersionNumbers& verN
 
 void twainsave_app::load_resources_from_rc()
 {
-    char szBuffer[DTWAIN_USERRES_MAXSIZE + 1]{};
+    wchar_t szBuffer[DTWAIN_USERRES_MAXSIZE + 1]{};
     HMODULE hMod = GetModuleHandleA(NULL);
     if (!hMod)
         return;
@@ -1367,7 +1390,7 @@ void twainsave_app::load_resources_from_rc()
     // Load the error strings
     for (int curError = 0; curError < RETURN_CODE_LAST; ++curError)
     {
-        if (::LoadStringA(hMod, curError, szBuffer, DTWAIN_USERRES_MAXSIZE))
+        if (::LoadStringW(hMod, curError, szBuffer, DTWAIN_USERRES_MAXSIZE))
             s_options.m_StandardReturnCodesMap[curError] = szBuffer;
     }
 }
@@ -1411,11 +1434,18 @@ void twainsave_app::load_custom_resources_from_ini()
     {
         std::string errorKey = "error" + std::to_string(curError);
         auto errorValue = customProfile.GetValue("Error Messages", errorKey.c_str(), "");
-        s_options.m_ReturnCodesMap[curError] = errorValue;
+        if (errorValue)
+        {
+            std::string sErrorValue = errorValue;
+            std::wstring wError;
+            for (auto ch : sErrorValue)
+                wError.push_back(ch);
+            s_options.m_ReturnCodesMap[curError] = wError;
+        }
     }
 }
 
-std::pair<bool, std::string> twainsave_app::get_resource_string(int resourceNum) const
+std::pair<bool, std::wstring> twainsave_app::get_resource_string(int resourceNum) const
 {
     auto iter = s_options.m_ReturnCodesMap.find(resourceNum);
     if (iter != s_options.m_ReturnCodesMap.end())
@@ -1423,39 +1453,82 @@ std::pair<bool, std::string> twainsave_app::get_resource_string(int resourceNum)
     auto iter2 = s_options.m_StandardReturnCodesMap.find(resourceNum);
     if (iter2 != s_options.m_StandardReturnCodesMap.end())
         return { true, iter2->second };
-    return { false, "Unknown error" };
+    return { false, L"Unknown error" };
 }
 
 void twainsave_app::reload_custom_resources()
 {
     for (int curError = DTWAIN_USERRES_START; curError < DTWAIN_USERRES_START + RETURN_CODE_LAST; ++curError)
     {
-        char szRes[1024];
-        LONG numChars = API_INSTANCE DTWAIN_GetResourceStringA(curError, szRes, 1024);
+        wchar_t szRes[1024];
+        LONG numChars = API_INSTANCE DTWAIN_GetResourceStringW(curError, szRes, 1024);
         if ( numChars > 0 )
             s_options.m_ReturnCodesMap[curError - DTWAIN_USERRES_START] = szRes;
     }
+}
+
+std::wstring UTF8ToWide(const std::string& utf8)
+{
+    if (utf8.empty())
+        return {};
+
+    int len = MultiByteToWideChar(
+        CP_UTF8,
+        MB_ERR_INVALID_CHARS,
+        utf8.c_str(),
+        static_cast<int>(utf8.size()),
+        nullptr,
+        0
+    );
+
+    if (len == 0)
+        return {};
+
+    std::wstring result(len, L'\0');
+
+    if (MultiByteToWideChar(
+        CP_UTF8,
+        MB_ERR_INVALID_CHARS,
+        utf8.c_str(),
+        static_cast<int>(utf8.size()),
+        result.data(),
+        len
+    ) == 0)
+        return {};
+
+    return result;
 }
 
 void twainsave_app::load_language_strings()
 {
     if (s_options.m_strLanguage.empty())
         return;
+
     // Open the custom resource language file
     std::string resFileName = ".\\twaincustomresources_" + s_options.m_strLanguage + ".txt";
+
     std::ifstream resFile(resFileName);
+
     if (resFile)
     {
         std::string sLine;
         std::string sText;
-        while (resFile)
+
+        while (std::getline(resFile, sLine))
         {
-            std::getline(resFile, sLine);
             std::istringstream strm(sLine);
-            int nLine;
-            strm >> nLine;
+
+            int nLine = 0;
+
+            if (!(strm >> nLine))
+                continue;
+
             std::getline(strm, sText);
-            s_options.m_ReturnCodesMap[nLine - DTWAIN_USERRES_START] = sText;
+
+            // Convert UTF-8 text to UTF-16
+            std::wstring wideText = UTF8ToWide(sText);
+
+            s_options.m_ReturnCodesMap[nLine - DTWAIN_USERRES_START] = std::move(wideText);
         }
     }
 }
@@ -1498,7 +1571,7 @@ static std::string GetNewFileName(const std::string& fullpath, int inc, int maxW
 }
 
 
-twainsave_app::STFCallback::STFCallback() : twain_callback() {}
+twainsave_app::STFCallback::STFCallback() {}
 void twainsave_app::STFCallback::setscanneropts(scanner_options* mSS)
 {
     m_pScannerOpts = mSS;
@@ -1534,12 +1607,20 @@ int twainsave_app::STFCallback::transferready(twain_source& source)
     return 1;
 }
 
+std::wstring MakeWide(const std::string& input)
+{
+    std::wstring out;
+    for (auto ch : input)
+        out.push_back(ch);
+    return out;
+}
+
 int twainsave_app::STFCallback::sourcedetails(twain_source& source)
 {
-    std::string msg = "\"" + source.get_source_name() + "\"";
-    std::string retcode_msg = m_pTheApp->get_resource_string(RETURN_GENERATEDETAILS_MSG).second;
-    std::string msg_formatted = dynarithmic::twain::format_percent_args<std::string>(retcode_msg, { msg });
-    std::cout << msg_formatted << std::endl;
+    std::wstring msg = WIDEN("\"") + MakeWide(source.get_source_name()) + WIDEN("\"");
+    std::wstring retcode_msg = m_pTheApp->get_resource_string(RETURN_GENERATEDETAILS_MSG).second;
+    std::wstring msg_formatted = dynarithmic::twain::format_percent_args<std::wstring>(retcode_msg, { msg });
+    WriteUnicodeConsole(msg_formatted);
     return 1;
 }
 
