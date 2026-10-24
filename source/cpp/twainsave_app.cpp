@@ -1464,10 +1464,10 @@ int twainsave_app::start_acquisitions(twain_session* pSession)
             if (acq_return.first == twain_source::acquire_timeout)
                 s_options.set_return_code(RETURN_TIMEOUT_REACHED);
             else
-                if (acq_return.first == twain_source::acquire_canceled || acq_return.first == twain_source::acquire_ok)
-                    s_options.set_return_code(RETURN_OK);
-                else
-                    s_options.set_return_code(RETURN_FILESAVE_ERROR);
+            if (acq_return.first == twain_source::acquire_canceled || acq_return.first == twain_source::acquire_ok)
+                s_options.set_return_code(RETURN_OK);
+            else
+                s_options.set_return_code(RETURN_FILESAVE_ERROR);
             g_source.reset();
         }
         else

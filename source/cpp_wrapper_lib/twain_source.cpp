@@ -456,6 +456,12 @@ namespace dynarithmic
                 API_INSTANCE DTWAIN_SetLastError(DTWAIN_ERR_BAD_SOURCE);
                 return { DTWAIN_ERR_BAD_SOURCE, {} };
             }
+            if ( m_pTwainSourceImpl->m_acquire_characteristics->get_userinterface_options().is_uionly_shown())
+            {
+                auto retval = API_INSTANCE DTWAIN_ShowUIOnly(m_theSource);
+                auto last_error = API_INSTANCE DTWAIN_GetLastError();
+                return { last_error, {} };
+            }
             bool fstatus = true;
             prepare_acquisition();
             if (!m_pTwainSourceImpl->m_acquire_characteristics->get_paperhandling_options().is_feeder_enabled())
