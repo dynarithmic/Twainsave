@@ -1,7 +1,8 @@
 # TwainSave
 TwainSave is a free, open source version of Dynarithmic Software's [TwainSave](http://www.dynarithmic.com/onlinehelp5/twainsave_opensource/Introduction.html) command-line program to access TWAIN devices and convert scanned pages to image files (BMP, JPEG, TIFF, etc).  This version is licensed under the Apache 2.0 license.  
 
-Close to all of the functionality that is in the commercial version of TwainSave is implemented in the open source version.  
+Close to all of the functionality that is in the commercial version of TwainSave is implemented in the open source version.  Similarly, there is some functionality (such as the extended list
+of image file types supported) that the open source version has that does not exist in the commercial version.
 
 Note that there are two copies of the TwainSave executable files for each architecture and TWAIN device  (32-bit and 64-bit).  To access 32-bit TWAIN devices, you must run the 32-bit version of TwainSave, and similarly, to access 64-bit TWAIN devices, you must run the 64-bit version of TwainSave.
 
