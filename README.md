@@ -38,7 +38,7 @@ No separate Visual C++ Redistributable installation is normally necessary when u
 If you build TwainSave from source or distribute only selected files, you may need to install the latest supported [Microsoft Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) for the appropriate architecture ([x86](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [x64](https://aka.ms/vs/17/release/vc_redist.x64.exe)).  For best compatibility, keep the supplied runtime DLLs in the same directory as the TwainSave executable.  
 
 ----
-The current open source TwainSave version is **1.6.0**.
+The current open source TwainSave version is **1.6.0.2**.
 
 ----
 
