@@ -1,8 +1,24 @@
 TwainSave version changes
 
+1.6.0
+
+- Add JPEG-XL (--filetype jxl) and JPEG-XR (--filetype jxr) file formats.
+
+- Include the Microsoft C++ runtime in the distribution, plus supporting libraries for JPEG-XL support.
+
+- Fix issue with --uionly not showing the correct device's user-interface for setting options within
+  the device.
+
+- Ensure foreign language strings and messages are displayed in the console as UTF-8.
+
+- The --noconsole is now ignored for command-line arguments that do not start the acquisition
+  process (for example, --devicelist, --details, --version, and similar "information-only" options 
+  will now ignore the --noconsole setting).
+
+
 1.5.0
 
-The twainsave.ini, dtwain32.ini, and dtwain64.ini files are no longer required to run TwainSave.
+- The twainsave.ini, dtwain32.ini, and dtwain64.ini files are no longer required to run TwainSave.
 
 
 1.4.1

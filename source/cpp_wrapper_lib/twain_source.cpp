@@ -366,6 +366,7 @@ namespace dynarithmic
             imagetype_options& iOpts = ac.get_imagetype_options();
             API_INSTANCE DTWAIN_SetJpegValues(m_theSource, iOpts.get_jpegquality(), false);
             API_INSTANCE DTWAIN_SetJpegXRValues(m_theSource, iOpts.get_jpegquality(), false);
+            API_INSTANCE DTWAIN_SetJpegXLQuality(m_theSource, iOpts.get_jpegquality());
 
             // If non-TWAIN scaling is enabled, enable it now
             auto& imageOptions = ac.get_imageparameter_options();
@@ -454,6 +455,12 @@ namespace dynarithmic
             {
                 API_INSTANCE DTWAIN_SetLastError(DTWAIN_ERR_BAD_SOURCE);
                 return { DTWAIN_ERR_BAD_SOURCE, {} };
+            }
+            if ( m_pTwainSourceImpl->m_acquire_characteristics->get_userinterface_options().is_uionly_shown())
+            {
+                auto retval = API_INSTANCE DTWAIN_ShowUIOnly(m_theSource);
+                auto last_error = API_INSTANCE DTWAIN_GetLastError();
+                return { last_error, {} };
             }
             bool fstatus = true;
             prepare_acquisition();

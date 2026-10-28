@@ -9,6 +9,9 @@
 #include "twainsave_app.h"
 #include "dynarithmic\twain\utilities\string_utilities.hpp"
 
+#define WIDEN2(x) L##x
+#define WIDEN(x)  WIDEN2(x)
+
 twainsave_broker::twainsave_broker() : m_twainSession(dynarithmic::twain::startup_mode::none)
 {}
 
@@ -181,10 +184,10 @@ int twainsave_broker::StartBroker(twainsave_app& theApp)
 			if ( !scanOk )
 			{
 				auto retCode = allOptions.get_return_code();
-				std::string retCodeStr = std::to_string(retCode);
-				retCodeStr += "Error: " + retCodeStr +
-					" (" + allOptions.m_ReturnCodesMap[retCode] + ")\n";
-				WritePipeResponse(retCodeStr.c_str());
+				std::wstring retCodeStr = std::to_wstring(retCode);
+/*			retCodeStr += "Error: " + retCodeStr +
+					WIDEN(" (") + allOptions.m_ReturnCodesMap[retCode] + WIDEN(")\n");*/
+				// WritePipeResponse(retCodeStr.c_str());
 			}
 		}
 

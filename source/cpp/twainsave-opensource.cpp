@@ -21,7 +21,6 @@ OF THIRD PARTY RIGHTS.
 
 #include "stdafx.h"
 #define NOMINMAX
-#include "twainsave_verinfo.h"
 #include "twainsave.h"
 #include "twainsave_broker.h"
 #include "twainsave_opensource.h"
@@ -30,17 +29,12 @@ OF THIRD PARTY RIGHTS.
 #define WIDEN2(x) L##x
 #define WIDEN(x)  WIDEN2(x)
 
-static std::string create_version_error_string(const VersionNumbers& verNumbers, twainsave_app& theApp)
+static std::wstring create_version_error_string(const VersionNumbers& verNumbers, twainsave_app& theApp)
 {
-    std::string retcode_error = theApp.get_resource_string(RETURN_DTWAINDLL_WRONG_VERSION_MSG).second;
-    std::wstring wide_retcode_error;
-    std::copy(retcode_error.begin(), retcode_error.end(), std::back_inserter(wide_retcode_error));
+    std::wstring wide_retcode_error = theApp.get_resource_string(RETURN_DTWAINDLL_WRONG_VERSION_MSG).second;
     std::wstring ws = dynarithmic::twain::format_percent_args<std::wstring>(wide_retcode_error,
         { verNumbers.DLLName, verNumbers.FileVersion, verNumbers.FileVersionRequired });
-    std::string outstr;
-    for (auto ch : ws)
-        outstr.push_back(static_cast<char>(ch));
-    return outstr;
+    return ws;
 }
 
 bool set_console_to_UTF8()
@@ -49,6 +43,28 @@ bool set_console_to_UTF8()
     const BOOL inputOK = SetConsoleCP(CP_UTF8);
 
     return outputOK != FALSE && inputOK != FALSE;
+}
+
+void WriteUnicodeConsole(const std::wstring& text, bool bShowConsole)
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    if (hConsole == INVALID_HANDLE_VALUE || hConsole == nullptr)
+        return;
+
+    if ( bShowConsole )
+    {
+        ShowWindow(GetConsoleWindow(), SW_SHOW);
+    }
+    DWORD written = 0;
+
+    WriteConsoleW(
+        hConsole,
+        text.c_str(),
+        static_cast<DWORD>(text.size()),
+        &written,
+        nullptr
+    );
 }
 
 int main(int argc, char *argv[])
@@ -91,36 +107,48 @@ int main(int argc, char *argv[])
         }
     }
     auto retcode = allOptions.get_return_code();
-    std::string retcode_error = ts_app.get_resource_string(retcode).second;
+    std::wstring retcode_error = ts_app.get_resource_string(retcode).second;
+    std::wstring retcode_wide_error;
+    if (!allOptions.m_strDTWAINError.empty())
+        retcode_wide_error = allOptions.m_strDTWAINError;
     if (allOptions.m_bNoConsole && !allOptions.m_bNoPause)
     {
-        ShowWindow(GetConsoleWindow(), SW_SHOW);
         // display a pause message
-        std::string s = "TwainSave returned code: " + std::to_string(retcode);
-        std::string s2 = ": " + std::string(DTWAIN_DLLNAME);
+        std::wstring s = WIDEN("TwainSave returned code: ") + std::to_wstring(retcode);
+        std::wstring s2 = WIDEN(": ") + std::wstring(WIDEN(DTWAIN_DLLNAME));
         if (retcode != RETURN_DTWAINDLL_NOT_FOUND)
             s2.clear();
-        std::string s3;
+        std::wstring s3;
         if (retcode == RETURN_DTWAINDLL_WRONG_VERSION)
             s3 = create_version_error_string(verNumbers, ts_app);
-        s += " (" + retcode_error + s2 + s3 + ")\nPress any key to continue...";
+        std::wstring actual_error = retcode_error;
+        if ( !retcode_wide_error.empty() )
+        {
+            actual_error = retcode_wide_error;
+        }
+        s += WIDEN(" (") + actual_error + s2 + s3 + WIDEN(")\nPress any key to continue...");
+        WriteUnicodeConsole(s, true);
         DWORD d;
-        WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), static_cast<DWORD>(s.size()), &d, nullptr);
         char buffer[10];
         ReadConsoleA(GetStdHandle(STD_INPUT_HANDLE), buffer, 1, &d, NULL);
     }
     else
     {
-		ShowWindow(GetConsoleWindow(), SW_SHOW);
-        std::string s = "TwainSave returned code: " + std::to_string(retcode);
-        std::string s2 = ": " + std::string(DTWAIN_DLLNAME);
+        std::wstring s = L"TwainSave returned code: " + std::to_wstring(retcode);
+        std::wstring s2 = L": ";
+        s2 += WIDEN(DTWAIN_DLLNAME);
         if (retcode != RETURN_DTWAINDLL_NOT_FOUND)
             s2.clear();
-        std::string s3;
+        std::wstring s3;
         if (retcode == RETURN_DTWAINDLL_WRONG_VERSION)
             s3 = create_version_error_string(verNumbers, ts_app);
-        s += " (" + retcode_error + s2 + s3 + ")\nPress any key to continue...";
-        std::cout << s;
+        std::wstring actual_error = retcode_error;
+        if (!retcode_wide_error.empty())
+        {
+            actual_error = retcode_wide_error;
+        }
+        s += WIDEN(" (") + actual_error + s2 + s3 + WIDEN(")\nPress any key to continue...");
+        WriteUnicodeConsole(s, true);
     }
     return retcode;
 }
