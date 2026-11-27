@@ -1,6 +1,13 @@
 TwainSave version changes
 
-1.6.0
+1.6.0.2-Update-1
+
+- This revision includes corrected foreign language resource files with improved translations, grammar, and technical terminology.
+  The TwainSave executable remains unchanged. No new features or functional changes have been introduced.
+  Existing TwainSave users need only replace their foreign language resource files. No executable replacement is required.
+
+
+1.6.0.2
 
 - Add JPEG-XL (--filetype jxl) and JPEG-XR (--filetype jxr) file formats.
 

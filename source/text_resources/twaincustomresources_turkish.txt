@@ -1,4 +1,4 @@
-20000 TwainSave başarıyla çalıştı.
+﻿20000 TwainSave başarıyla çalıştı.
 20001 Dosya adı belirtilmedi.  TwainSave komut satırında --filename seçeneği eksik.
 20002 TWAIN sistemi başlatılamadı.
 20003 TWAIN aygıtı başlatılamadı.  TWAIN aygıtını açmak için --selectdefault komutu kullanıldıysa, varsayılan aygıt (TWAIN sürücüsü veya donanımı) arızalıdır.
@@ -8,7 +8,7 @@
 20007 Aygıttan alma işlemi başlatılırken hata oluştu.
 20008 Aygıt Siyah/Beyaz, Gri Tonlamalı, RGB, Palet, CMY veya CMYK görüntülerini desteklemiyor.
 20009 Konsol kullanılamıyor.  -noconsole seçeneğini kullanın.
-20010 TwainSave, belirtilen süre içinde besleyiciye kağıt yerleştirilmediği için zaman aşımına uğradı.  Daha fazla bilgi için --nouiwait ve --nouiwaittime seçeneklerine bakın.
+20010 Belirtilen süre içinde belge besleyiciye kâğıt yerleştirilmediği için TwainSave zaman aşımına uğradı. Daha fazla bilgi için --nouiwait ve --nouiwaittime seçeneklerine bakın.
 20011 TwainSave kullanıcı arayüzü etkinleştirilemedi.
 20012 TwainSave, dosya zaten mevcut olduğu için çıktı.  Bu dönüş kodu, --overwritemode 2 belirtilirse oluşur.
 20013 Aygıt, belirtilen mod 2 dosya türünü desteklemiyor.  Mod 2 dosya türleri için --filetype seçeneğine bakın.
@@ -22,9 +22,9 @@
 20021 Geçersiz --orientation belirtildi.
 20022 Geçersiz --jobcontrol belirtildi.
 20023 
-20024 Twainsave aracı hatası
+20024 TwainSave broker bileşeni hatası
 20025 DTWAIN DLL bulunamadı veya yüklenemedi.
-20026 Bozuk veya geçersiz twaininfo.txt dosyası.
+20026 twaininfo.txt dosyası eksik, bozuk veya geçersiz.
 20027 dtwain32.ini veya dtwain64.ini dosyası bulunamadı ya da açılamadı.
 20028 DTWAIN DLL sürümü geçerli değil.
 20029 DTWAIN DLL adı: %1 | Bulunan sürüm: %2 | Gerekli sürüm: %3
